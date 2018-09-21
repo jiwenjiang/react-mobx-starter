@@ -150,7 +150,13 @@ module.exports = {
                                 },
                             },
                             {
-                                loader: require.resolve('less-loader') // compiles Less to CSS
+                                loader: require.resolve('less-loader'), // compiles Less to CSS
+                                options: {
+                                    globalVars: {
+                                        themeColor: "#1cccc6",
+                                        iconColor: "#0abfb9"
+                                    }
+                                }
                             }
                         ],
                     },

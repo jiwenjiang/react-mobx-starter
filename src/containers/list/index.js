@@ -4,29 +4,42 @@
 import React, {Component} from "react";
 import {List} from 'antd-mobile';
 import {observer, inject} from 'mobx-react';
-import http from "services/http";
-import normalUrl from "config/url/normal"
+
+const {Item} = List;
 
 @inject("mapStore")
 @observer
 class listPage extends Component {
+    state = {
+        listArr: [
+            {name: "理想中心", mapId: 2},
+            {name: "路易艺术城堡", mapId: 1},
+            {name: "成都妇女儿童医院", mapId: 3},
+        ]
+    }
 
     componentDidMount() {
     }
 
-    test() {
-        http.post(normalUrl.dynamicParams, `mapId=2`, (data) => {
-            console.log(data)
-        })
-        this.props.mapStore.updateMapId(666)
+    chooseArea(id) {
+        this.props.mapStore.updateMapId(id)
     }
 
     render() {
         return (
-            <List renderHeader={() => 'Basic Style'} className="my-list">
-                <List.Item extra={'extra content'} onClick={() => this.test()}>理想中心</List.Item>
-                <List.Item extra={'extra content'}>{this.props.mapStore.mapId == 666 ? "路易城堡" : "11111"}</List.Item>
-                <List.Item extra={'extra content'}>{this.props.mapStore.mapId}</List.Item>
+            <List>
+                {
+                    this.state.listArr && this.state.listArr.map((v) =>
+                        <Item
+                            key={v.mapId}
+                            extra="距离： 0米"
+                            thumb="https://zos.alipayobjects.com/rmsportal/dNuvNrtqUztHCwM.png"
+                            multipleLine
+                            onClick={() => this.chooseArea(v.mapId)}>
+                            {v.name}
+                        </Item>
+                    )
+                }
             </List>
         );
     }

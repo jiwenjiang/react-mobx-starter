@@ -1,35 +1,50 @@
 /**
  * Created by j_bleach on 2018/9/20 0020.
  */
-import {observable, action, autorun, computed, configure} from 'mobx';
+import {observable, action, autorun, computed, configure, runInAction} from "mobx";
+import http from "services/http";
+import normalUrl from "config/url/normal";
 
 configure({
     enforceActions: "observed"
 });
 
 class MapStore {
-    @observable mapId;
+    @observable mapId; // 地图ID
+    @observable mapNavParams; // 地图导航参数
 
     constructor() {
         this.mapId = 0;
+        this.mapNavParams = {};
     }
 
-    @action updateMapId = (value) => {
-        this.mapId = value;
+    @action
+    async updateMapId(mapId) {
+        this.mapId = mapId;
+        try {
+            const dynamicParams = await http.post(normalUrl.dynamicParams, {mapId});
+            runInAction(() => {
+                this.mapNavParams = dynamicParams;
+            });
+        } catch (e) {
+            throw e;
+        }
     }
 
-    @computed get funn() {
-        return this.mapId * 10
+    @action updateParams(v) {
+        this.mapNavParams = v;
+    }
+
+    @computed get func() {
+        return this.mapId * 10;
     }
 }
 
 
 const mapStore = new MapStore();
 autorun(() => {
-    if (mapStore.mapId == 3) {
-        console.log(1)
-    }
-    console.log("test:");
+    // console.log("test:", mapStore.mapId);
+    // console.log("test2:", mapStore.mapNavParams);
 });
 
 
