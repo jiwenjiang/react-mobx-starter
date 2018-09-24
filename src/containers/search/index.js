@@ -34,11 +34,15 @@ class listPage extends Component {
             }
         };
         return (
-            <div>
+            <div className="wb-search-page">
                 <div className="search-container">
                     <SearchComponent {...searchProps}></SearchComponent>
                 </div>
-                <CarouselComponent data={this.state.data}></CarouselComponent>
+                <div className="search-content">
+                    <div className="mt-10 carousel-box">
+                        <CarouselComponent data={this.state.data}></CarouselComponent>
+                    </div>
+                </div>
             </div>
         );
     }

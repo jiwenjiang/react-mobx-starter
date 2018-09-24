@@ -1,9 +1,12 @@
 /**
  * Created by j_bleach on 2018/9/21 0021.
  */
+/*eslint-disable*/
 import {PureComponent} from "react";
-import {Carousel, WingBlank} from "antd-mobile";
 import React from "react";
+import {Grid} from "antd-mobile";
+import "./index.less";
+import pic from "./1_j_bleach.jpg"
 
 class CarouselComponent extends PureComponent {
     componentDidMount() {
@@ -12,35 +15,42 @@ class CarouselComponent extends PureComponent {
         }, {
             passive: false
         });
+        this.data = Array.from(new Array(9)).map((_val, i) => ({
+            icon: pic,
+            text: `name${i}`
+        }));
+    }
+
+    renderItem(e) {
+        console.log(e)
+        return <div className="grid-item-box">
+            <div>
+                <img src={e.icon} alt=""/>
+            </div>
+            <div>
+                <span>自助缴费</span>
+            </div>
+        </div>
     }
 
     render() {
-        const {data} = this.props;
+        const dotStyle = {
+            backgroundColor: "rgba(199,246,244,1)",
+            width: "1vw",
+            height: "1vw"
+        }
+        const dotActiveStyle = {
+            background: "rgba(174,237,235,1)",
+            width: "4vw",
+            height: "1vw",
+            borderRadius: "0.5vw"
+        }
         return (
-            <WingBlank>
-                <Carousel
-                    autoplay={false}
-                >
-                    {data && data.map(val => (
-                        <a
-                            key={val}
-                            href="http://www.alipay.com"
-                            style={{display: "inline-block", width: "100%", height: "25vh"}}
-                        >
-                            <img
-                                src={`https://zos.alipayobjects.com/rmsportal/${val}.png`}
-                                alt=""
-                                style={{width: "100%", verticalAlign: "top"}}
-                                onLoad={() => {
-                                    // fire window resize event to change height
-                                    window.dispatchEvent(new Event("resize"));
-                                    this.setState({imgHeight: "auto"});
-                                }}
-                            />
-                        </a>
-                    ))}
-                </Carousel>
-            </WingBlank>
+            <Grid data={this.data} isCarousel hasLine={false}
+                  dotStyle={dotStyle}
+                  dotActiveStyle={dotActiveStyle}
+                  renderItem={(e) => this.renderItem(e)}
+                  onClick={_el => console.log(_el)}/>
         );
     }
 }
