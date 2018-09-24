@@ -24,22 +24,24 @@ class AccordionComponent extends PureComponent {
 
     renderPanel(data) {
         if (data) {
-            const gridData = [{text: "测试"}, {text: "测试"}, {text: "测试"}, {text: "测试"}, {text: "测试"}]
+            const gridData = [{text: "测试23333啊"}, {text: "测试"}, {text: "测试"}, {text: "测试"}, {text: "测试"}]
             const header = (item) => <div className="accordion-header">
                 <span className="col-icon"></span>
                 <span>{item.floor}</span>
                 <span>{item.name}</span>
             </div>
             return data.map(v => <Accordion.Panel header={header(v)} key={v.id}>
+                <div className="accordion-grid-box">
                     <Grid data={gridData} hasLine={false} square={false} activeStyle={false}
                           renderItem={(e) => this.renderItem(e)} columnNum={4}/>
+                </div>
                 </Accordion.Panel>
             )
         }
     }
 
     renderItem(e) {
-        return <span className="grid-text">{e.text}</span>
+        return <span className="accordion-grid-text">{e.text}</span>
     }
 
     changeActive(e) {

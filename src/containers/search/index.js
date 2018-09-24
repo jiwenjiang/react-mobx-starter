@@ -6,6 +6,7 @@ import {observer, inject} from "mobx-react";
 import CarouselComponent from "component/carousel";
 import SearchComponent from "component/search";
 import AccordionComponent from "component/accordion";
+import MapTag from "component/map/mapTag";
 import "./index.less";
 
 
@@ -52,6 +53,7 @@ class listPage extends Component {
                         <AccordionComponent {...accordionProps}></AccordionComponent>
                     </div>
                 </div>
+                <MapTag/>
             </div>
         );
     }
