@@ -1,7 +1,7 @@
 /**
  * Created by j_bleach on 2018/9/21 0021.
  */
-/*eslint-disable*/
+
 import {PureComponent} from "react";
 import React from "react";
 import {Grid} from "antd-mobile";
@@ -22,13 +22,12 @@ class CarouselComponent extends PureComponent {
     }
 
     renderItem(e) {
-        console.log(e)
         return <div className="grid-item-box">
             <div>
                 <img src={e.icon} alt=""/>
             </div>
             <div>
-                <span>自助缴费</span>
+                <span>{e.text}</span>
             </div>
         </div>
     }

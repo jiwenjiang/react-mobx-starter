@@ -5,6 +5,7 @@ import React, {Component} from "react";
 import {observer, inject} from "mobx-react";
 import CarouselComponent from "component/carousel";
 import SearchComponent from "component/search";
+import AccordionComponent from "component/accordion";
 import "./index.less";
 
 
@@ -15,13 +16,13 @@ class listPage extends Component {
         listArr: [
             {name: "理想中心", mapId: 2},
             {name: "路易艺术城堡", mapId: 1},
-            {name: "成都妇女儿童医院", mapId: 3},
+            {name: "成都妇女儿童医院", mapId: 3}
         ]
     };
 
     componentDidMount() {
         this.setState({
-            data: ["AiyWuByWklrrUDlFignR", "TekJlZRVCjLFexlOCuWn", "IJOtIlfsYdTyaDTRVrLI"],
+            data: ["AiyWuByWklrrUDlFignR", "TekJlZRVCjLFexlOCuWn", "IJOtIlfsYdTyaDTRVrLI"]
         });
     }
 
@@ -33,6 +34,11 @@ class listPage extends Component {
                 "backgroundColor": "rgba(183, 253, 251, 1)"
             }
         };
+        const accordionProps = {
+            data: [{name: "儿童保健指导中心", id: 0, floor: "1楼"},
+                {name: "儿童保健指导中心", id: 1, floor: "2楼"},
+                {name: "儿童保健指导中心", id: 2, floor: "3楼"}]
+        }
         return (
             <div className="wb-search-page">
                 <div className="search-container">
@@ -41,6 +47,9 @@ class listPage extends Component {
                 <div className="search-content">
                     <div className="mt-10 carousel-box">
                         <CarouselComponent data={this.state.data}></CarouselComponent>
+                    </div>
+                    <div className="mt-10 carousel-box">
+                        <AccordionComponent {...accordionProps}></AccordionComponent>
                     </div>
                 </div>
             </div>

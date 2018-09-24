@@ -9,7 +9,7 @@ class SearchComponent extends PureComponent {
     render() {
         const {placeholder = "请搜索位置"} = this.props;
         return (
-            <div className="search-box" style={{color: "red"}}>
+            <div className="search-box">
                 <form action="#">
                     <div className="search-input">
                         <i className="wbIcon-search iconfont icon-search"></i>
