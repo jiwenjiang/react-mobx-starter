@@ -5,7 +5,7 @@ import config from "config";
 
 const {mapIp, version} = config;
 const url = {
-    mapService: `${mapIp}/hospService/${version}/getAllService`
+    mapSearch: `${mapIp}/map/search/${version}/keyword`
 };
 
 export default url

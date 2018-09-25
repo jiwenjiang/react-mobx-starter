@@ -1,7 +1,6 @@
 /**
  * Created by j_bleach on 2018/9/21 0021.
  */
-/* eslint-disable */
 
 import React, {Component} from "react";
 import {observer, inject} from "mobx-react";
@@ -13,23 +12,27 @@ import MapTag from "component/map/mapTag";
 import http from "services/http";
 import normalUrl from "config/url/normal";
 import mapUrl from "config/url/map";
+import {unique} from "services/utils/tool";
 import "./index.less";
 
 @inject("mapStore")
+@inject("navStore")
 @observer
 class listPage extends Component {
     constructor() {
         super();
         this.state = {
-            carouselData: [],
-            accordionData: []
+            carouselData: [], // 走马灯数组
+            accordionData: [], // 手风琴数组
+            showSearchHistory: false // 展示搜索历史
         };
     }
 
+
     componentDidMount() {
-        http.post(normalUrl.mapService, {mapId: 3}, (data) => {
-            const carouselData = [];
-            const accordionData = [];
+        http.post(normalUrl.mapService, {mapId: this.props.mapStore.mapId}, (data) => {
+            const carouselData = []; // 走马灯数据
+            const accordionData = []; // 手风琴数据
             data && data.forEach(v => {
                 if (v.serviceType === 1) {
                     carouselData.push(v);
@@ -45,17 +48,43 @@ class listPage extends Component {
         });
     }
 
-    toSearch() {
+    /**
+     * @author j_bleach
+     * @date 2018-09-25
+     * @Description: 搜索方法
+     * @param v:搜索输入框value
+     */
+    async toSearch(v) {
+        let params = {
+            zone_id: this.props.mapStore.mapId,
+            page: 1,
+            pageSize: 20,
+            location: this.props.navStore.locateCoordinate,
+            text: v
+        };
+        await http.post(mapUrl.mapSearch, params);
+        const historyRecords = localStorage.historyRecords
+            ? unique([...JSON.parse(localStorage.historyRecords), {name: v}])
+            : [{name: v}];
+        localStorage.historyRecords = JSON.stringify(historyRecords);
+    }
 
+    focusSearch() {
+        this.setState({
+            showSearchHistory: true
+        });
     }
 
 
     render() {
-        const {carouselData, accordionData} = this.state;
+        const {carouselData, accordionData, showSearchHistory} = this.state;
 
         const searchProps = {
-            toSearch: () => {
-                this.toSearch();
+            toSearch: (e) => {
+                this.toSearch(e);
+            },
+            focusSearch: () => {
+                this.focusSearch();
             }
         };
         const accordionProps = {
@@ -73,7 +102,7 @@ class listPage extends Component {
                     <div className="mt-10 carousel-box">
                         {accordionData.length > 0 && <AccordionComponent {...accordionProps}></AccordionComponent>}
                     </div>
-                    <SearchHistory></SearchHistory>
+                    {showSearchHistory && <SearchHistory />}
                 </div>
                 <MapTag/>
             </div>

@@ -31,20 +31,9 @@ class SearchHistory extends PureComponent {
         });
     }
 
-    clearAll() {
-        localStorage.historyRecords = JSON.stringify([]);
-        this.setState({
-            historyRecords: []
-        });
-    }
-
     render() {
         return (
             <div className="search-history-box">
-                <div className="search-history-panel">
-                    <span style={{color: "rgba(153,153,153,1)"}}>历史搜索</span>
-                    <span className="clear-history" onClick={() => this.clearAll()}>清空历史记录</span>
-                </div>
                 <div className="search-history-content">
                     <List>
                         {this.state.historyRecords.map(v =>

@@ -15,7 +15,6 @@ class SearchComponent extends PureComponent {
     submit(e) {
         e.preventDefault();
         this.props.toSearch(this.state.inputValue);
-        console.log(this.state.inputValue);
     }
 
     render() {
@@ -29,6 +28,7 @@ class SearchComponent extends PureComponent {
                                onChange={(e) => this.setState({
                                    inputValue: e.target.value
                                })}
+                               onFocus={() => this.props.focusSearch()}
                                placeholder={placeholder}/>
                         <i className="wbIcon-mic iconfont icon-mic"></i>
                     </div>
