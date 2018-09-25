@@ -1,35 +1,31 @@
 /**
  * Created by j_bleach on 2018/9/21 0021.
  */
-
-import {PureComponent} from "react";
+import {Component} from "react";
 import React from "react";
 import {Grid} from "antd-mobile";
 import "./index.less";
-import pic from "./1_j_bleach.jpg"
+import config from "config";
+import pic from "assets/img/logo.png";
 
-class CarouselComponent extends PureComponent {
-    componentDidMount() {
-        document.addEventListener("touchmove", function (event) {
-            event.preventDefault();
-        }, {
-            passive: false
-        });
+class CarouselComponent extends Component {
+    constructor(props) {
+        super(props);
         this.data = Array.from(new Array(9)).map((_val, i) => ({
             icon: pic,
-            text: `name${i}`
+            serviceName: `name${i}`
         }));
     }
 
     renderItem(e) {
         return <div className="grid-item-box">
             <div>
-                <img src={e.icon} alt=""/>
+                <img src={e.icon ? e.icon : `${config.normalIp}${e.iconImg}`} alt=""/>
             </div>
             <div>
-                <span>{e.text}</span>
+                <span>{e.serviceName}</span>
             </div>
-        </div>
+        </div>;
     }
 
     render() {
@@ -37,15 +33,16 @@ class CarouselComponent extends PureComponent {
             backgroundColor: "rgba(199,246,244,1)",
             width: "1vw",
             height: "1vw"
-        }
+        };
         const dotActiveStyle = {
             background: "rgba(174,237,235,1)",
             width: "4vw",
             height: "1vw",
             borderRadius: "0.5vw"
-        }
+        };
         return (
-            <Grid data={this.data} isCarousel hasLine={false}
+            <Grid data={this.props.data.length > 0 ? this.props.data : this.data}
+                  isCarousel hasLine={false}
                   dotStyle={dotStyle}
                   dotActiveStyle={dotActiveStyle}
                   renderItem={(e) => this.renderItem(e)}

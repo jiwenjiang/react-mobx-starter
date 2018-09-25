@@ -1,57 +1,79 @@
 /**
  * Created by j_bleach on 2018/9/21 0021.
  */
+/* eslint-disable */
+
 import React, {Component} from "react";
 import {observer, inject} from "mobx-react";
 import CarouselComponent from "component/carousel";
-import SearchComponent from "component/search";
+import SearchInput from "component/search/searchInput";
 import AccordionComponent from "component/accordion";
+import SearchHistory from "component/search/searchHistory";
 import MapTag from "component/map/mapTag";
+import http from "services/http";
+import normalUrl from "config/url/normal";
+import mapUrl from "config/url/map";
 import "./index.less";
-
 
 @inject("mapStore")
 @observer
 class listPage extends Component {
-    state = {
-        listArr: [
-            {name: "理想中心", mapId: 2},
-            {name: "路易艺术城堡", mapId: 1},
-            {name: "成都妇女儿童医院", mapId: 3}
-        ]
-    };
+    constructor() {
+        super();
+        this.state = {
+            carouselData: [],
+            accordionData: []
+        };
+    }
 
     componentDidMount() {
-        this.setState({
-            data: ["AiyWuByWklrrUDlFignR", "TekJlZRVCjLFexlOCuWn", "IJOtIlfsYdTyaDTRVrLI"]
+        http.post(normalUrl.mapService, {mapId: 3}, (data) => {
+            const carouselData = [];
+            const accordionData = [];
+            data && data.forEach(v => {
+                if (v.serviceType === 1) {
+                    carouselData.push(v);
+                }
+                if (v.serviceType === 2) {
+                    accordionData.push(v);
+                }
+            });
+            this.setState({
+                carouselData,
+                accordionData
+            });
         });
+    }
+
+    toSearch() {
+
     }
 
 
     render() {
+        const {carouselData, accordionData} = this.state;
+
         const searchProps = {
-            styleExtend: {
-                "borderRadius": 5,
-                "backgroundColor": "rgba(183, 253, 251, 1)"
+            toSearch: () => {
+                this.toSearch();
             }
         };
         const accordionProps = {
-            data: [{name: "儿童保健指导中心", id: 0, floor: "1楼"},
-                {name: "儿童保健指导中心", id: 1, floor: "2楼"},
-                {name: "儿童保健指导中心", id: 2, floor: "3楼"}]
-        }
+            data: accordionData
+        };
         return (
             <div className="wb-search-page">
                 <div className="search-container">
-                    <SearchComponent {...searchProps}></SearchComponent>
+                    <SearchInput {...searchProps}></SearchInput>
                 </div>
                 <div className="search-content">
-                    <div className="mt-10 carousel-box">
-                        <CarouselComponent data={this.state.data}></CarouselComponent>
+                    <div className="mt-10 carousel-box carousel-content">
+                        {<CarouselComponent data={carouselData}></CarouselComponent>}
                     </div>
                     <div className="mt-10 carousel-box">
-                        <AccordionComponent {...accordionProps}></AccordionComponent>
+                        {accordionData.length > 0 && <AccordionComponent {...accordionProps}></AccordionComponent>}
                     </div>
+                    <SearchHistory></SearchHistory>
                 </div>
                 <MapTag/>
             </div>

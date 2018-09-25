@@ -4,14 +4,14 @@
 import {observable, action} from 'mobx';
 
 class NavStore {
-    @observable mapId;
+    @observable locateCoordinate; // 定位坐标
 
     constructor() {
-        this.mapId = null;
+        this.locateCoordinate = null;
     }
 
-    @action updateMapId = (value) => {
-        this.mapId = value;
+    @action updateLocateCoordinate = (value) => {
+        this.locateCoordinate = value;
     }
 }
 

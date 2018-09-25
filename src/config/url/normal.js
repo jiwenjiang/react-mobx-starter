@@ -5,7 +5,8 @@ import config from "config";
 
 const {normalIp, version} = config;
 const url = {
-    dynamicParams: `${normalIp}/location/locDynamicThreshold/${version}/getLocDynamicThreshold`
+    dynamicParams: `${normalIp}/location/locDynamicThreshold/${version}/getLocDynamicThreshold`,
+    mapService: `${normalIp}/hospService/${version}/getAllService`
 };
 
 export default url

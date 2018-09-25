@@ -7,7 +7,7 @@ import {HashRouter as Router, Route, Redirect, Switch} from 'react-router-dom'
 import AsyncComponent from './asyncRoute';
 import * as stores from '../mobx/stores';
 
-// const List = AsyncComponent(() => import("../containers/list"));
+const List = AsyncComponent(() => import("../containers/list"));
 const Search = AsyncComponent(() => import("../containers/search"));
 
 
@@ -15,9 +15,9 @@ const reactConfig = (
     <Provider {...stores}>
         <Router>
             <Switch>
-                <Route path='/list' component={Search}/>
+                <Route path='/list' component={List}/>
                 <Route path='/search' component={Search}/>
-                <Redirect path="/" to={{pathname: '/search'}}/>
+                <Redirect path="/" to={{pathname: '/list'}}/>
             </Switch>
         </Router>
     </Provider>
