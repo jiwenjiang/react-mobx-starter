@@ -6,23 +6,17 @@ import React, {PureComponent} from "react";
 import {List} from "antd-mobile";
 import "./index.less";
 
-class SearchHistory extends PureComponent {
+class SearchResult extends PureComponent {
     state = {
-        historyRecords: []
+        searchResult: []
     };
 
     componentDidMount() {
         this.setState({
-            historyRecords: localStorage.historyRecords && JSON.parse(localStorage.historyRecords)
+            searchResult: this.props.data || []
         });
     }
 
-    /**
-     * @author j_bleach
-     * @date 2018-09-25
-     * @Description: 删除本地存储项（这里使用更复杂的复合类型，而不直接使用简单值存储是为了之后的扩展）
-     * @param e:待删除项
-     */
     deleteRecord(e) {
         let recordArr = JSON.parse(localStorage.historyRecords);
         recordArr = recordArr.filter(v => v.name !== e.name);
@@ -37,12 +31,29 @@ class SearchHistory extends PureComponent {
             <div className="search-history-box">
                 <div className="search-history-content">
                     <List>
-                        {this.state.historyRecords.map(v =>
+                        {this.state.searchResult.map(v =>
                             <List.Item
-                                key={v.name}
-                                thumb={<i className="iconfont icon-search" style={{fontSize: "3.9vw"}}></i>}
-                                extra={<i className="iconfont icon-close" onClick={() => this.deleteRecord(v)}></i>}>
-                                <span>{v.name}</span>
+                                key={v.id}
+                                thumb={<i className="iconfont icon-didian"
+                                          style={{fontSize: "4.5vw", color: "#1cccc6"}}></i>}
+                                extra={<div className="search-result-extra">
+                                    <i className="iconfont icon-quzheli"
+                                       style={{
+                                           color: "#1cccc6",
+                                           fontSize: "7vw",
+                                           display: "block",
+                                           marginRight: "1vw"
+                                       }}
+                                       onClick={() => this.deleteRecord(v)}></i>
+                                    <span style={{
+                                        fontSize: "3vw",
+                                        color: "#1cccc6",
+                                        display: "block",
+                                        marginTop: "-1vw"
+                                    }}>去这里</span>
+                                </div>}>
+                                <p className="search-result-content">{v.tags.name}</p>
+                                <List.Item.Brief>{`在${v.tags.level}楼  距离：${v.distance}米`}</List.Item.Brief>
                             </List.Item>
                         )}
                     </List>
@@ -52,4 +63,4 @@ class SearchHistory extends PureComponent {
     }
 }
 
-export default SearchHistory;
+export default SearchResult;

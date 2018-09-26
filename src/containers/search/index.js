@@ -8,6 +8,7 @@ import CarouselComponent from "component/carousel";
 import SearchInput from "component/search/searchInput";
 import AccordionComponent from "component/accordion";
 import SearchHistory from "component/search/searchHistory";
+import SearchResult from "component/search/searchResult";
 import MapTag from "component/map/mapTag";
 import http from "services/http";
 import normalUrl from "config/url/normal";
@@ -16,9 +17,7 @@ import {unique} from "services/utils/tool";
 import "./index.less";
 import LoadingComponent from "component/common/loading";
 
-@inject("mapStore")
-@inject("navStore")
-@inject("commonStore")
+@inject("mapStore", "commonStore", "navStore")
 @observer
 class listPage extends Component {
     constructor() {
@@ -26,7 +25,8 @@ class listPage extends Component {
         this.state = {
             carouselData: [], // 走马灯数组
             accordionData: [], // 手风琴数组
-            showSearchHistory: false // 展示搜索历史
+            showSearchHistory: false, // 展示搜索历史
+            showSearchResult: false // 展示搜索结果
         };
     }
 
@@ -67,8 +67,15 @@ class listPage extends Component {
             location: this.props.navStore.locateCoordinate,
             text: v
         };
-        let a = await http.post(mapUrl.mapSearch, params);
-        console.log(a);
+        this.props.commonStore.changeLoadingStatus(true);
+        let response = await http.post(mapUrl.mapSearch, params);
+        this.props.commonStore.changeLoadingStatus(false);
+        this.setState({
+            showSearchHistory: false,
+            showSearchResult: true,
+            searchResultData: response && response.list
+        });
+        console.log(response);
         const historyRecords = localStorage.historyRecords
             ? unique([...JSON.parse(localStorage.historyRecords), {name: v}])
             : [{name: v}];
@@ -83,7 +90,7 @@ class listPage extends Component {
 
 
     render() {
-        const {carouselData, accordionData, showSearchHistory} = this.state;
+        const {carouselData, accordionData, showSearchHistory, showSearchResult, searchResultData} = this.state;
 
         const searchProps = {
             toSearch: (e) => {
@@ -92,6 +99,12 @@ class listPage extends Component {
             focusSearch: () => {
                 this.focusSearch();
             }
+        };
+
+        const searchHistoryProps = {
+            toSearch: (e) => {
+                this.toSearch(e);
+            },
         };
         const accordionProps = {
             data: accordionData
@@ -108,9 +121,10 @@ class listPage extends Component {
                     <div className="mt-10 carousel-box">
                         {accordionData.length > 0 && <AccordionComponent {...accordionProps}></AccordionComponent>}
                     </div>
-                    {showSearchHistory && <SearchHistory/>}
+                    {showSearchHistory && <SearchHistory {...searchHistoryProps}/>}
+                    {showSearchResult && <SearchResult data={searchResultData}/>}
                 </div>
-                <MapTag/>
+                {!showSearchHistory && !showSearchResult && <MapTag/>}
                 {this.props.commonStore.loadingStatus && <LoadingComponent/>}
             </div>
         );
