@@ -3,8 +3,10 @@
  */
 import {mapStore} from "./mapStore";
 import {navStore} from "./navStore";
+import {commonStore} from "./commonStore";
 
 export {
     mapStore,
-    navStore
-}
+    navStore,
+    commonStore
+};

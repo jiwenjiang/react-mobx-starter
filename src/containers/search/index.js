@@ -1,7 +1,7 @@
 /**
  * Created by j_bleach on 2018/9/21 0021.
  */
-
+/* eslint-disable*/
 import React, {Component} from "react";
 import {observer, inject} from "mobx-react";
 import CarouselComponent from "component/carousel";
@@ -14,9 +14,11 @@ import normalUrl from "config/url/normal";
 import mapUrl from "config/url/map";
 import {unique} from "services/utils/tool";
 import "./index.less";
+import LoadingComponent from "component/common/loading";
 
 @inject("mapStore")
 @inject("navStore")
+@inject("commonStore")
 @observer
 class listPage extends Component {
     constructor() {
@@ -30,6 +32,7 @@ class listPage extends Component {
 
 
     componentDidMount() {
+        this.props.commonStore.changeLoadingStatus(true);
         http.post(normalUrl.mapService, {mapId: this.props.mapStore.mapId}, (data) => {
             const carouselData = []; // 走马灯数据
             const accordionData = []; // 手风琴数据
@@ -44,6 +47,8 @@ class listPage extends Component {
             this.setState({
                 carouselData,
                 accordionData
+            }, () => {
+                this.props.commonStore.changeLoadingStatus(false);
             });
         });
     }
@@ -62,7 +67,8 @@ class listPage extends Component {
             location: this.props.navStore.locateCoordinate,
             text: v
         };
-        await http.post(mapUrl.mapSearch, params);
+        let a = await http.post(mapUrl.mapSearch, params);
+        console.log(a);
         const historyRecords = localStorage.historyRecords
             ? unique([...JSON.parse(localStorage.historyRecords), {name: v}])
             : [{name: v}];
@@ -102,9 +108,10 @@ class listPage extends Component {
                     <div className="mt-10 carousel-box">
                         {accordionData.length > 0 && <AccordionComponent {...accordionProps}></AccordionComponent>}
                     </div>
-                    {showSearchHistory && <SearchHistory />}
+                    {showSearchHistory && <SearchHistory/>}
                 </div>
                 <MapTag/>
+                {this.props.commonStore.loadingStatus && <LoadingComponent/>}
             </div>
         );
     }

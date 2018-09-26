@@ -1,6 +1,7 @@
 /**
  * Created by j_bleach on 2018/9/25 0025.
  */
+
 import React, {PureComponent} from "react";
 import {List} from "antd-mobile";
 import "./index.less";
