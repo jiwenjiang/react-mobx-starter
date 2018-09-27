@@ -11,6 +11,7 @@ const List = AsyncComponent(() => import("../containers/list"));
 const Search = AsyncComponent(() => import("../containers/search"));
 const Car = AsyncComponent(() => import("../containers/car"));
 const Config = AsyncComponent(() => import("../containers/config"));
+const Map = AsyncComponent(() => import("../containers/map"));
 
 
 const reactConfig = (
@@ -21,7 +22,8 @@ const reactConfig = (
                 <Route path='/config' component={Config}/>
                 <Route path='/search' component={Search}/>
                 <Route path='/car' component={Car}/>
-                <Redirect path="/" to={{pathname: '/list'}}/>
+                <Route path='/map' component={Map}/>
+                <Redirect path="/" to={{pathname: '/map'}}/>
             </Switch>
         </Router>
     </Provider>

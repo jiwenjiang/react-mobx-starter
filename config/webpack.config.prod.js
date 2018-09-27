@@ -174,8 +174,8 @@ module.exports = {
                         test: /\.(js|jsx|mjs)$/,
                         include: paths.appSrc,
                         loader: require.resolve('babel-loader'),
+                        exclude: /mapbox-gl/,
                         options: {
-
                             compact: true,
                         },
                     },

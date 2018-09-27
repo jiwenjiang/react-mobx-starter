@@ -12,7 +12,6 @@ import SearchResult from "component/search/searchResult";
 import MapTag from "component/map/mapTag";
 import ConfigTag from "component/map/config";
 import http from "services/http";
-// import normalUrl from "config/url/normal";
 import mapUrl from "config/url/map";
 import {unique} from "services/utils/tool";
 import "./index.less";

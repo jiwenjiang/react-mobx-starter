@@ -103,6 +103,7 @@ module.exports = {
         ],
     },
     module: {
+        noParse: /(mapbox-gl)\.js$/,
         strictExportPresence: true,
         rules: [
             // TODO: Disable require.ensure as it's not a standard language feature.
@@ -176,6 +177,7 @@ module.exports = {
                             // directory for faster rebuilds.
                             cacheDirectory: true,
                         },
+                        exclude: /mapbox-gl/
                     },
                     // "postcss" loader applies autoprefixer to our CSS.
                     // "css" loader resolves paths in CSS and adds assets as dependencies.
