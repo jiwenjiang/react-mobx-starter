@@ -10,12 +10,14 @@ import AccordionComponent from "component/accordion";
 import SearchHistory from "component/search/searchHistory";
 import SearchResult from "component/search/searchResult";
 import MapTag from "component/map/mapTag";
+import ConfigTag from "component/map/config";
 import http from "services/http";
-import normalUrl from "config/url/normal";
+// import normalUrl from "config/url/normal";
 import mapUrl from "config/url/map";
 import {unique} from "services/utils/tool";
 import "./index.less";
 import LoadingComponent from "component/common/loading";
+import {toJS} from "mobx";
 
 @inject("mapStore", "commonStore", "navStore")
 @observer
@@ -30,28 +32,15 @@ class listPage extends Component {
         };
     }
 
+    componentWillReact() {
+        // this.dataRender();
+    }
+
 
     componentDidMount() {
-        this.props.commonStore.changeLoadingStatus(true);
-        http.post(normalUrl.mapService, {mapId: this.props.mapStore.mapId}, (data) => {
-            const carouselData = []; // 走马灯数据
-            const accordionData = []; // 手风琴数据
-            data && data.forEach(v => {
-                if (v.serviceType === 1) {
-                    carouselData.push(v);
-                }
-                if (v.serviceType === 2) {
-                    accordionData.push(v);
-                }
-            });
-            this.setState({
-                carouselData,
-                accordionData
-            }, () => {
-                this.props.commonStore.changeLoadingStatus(false);
-            });
-        });
+
     }
+
 
     /**
      * @author j_bleach
@@ -89,7 +78,10 @@ class listPage extends Component {
 
 
     render() {
-        const {carouselData, accordionData, showSearchHistory, showSearchResult, searchResultData} = this.state;
+        const {showSearchHistory, showSearchResult, searchResultData} = this.state;
+        const {carouselData, accordionData} = this.props.mapStore;
+        console.log("s1",toJS(carouselData))
+        console.log("s2",toJS(accordionData))
 
         const searchProps = {
             toSearch: (e) => {
@@ -124,6 +116,7 @@ class listPage extends Component {
                     {showSearchResult && <SearchResult data={searchResultData}/>}
                 </div>
                 {!showSearchHistory && !showSearchResult && <MapTag/>}
+                {!showSearchHistory && !showSearchResult && <ConfigTag/>}
                 {this.props.commonStore.loadingStatus && <LoadingComponent/>}
             </div>
         );

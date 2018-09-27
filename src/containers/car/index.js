@@ -1,10 +1,10 @@
 /**
  * Created by j_bleach on 2018/9/26 0026.
  */
-/* eslint-disable*/
 import React, {Component} from "react";
 import {Tabs} from "antd-mobile";
 import {observer, inject} from "mobx-react";
+
 import "./index.less";
 import LoadingComponent from "component/common/loading";
 import http from "services/http";

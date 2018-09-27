@@ -10,6 +10,7 @@ import * as stores from '../mobx/stores';
 const List = AsyncComponent(() => import("../containers/list"));
 const Search = AsyncComponent(() => import("../containers/search"));
 const Car = AsyncComponent(() => import("../containers/car"));
+const Config = AsyncComponent(() => import("../containers/config"));
 
 
 const reactConfig = (
@@ -17,9 +18,10 @@ const reactConfig = (
         <Router>
             <Switch>
                 <Route path='/list' component={List}/>
+                <Route path='/config' component={Config}/>
                 <Route path='/search' component={Search}/>
                 <Route path='/car' component={Car}/>
-                <Redirect path="/" to={{pathname: '/car'}}/>
+                <Redirect path="/" to={{pathname: '/list'}}/>
             </Switch>
         </Router>
     </Provider>
