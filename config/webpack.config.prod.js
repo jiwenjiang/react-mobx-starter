@@ -154,7 +154,8 @@ module.exports = {
                                 options: {
                                     globalVars: {
                                         themeColor: "#1cccc6",
-                                        iconColor: "#0abfb9"
+                                        iconColor: "#0abfb9",
+                                        bgColor: "#F5FFFE"
                                     }
                                 }
                             }

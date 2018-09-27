@@ -14,7 +14,7 @@ class MapStore {
     @observable mapNavParams; // 地图导航参数
 
     constructor() {
-        this.mapId = 3;
+        this.mapId = 1;
         this.mapNavParams = {};
     }
 

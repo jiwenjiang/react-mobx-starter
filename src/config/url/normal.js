@@ -6,7 +6,9 @@ import config from "config";
 const {normalIp, version} = config;
 const url = {
     dynamicParams: `${normalIp}/location/locDynamicThreshold/${version}/getLocDynamicThreshold`,
-    mapService: `${normalIp}/hospService/${version}/getAllService`
+    mapService: `${normalIp}/hospService/${version}/getAllService`,
+    searchCarByNumber:`${normalIp}/carStatus/${version}/searchCar`,
+    searchCarByPosition:`${normalIp}/carStatus/${version}/getParkingNo`,
 };
 
 export default url

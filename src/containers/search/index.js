@@ -1,7 +1,7 @@
 /**
  * Created by j_bleach on 2018/9/21 0021.
  */
-/* eslint-disable*/
+
 import React, {Component} from "react";
 import {observer, inject} from "mobx-react";
 import CarouselComponent from "component/carousel";
@@ -75,7 +75,6 @@ class listPage extends Component {
             showSearchResult: true,
             searchResultData: response && response.list
         });
-        console.log(response);
         const historyRecords = localStorage.historyRecords
             ? unique([...JSON.parse(localStorage.historyRecords), {name: v}])
             : [{name: v}];
