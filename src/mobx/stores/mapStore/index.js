@@ -33,7 +33,7 @@ class MapStore {
     @observable accordionData;
 
     constructor() {
-        this.mapId = 1;
+        this.mapId = 2;
         this.mapNavParams = {
             timeThrottle: 5000,
             ibeaconLoc: 10,

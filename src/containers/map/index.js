@@ -6,22 +6,31 @@ import React, {Component} from "react";
 import {List} from "antd-mobile";
 import {observer, inject} from "mobx-react";
 import config from "config";
+import Search from "containers/search";
 import * as creeper from "services/mapSDK/mapbox-gl";
 import "./index.less";
 
 
-@inject("mapStore")
+@inject("mapStore", "commonStore")
 @observer
 class listPage extends Component {
 
     componentDidMount() {
-        new creeper.VectorMap("map", 2, config.mapIp + "/");
-        console.log(creeper);
+        const map = new creeper.VectorMap("map", this.props.mapStore.mapId, config.mapIp + "/");
+
+        map.on("drag", () => {
+        });
+
+        console.log(444);
     }
 
     render() {
+        const {searchStatus} = this.props.commonStore;
         return (
-            <div id="map" className="wb-map"></div>
+            <div className="map-container">
+                <div id="map" className="wb-map"></div>
+                {searchStatus && <Search></Search>}
+            </div>
         );
     }
 }

@@ -12,14 +12,21 @@ configure({
 
 class CommonStore {
     @observable loadingStatus; // loading 状态显示
+    @observable searchStatus; // 搜索页面显示
 
     constructor() {
         this.loadingStatus = false;
+        this.searchStatus = true;
     }
 
     @action
     changeLoadingStatus(status) {
         this.loadingStatus = status;
+    }
+
+    @action
+    changeSearchStatus(status) {
+        this.searchStatus = status;
     }
 }
 

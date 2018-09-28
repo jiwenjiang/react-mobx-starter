@@ -1,14 +1,12 @@
 /**
  * Created by j_bleach on 2018/9/21 0021.
  */
-/* eslint-disable*/
 import {Component} from "react";
 import React from "react";
 import {Grid} from "antd-mobile";
 import "./index.less";
 import config from "config";
 import pic from "assets/img/logo.png";
-import {toJS} from "mobx";
 
 class CarouselComponent extends Component {
     constructor(props) {
@@ -42,7 +40,6 @@ class CarouselComponent extends Component {
             height: "1vw",
             borderRadius: "0.5vw"
         };
-        console.log("s3", toJS(this.props.data));
         return (
             <Grid data={this.props.data && this.props.data.length > 0 ? this.props.data : this.data}
                   isCarousel hasLine={false}

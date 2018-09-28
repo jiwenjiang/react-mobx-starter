@@ -16,11 +16,10 @@ import mapUrl from "config/url/map";
 import {unique} from "services/utils/tool";
 import "./index.less";
 import LoadingComponent from "component/common/loading";
-import {toJS} from "mobx";
 
 @inject("mapStore", "commonStore", "navStore")
 @observer
-class listPage extends Component {
+class searchPage extends Component {
     constructor() {
         super();
         this.state = {
@@ -30,11 +29,6 @@ class listPage extends Component {
             showSearchResult: false // 展示搜索结果
         };
     }
-
-    componentWillReact() {
-        // this.dataRender();
-    }
-
 
     componentDidMount() {
 
@@ -79,8 +73,6 @@ class listPage extends Component {
     render() {
         const {showSearchHistory, showSearchResult, searchResultData} = this.state;
         const {carouselData, accordionData} = this.props.mapStore;
-        console.log("s1",toJS(carouselData))
-        console.log("s2",toJS(accordionData))
 
         const searchProps = {
             toSearch: (e) => {
@@ -122,4 +114,4 @@ class listPage extends Component {
     }
 }
 
-export default listPage;
+export default searchPage;

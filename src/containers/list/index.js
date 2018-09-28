@@ -13,9 +13,9 @@ const {Item} = List;
 class listPage extends Component {
     state = {
         listArr: [
-            {name: "理想中心", mapId: 2, link: "/search"},
-            {name: "路易艺术城堡", mapId: 1, link: "/search"},
-            {name: "成都妇女儿童医院", mapId: 3, link: "/search"},
+            {name: "理想中心", mapId: 2, link: "/map"},
+            {name: "路易艺术城堡", mapId: 1, link: "/map"},
+            {name: "成都妇女儿童医院", mapId: 3, link: "/map"},
         ]
     };
 
