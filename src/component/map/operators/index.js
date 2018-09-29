@@ -20,7 +20,7 @@ class operatorsComponent extends Component {
 
     render() {
         const {projectType} = this.props.commonStore;
-        const {mapObj} = this.props.mapStore;
+        const {mapObj, mapFloor = 1} = this.props.mapStore;
         const searchProps = {
             extendStyle: "extendSearchStyle",
             focusSearch: () => {
@@ -33,7 +33,7 @@ class operatorsComponent extends Component {
                 {Logo(projectType)}
                 {mapObj && <Direction map={mapObj}></Direction>}
                 {mapObj && <Scale map={mapObj} measurement="km"></Scale>}
-                {mapObj && <Floor map={mapObj}></Floor>}
+                {mapObj && <Floor map={mapObj} floor={1}></Floor>}
                 <Location></Location>
                 <Zoom></Zoom>
 

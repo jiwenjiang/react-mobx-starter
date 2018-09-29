@@ -5,12 +5,47 @@
   width: 9.3vw;
   z-index: 2;
   .map-operators-floor-total {
+    .swipe-floor {
+      z-index: 1;
+      height: 10vw;
+      width: 9vw;
+      border: 1px solid red;
+      margin-top: 7vw;
+      position: absolute;
+    }
+    position: relative;
     height: 23.7vw;
     width: 9.3vw;
-    overflow: hidden;
+    overflow-y: auto;
     background: rgba(255, 255, 255, 1);
     border-radius: 5px;
     box-shadow: 0px 2px 6px 0px rgba(119, 119, 119, 0.3);
+    ul > li {
+      width: 9.3vw;
+      height: 7.8vw;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 4vw;
+      font-family: PingFang-SC-Heavy;
+      font-weight: 800;
+    }
+  }
+  .map-operators-floor-current {
+    width: 9.3vw;
+    height: 9.3vw;
+    border-radius: 5px;
+    background-color: white;
+    margin-top: 2vw;
+    box-shadow: 0px 2px 6px 0px rgba(119, 119, 119, 0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #0AA5A0;
+    font-family: PingFang-SC-Heavy;
+    font-weight: 800;
+    color: rgba(10, 165, 160, 1);
+    font-size: 4vw;
   }
   .wb-picker {
     display: flex;

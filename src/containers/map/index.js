@@ -30,7 +30,6 @@ class mapPage extends Component {
                 {searchStatus && <Search></Search>}
                 <Operators></Operators>
             </div>
-
         );
     }
 }

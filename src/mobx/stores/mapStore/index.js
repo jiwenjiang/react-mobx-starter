@@ -16,12 +16,14 @@ class MapStore {
     @observable carouselData; // 跑马灯数据
     @observable accordionData; // 手风琴数据
     @observable mapObj; // map 对象
+    @observable mapFloor; // 当前地图楼层
 
     constructor() {
         this.mapId = 2;
         this.carouselData = [];
         this.accordionData = [];
         this.mapObj = null;
+        this.mapFloor = 1;
     }
 
     // 更新mapId
@@ -68,6 +70,12 @@ class MapStore {
     @action
     saveMapObj(obj) {
         this.mapObj = obj;
+    }
+
+    // 更新当前楼层
+    @action
+    updateFloor(floor) {
+        this.mapFloor = floor;
     }
 
     @computed get func() {
