@@ -13,10 +13,12 @@ configure({
 class CommonStore {
     @observable loadingStatus; // loading 状态显示
     @observable searchStatus; // 搜索页面显示
+    @observable projectType; // 寻址（车位鲸） Addressing(Car)
 
     constructor() {
         this.loadingStatus = false;
         this.searchStatus = true;
+        this.projectType = "Addressing";
     }
 
     @action
@@ -27,6 +29,11 @@ class CommonStore {
     @action
     changeSearchStatus(status) {
         this.searchStatus = status;
+    }
+
+    @action
+    changeProjectType(status) {
+        this.projectType = status;
     }
 }
 

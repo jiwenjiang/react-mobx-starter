@@ -18,11 +18,11 @@ class SearchComponent extends PureComponent {
     }
 
     render() {
-        const {placeholder = "请搜索位置"} = this.props;
+        const {placeholder = "请搜索位置", extendStyle} = this.props;
         return (
             <div className="search-box">
                 <form action="#" id="searchForm" onSubmit={(e) => this.submit(e)}>
-                    <div className="search-input">
+                    <div className={`search-input ${extendStyle}`}>
                         <i className="wbIcon-search iconfont icon-search"></i>
                         <input type="search" value={this.state.inputValue}
                                onChange={(e) => this.setState({

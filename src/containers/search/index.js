@@ -30,11 +30,6 @@ class searchPage extends Component {
         };
     }
 
-    componentDidMount() {
-
-    }
-
-
     /**
      * @author j_bleach
      * @date 2018-09-25
