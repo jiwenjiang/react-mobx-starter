@@ -1,7 +1,6 @@
 /**
  * Created by j_bleach on 2018/9/27 0027.
  */
-/*eslint-disable*/
 import React, {Component} from "react";
 import {observer, inject} from "mobx-react";
 import config from "config";
@@ -11,13 +10,28 @@ import Operators from "component/map/operators";
 import "./index.less";
 
 
-@inject("mapStore", "commonStore")
+@inject("mapStore", "commonStore", "floorStore")
 @observer
 class mapPage extends Component {
 
     componentDidMount() {
         const map = new creeper.VectorMap("wb-map", this.props.mapStore.mapId, config.mapIp + "/");
-        this.props.mapStore.saveMapObj(map);
+        // 监听地图加载完成
+        map.on("load", () => {
+            this.props.mapStore.saveMapObj(map);
+            console.log("zoom", map.getZoom());
+        });
+
+        // 监听地图点击
+        map.on("click", (e) => {
+            console.log(e);
+            this.props.mapStore.handleMarker(creeper, e, map);
+        });
+
+        // 监听楼层改变
+        map.on("floor.state.change", (event) => {
+            this.props.floorStore.changeFloorStatus(event, map);
+        });
     }
 
 

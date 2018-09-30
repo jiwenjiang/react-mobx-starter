@@ -35,12 +35,10 @@ class operatorsComponent extends Component {
                 {mapObj && <Scale map={mapObj} measurement="km"></Scale>}
                 {mapObj && <Floor map={mapObj} floor={1}></Floor>}
                 <Location></Location>
-                <Zoom></Zoom>
-
+                {mapObj && Zoom(mapObj)}
                 <div className="map-operators-search">
                     <SearchInput {...searchProps}></SearchInput>
                 </div>
-
             </div>
         );
     }

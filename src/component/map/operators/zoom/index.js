@@ -5,9 +5,13 @@
 import React from "react";
 import "./index.less";
 
-const location = () => <div className="map-operators-zoom-box">
-    <i className="iconfont icon-jia map-operators-zoom"></i>
-    <i className="iconfont icon-jian map-operators-zoom"></i>
+const zoomTo = (map, type) => {
+    map[type === "increases" ? "zoomIn" : "zoomOut"]();
+};
+
+const zoom = (map) => <div className="map-operators-zoom-box">
+    <i className="iconfont icon-jia map-operators-zoom" onClick={() => zoomTo(map, "increases")}></i>
+    <i className="iconfont icon-jian map-operators-zoom" onClick={() => zoomTo(map, "decreases ")}></i>
 </div>;
 
-export default location;
+export default zoom;

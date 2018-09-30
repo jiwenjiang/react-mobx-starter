@@ -21,9 +21,13 @@ class direction extends Component {
         });
     }
 
+    reset() {
+        this.props.map.resetNorth();
+    }
+
     render() {
         return <img className="map-operators-direction" style={{transform: this.state.mapRotate}}
-                    src={DirectionImg} alt=""/>;
+                    src={DirectionImg} alt="" onClick={() => this.reset()}/>;
     }
 }
 

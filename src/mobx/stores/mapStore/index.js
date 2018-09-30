@@ -1,11 +1,14 @@
 /**
  * Created by j_bleach on 2018/9/20 0020.
  */
-import {observable, action, autorun, computed, configure, runInAction} from "mobx";
+/*eslint-disable*/
+import {action, autorun, computed, configure, observable, runInAction} from "mobx";
 import http from "services/http";
 import normalUrl from "config/url/normal";
 import {commonStore} from "../commonStore";
-
+// import {start} from "component/map/marker";
+import start from "assets/img/start.png";
+import "./index.less";
 
 configure({
     enforceActions: "observed"
@@ -16,14 +19,12 @@ class MapStore {
     @observable carouselData; // 跑马灯数据
     @observable accordionData; // 手风琴数据
     @observable mapObj; // map 对象
-    @observable mapFloor; // 当前地图楼层
 
     constructor() {
         this.mapId = 2;
         this.carouselData = [];
         this.accordionData = [];
         this.mapObj = null;
-        this.mapFloor = 1;
     }
 
     // 更新mapId
@@ -78,6 +79,37 @@ class MapStore {
         this.mapFloor = floor;
     }
 
+    // marker处理
+    handleMarker(mapgl, e, map) {
+        // TODO 找中点
+        let feature = map.queryRenderedFeatures(e.point);
+        console.log(feature);
+        if (feature && feature[0] && "layer" in feature[0] && "properties" in feature[0]) {
+            if (feature[0]["properties"]["name"]) {
+                let polygonGeojson = feature[0].geometry.coordinates;
+                let point;
+                if (polygonGeojson[0] instanceof Array) {
+                    let polygon = turf.polygon(polygonGeojson);
+                    point = turf.centerOfMass(polygon);
+                } else {
+                    point = {
+                        geometry: {
+                            coordinates: [polygonGeojson[0], polygonGeojson[1]],
+                            type: "Point"
+                        },
+                        floor: feature.properties.level
+                    };
+                }
+                let el = document.createElement("div");
+                let img = document.createElement("img");
+                img.src = start;
+                img.style.width = "7.3vw";
+                el.appendChild(img);
+                this.startMarker = new mapgl.Marker(el).setLngLat(feature[0].geometry.coordinates).addTo(map);
+            }
+        }
+    }
+
     @computed get func() {
         return this.mapId * 10;
     }
@@ -86,8 +118,7 @@ class MapStore {
 
 const mapStore = new MapStore();
 autorun(() => {
-    // console.log("test:", mapStore.mapId);
-    // console.log("test2:", mapStore.mapNavParams);
+    // console.log(this.mapId);
 });
 
 

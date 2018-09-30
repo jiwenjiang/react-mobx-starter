@@ -9,7 +9,7 @@ import {inject, observer} from "mobx-react";
 // import Hammer from "hammerjs";
 
 
-@inject("mapStore")
+@inject("floorStore", "mapStore")
 @observer
 class floor extends Component {
     state = {
@@ -81,8 +81,10 @@ class floor extends Component {
                 showFloor: false
             });
         } else {
+            const floorData = this.calcFloorList(this.props.mapStore.mapObj);
             this.setState({
-                showFloor: true
+                showFloor: true,
+                floorData,
             }, () => {
                 const mapFloor = document.getElementById("map-operators-floor-total");
                 const scrollHeight = mapFloor.scrollHeight;
@@ -91,32 +93,51 @@ class floor extends Component {
         }
     }
 
+    calcFloorList(map) {
+        const maxFloor = map.getMaxLevel();
+        const minFloor = map.getMinLevel();
+        let minArr = [];
+        if (minFloor <= -1) {
+            minArr = Array.from({length: -minFloor}, (v, i) => {
+                return {label: "B" + (i + 1), value: -(i + 1)};
+            }).reverse();
+        }
+        let maxArr = Array.from({length: maxFloor}, (v, i) => {
+            return {label: (i + 1) + "F", value: (i + 1)};
+        });
+        return [...minArr, ...maxArr].reverse();
+    }
+
     changeFloor(v) {
-        this.props.mapStore.updateFloor(v);
+        this.props.floorStore.updateFloor(v);
+        this.props.mapStore.mapObj.setLevel(v - 1);
         this.setState({
             showFloor: false
         });
     }
 
     render() {
-        const {showFloor} = this.state;
-        const {mapFloor} = this.props.mapStore;
-        return <div className="map-operators-floor">
-            {
-                showFloor && <div className="map-operators-floor-total" id="map-operators-floor-total">
-                    {/*<div id="floor" className="swipe-floor"></div>*/}
-                    <ul>
-                        {this.data.map(v => {
-                            const color = v.value == mapFloor ? "#009999" : "#999999";
-                            return <li key={v.value} style={{color}}
-                                       onClick={() => this.changeFloor(v.value)}>{v.label}</li>;
-                        })}
-                    </ul>
+        const {showFloor, floorData} = this.state;
+        const {mapFloor, floorStatus} = this.props.floorStore;
+        return <div>
+            {floorStatus && <div className="map-operators-floor">
+                {
+                    showFloor && <div className="map-operators-floor-total" id="map-operators-floor-total">
+                        {/*<div id="floor" className="swipe-floor"></div>*/}
+                        <ul>
+                            {floorData && floorData.map(v => {
+                                const color = v.value == mapFloor ? "#009999" : "#999999";
+                                return <li key={v.value} style={{color}}
+                                           onClick={() => this.changeFloor(v.value)}>{v.label}</li>;
+                            })}
+                        </ul>
+                    </div>
+                }
+                <div className="map-operators-floor-current" onClick={() => this.calcFloorHeight()}>
+                    {mapFloor > 0 ? `${mapFloor}F` : `B${-mapFloor}`}
                 </div>
-            }
-            <div className="map-operators-floor-current" onClick={() => this.calcFloorHeight()}>
-                {mapFloor}
             </div>
+            };
         </div>;
     }
 }
