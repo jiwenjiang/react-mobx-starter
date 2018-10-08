@@ -7,6 +7,7 @@ import config from "config";
 import Search from "containers/search";
 import * as creeper from "services/mapSDK/mapbox-gl";
 import Operators from "component/map/operators";
+import GotoShare from "component/map/share";
 import "./index.less";
 
 
@@ -18,14 +19,13 @@ class mapPage extends Component {
         const map = new creeper.VectorMap("wb-map", this.props.mapStore.mapId, config.mapIp + "/");
         // 监听地图加载完成
         map.on("load", () => {
-            this.props.mapStore.saveMapObj(map);
+            this.props.mapStore.saveMapObj(map, creeper);
             console.log("zoom", map.getZoom());
         });
 
         // 监听地图点击
         map.on("click", (e) => {
-            console.log(e);
-            this.props.mapStore.handleMarker(creeper, e, map);
+            this.props.mapStore.handleMarker(e);
         });
 
         // 监听楼层改变
@@ -43,6 +43,7 @@ class mapPage extends Component {
                      style={{width: "100vw", height: "100vh"}}></div>
                 {searchStatus && <Search></Search>}
                 <Operators></Operators>
+                <GotoShare></GotoShare>
             </div>
         );
     }

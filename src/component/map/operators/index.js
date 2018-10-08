@@ -33,7 +33,7 @@ class operatorsComponent extends Component {
                 {Logo(projectType)}
                 {mapObj && <Direction map={mapObj}></Direction>}
                 {mapObj && <Scale map={mapObj} measurement="km"></Scale>}
-                {mapObj && <Floor map={mapObj} floor={1}></Floor>}
+                {mapObj && <Floor map={mapObj} floor={mapFloor}></Floor>}
                 <Location></Location>
                 {mapObj && Zoom(mapObj)}
                 <div className="map-operators-search">

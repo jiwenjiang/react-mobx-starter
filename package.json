@@ -4,6 +4,7 @@
   "private": true,
   "homepage": ".",
   "dependencies": {
+    "@turf/turf": "^5.1.6",
     "antd-mobile": "^2.2.5",
     "autoprefixer": "7.1.6",
     "axios": "^0.18.0",

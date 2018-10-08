@@ -3,11 +3,13 @@
  */
 /*eslint-disable*/
 import {action, autorun, computed, configure, observable, runInAction} from "mobx";
+import {polygon, centerOfMass} from "@turf/turf";
 import http from "services/http";
 import normalUrl from "config/url/normal";
 import {commonStore} from "../commonStore";
 // import {start} from "component/map/marker";
-import start from "assets/img/start.png";
+import startImg from "assets/img/start.png";
+import endImg from "assets/img/end.png";
 import "./index.less";
 
 configure({
@@ -19,12 +21,20 @@ class MapStore {
     @observable carouselData; // 跑马灯数据
     @observable accordionData; // 手风琴数据
     @observable mapObj; // map 对象
+    @observable mapGL; // map sdk
+    @observable endMarker; // 结束marker
+    @observable endMarkerPoint; // 结束marker坐标点
+    @observable confirmEndMarker; // 确定终点标记
 
     constructor() {
         this.mapId = 2;
         this.carouselData = [];
         this.accordionData = [];
         this.mapObj = null;
+        this.mapGL = null;
+        this.endMarker = null;
+        this.endMarkerPoint = null;
+        this.confirmEndMarker = false;
     }
 
     // 更新mapId
@@ -69,8 +79,9 @@ class MapStore {
 
     // 获取地图对象
     @action
-    saveMapObj(obj) {
+    saveMapObj(obj, mapGL) {
         this.mapObj = obj;
+        this.mapGL = mapGL;
     }
 
     // 更新当前楼层
@@ -79,34 +90,77 @@ class MapStore {
         this.mapFloor = floor;
     }
 
-    // marker处理
-    handleMarker(mapgl, e, map) {
-        // TODO 找中点
-        let feature = map.queryRenderedFeatures(e.point);
+    // 地图点击处理
+    @action
+    handleMarker(e) {
+        // if (!this.confirmEndMarker && this.endMarker) {
+        //     this.endMarker.remove();
+        //     console.log(this.endMarker)
+        // }
+        let feature = this.mapObj.queryRenderedFeatures(e.point);
         console.log(feature);
         if (feature && feature[0] && "layer" in feature[0] && "properties" in feature[0]) {
             if (feature[0]["properties"]["name"]) {
                 let polygonGeojson = feature[0].geometry.coordinates;
                 let point;
                 if (polygonGeojson[0] instanceof Array) {
-                    let polygon = turf.polygon(polygonGeojson);
-                    point = turf.centerOfMass(polygon);
+                    let polygonPoints = polygon(polygonGeojson);
+                    point = centerOfMass(polygonPoints);
+                    point.floor = feature[0].properties.level;
                 } else {
                     point = {
                         geometry: {
                             coordinates: [polygonGeojson[0], polygonGeojson[1]],
                             type: "Point"
                         },
-                        floor: feature.properties.level
+                        floor: feature[0].properties.level
                     };
                 }
-                let el = document.createElement("div");
-                let img = document.createElement("img");
-                img.src = start;
-                img.style.width = "7.3vw";
-                el.appendChild(img);
-                this.startMarker = new mapgl.Marker(el).setLngLat(feature[0].geometry.coordinates).addTo(map);
+                if (!this.confirmEndMarker) {
+                    this.endMarkerPoint = {
+                        point: point.geometry.coordinates,
+                        floor: Number(point.floor) + 1,
+                        name: feature[0]["properties"]["name"]
+                    }; // marker 终点坐标
+                    if (this.endMarker) {
+                        console.log("marker 存在");
+                        this.endMarker.setLngLat(this.endMarkerPoint.point);
+                    } else {
+                        console.log("first marker");
+                        let el = document.createElement("div");
+                        let img = document.createElement("img");
+                        img.src = endImg;
+                        img.style.width = "7.3vw";
+                        el.appendChild(img);
+                        this.endMarker = new this.mapGL.Marker(el).setLngLat(this.endMarkerPoint.point).addTo(this.mapObj);
+                    }
+                } else {
+                    this.startMarker = new this.mapGL.Marker(el).setLngLat(this.endMarkerPoint.point).addTo(this.mapObj);
+                }
+                // this.confirmEndMarker = true;
+                this.mapObj.flyTo({
+                    center: point.geometry.coordinates,
+                    zoom: 19,
+                    speed: 1,
+                    curve: 1,
+                    easing(t) {
+                        return t;
+                    }
+                });
+                this.checkNodePosition();
             }
+        }
+    }
+
+    checkNodePosition() {
+        if (!this.confirmEndMarker && this.endMarker) {
+            const classList = ["map-operators-location-box", "map-logo",
+                "map-operators-scale", "map-operators-zoom-box", "map-operators-floor"];
+            for (let v of classList) {
+                console.log(document.getElementsByClassName(v)[0]);
+                document.getElementsByClassName(v)[0].classList.add("dom-transformY");
+            }
+            document.getElementsByClassName("map-goToShare")[0].classList.add("dom-transformY-30");
         }
     }
 

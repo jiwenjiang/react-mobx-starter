@@ -16,32 +16,6 @@ class floor extends Component {
         value: null,
         showFloor: false
     };
-    data = [
-        {
-            label: "1F",
-            value: "1",
-        },
-        {
-            label: "2F",
-            value: "2",
-        },
-        {
-            label: "3F",
-            value: "3",
-        },
-        {
-            label: "4F",
-            value: "4",
-        },
-        {
-            label: "5F",
-            value: "5",
-        },
-        {
-            label: "6F",
-            value: "6",
-        },
-    ];
 
     componentDidMount() {
         /**
@@ -111,9 +85,22 @@ class floor extends Component {
     changeFloor(v) {
         this.props.floorStore.updateFloor(v);
         this.props.mapStore.mapObj.setLevel(v - 1);
+        this.checkMarker(v);
         this.setState({
             showFloor: false
         });
+    }
+
+    checkMarker(v) {
+        const endMarkerPoint = this.props.mapStore.endMarkerPoint;
+        const endMarker = this.props.mapStore.endMarker;
+        if (endMarkerPoint) {
+            if (endMarkerPoint.floor === v) {
+                endMarker.setLngLat(endMarkerPoint.point);
+            } else {
+                endMarker.setLngLat([0, 0]);
+            }
+        }
     }
 
     render() {

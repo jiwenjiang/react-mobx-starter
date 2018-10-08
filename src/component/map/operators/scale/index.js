@@ -140,7 +140,7 @@ class direction extends Component {
     }
 
     render() {
-        return <div style={containerStyle}>
+        return <div style={containerStyle} className="map-operators-scale">
             <div style={{...scaleStyle, width: this.state.scaleWidth}}>
                 <div style={textStyle}>
                     {this._displayMeasurement(this.props.measurement, this.state.chosenScale)}
