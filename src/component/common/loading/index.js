@@ -13,8 +13,8 @@ class LoadingComponent extends PureComponent {
 
     render() {
         return (
-            <div className='loader'>
-                <div className='loader_overlay'></div>
+            <div className='wb-loader'>
+                <div className='wb-loader_overlay'></div>
                 <div className='loader_cogs'>
                     <div className='loader_cogs__top'>
                         <div className='top_part'></div>
@@ -34,7 +34,7 @@ class LoadingComponent extends PureComponent {
                         <div className='bottom_part'></div>
                         <div className='bottom_hole'></div>
                     </div>
-                    <p>正在加载...</p>
+                    <p>{this.props.text || "正在加载..."}</p>
                 </div>
             </div>
         );

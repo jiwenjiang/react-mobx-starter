@@ -7,7 +7,9 @@ import {polygon, centerOfMass} from "@turf/turf";
 import http from "services/http";
 import normalUrl from "config/url/normal";
 import {commonStore} from "../commonStore";
+import {floorStore} from "../floorStore";
 // import {start} from "component/map/marker";
+import {toJS} from "mobx";
 import startImg from "assets/img/start.png";
 import endImg from "assets/img/end.png";
 import "./index.less";
@@ -22,6 +24,7 @@ class MapStore {
     @observable accordionData; // 手风琴数据
     @observable mapObj; // map 对象
     @observable mapGL; // map sdk
+    @observable routeObj; // map 路径规划对象
     @observable startMarker; // 开始marker 对象（mapbox sdk）
     @observable endMarker; // 结束marker 对象（mapbox sdk）
     @observable startMarkerPoint; // 开始marker坐标点
@@ -34,6 +37,7 @@ class MapStore {
         this.accordionData = [];
         this.mapObj = null;
         this.mapGL = null;
+        this.routeObj = null;
         this.startMarker = null;
         this.endMarker = null;
         this.startMarkerPoint = null;
@@ -83,9 +87,59 @@ class MapStore {
 
     // 获取地图对象
     @action
-    saveMapObj(obj, mapGL) {
-        this.mapObj = obj;
+    saveMapObj(map, mapGL, route) {
+        this.mapObj = map;
         this.mapGL = mapGL;
+        this.routeObj = route;
+        this.listenRoutePlan();
+    }
+
+    @action
+    listenRoutePlan() {
+        this.routeObj.ri = {
+            routeSuccess: () => {
+                document.getElementsByClassName("wb-loader")[0].style.display = "none";
+                console.info("路径规划成功");
+                this.routeObj.clearLocation();
+            },
+            routeError: () => {
+                console.error("路径规划失败");
+                this.routeObj.clearLocation();
+            },
+            setPathListView: (paths) => {
+                // commonStore.loadingStatus = false;
+                let geojson = {
+                    "type": "FeatureCollection",
+                    "features": []
+                };
+
+                paths.forEach((value) => {
+                    geojson.features.push({
+                        "type": "Feature",
+                        "geometry": value.geometry
+                    });
+                });
+
+                this.mapObj.addSource("line", {
+                    type: "geojson",
+                    data: geojson
+                });
+
+                this.mapObj.addLayer({
+                    type: "line",
+                    source: "line",
+                    id: "line",
+                    paint: {
+                        "line-color": "blue",
+                        "line-width": 3
+                    },
+                    layout: {
+                        "line-cap": "round",
+                        "line-join": "round"
+                    }
+                });
+            },
+        };
     }
 
     // 更新当前楼层
@@ -97,12 +151,7 @@ class MapStore {
     // 地图点击处理
     @action
     handleMarker(e) {
-        // if (!this.confirmEndMarker && this.endMarker) {
-        //     this.endMarker.remove();
-        //     console.log(this.endMarker)
-        // }
         let feature = this.mapObj.queryRenderedFeatures(e.point);
-        console.log(feature);
         if (feature && feature[0] && "layer" in feature[0] && "properties" in feature[0]) {
             if (feature[0]["properties"]["name"]) {
                 let polygonGeojson = feature[0].geometry.coordinates;
@@ -130,7 +179,7 @@ class MapStore {
                         console.log("end marker 存在");
                         this.endMarker.setLngLat(this.endMarkerPoint.point);
                     } else {
-                        console.log("first start marker");
+                        console.log("first end marker");
                         let el = document.createElement("div");
                         let img = document.createElement("img");
                         img.src = endImg;
@@ -155,6 +204,7 @@ class MapStore {
                         img.style.width = "7.3vw";
                         el.appendChild(img);
                         this.startMarker = new this.mapGL.Marker(el).setLngLat(this.startMarkerPoint.point).addTo(this.mapObj);
+                        this.confirmStartMarkerFn();
                     }
                 }
                 // this.confirmEndMarker = true;
@@ -186,6 +236,26 @@ class MapStore {
     @action
     confirmEndMarkerFn(v) {
         this.confirmEndMarker = v;
+    }
+
+    @action
+    confirmStartMarkerFn() {
+        commonStore.confirmModalStatus = true;
+    }
+
+    @action
+    planRoute() {
+        commonStore.loadingStatus = true;
+        const [startLng, startLat] = toJS(this.startMarkerPoint).point;
+        const [endLng, endLat] = toJS(this.endMarkerPoint).point;
+        this.routeObj.setLocation({
+            type: "Point",
+            coordinates: [startLat, startLng, -1]
+        }, "起点", floorStore.mapFloor - 1);
+        this.routeObj.setLocation({
+            type: "Point",
+            coordinates: [endLat, endLng, -1]
+        }, "终点", floorStore.mapFloor - 1);
     }
 
     @computed get func() {

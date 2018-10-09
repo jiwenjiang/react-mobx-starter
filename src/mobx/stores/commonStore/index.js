@@ -14,11 +14,13 @@ class CommonStore {
     @observable loadingStatus; // loading 状态显示
     @observable searchStatus; // 搜索页面显示
     @observable projectType; // 寻址（车位鲸） Addressing(Car)
+    @observable confirmModalStatus; // 确认模态框
 
     constructor() {
         this.loadingStatus = false;
         this.searchStatus = true;
         this.projectType = "Addressing";
+        this.confirmModalStatus = false;
     }
 
     @action
@@ -34,6 +36,11 @@ class CommonStore {
     @action
     changeProjectType(status) {
         this.projectType = status;
+    }
+
+    @action
+    changeConfirmModal(status) {
+        this.confirmModalStatus = status;
     }
 }
 

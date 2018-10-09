@@ -12,6 +12,7 @@ import Scale from "./scale";
 import Floor from "./floor";
 import SearchInput from "component/search/searchInput";
 import "./index.less";
+import LoadingComponent from "component/common/loading";
 
 
 @inject("mapStore", "commonStore")
@@ -39,6 +40,7 @@ class operatorsComponent extends Component {
                 <div className="map-operators-search">
                     <SearchInput {...searchProps}></SearchInput>
                 </div>
+                {this.props.commonStore.loadingStatus ? <LoadingComponent text="路径规划中，请稍后..."/> : <div></div>}
             </div>
         );
     }
