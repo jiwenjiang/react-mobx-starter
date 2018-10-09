@@ -10,6 +10,11 @@ import "./index.less";
 @observer
 class gotoComponent extends Component {
 
+    goToHere() {
+        document.getElementsByClassName("map-routePanel")[0].classList.add("dom-transformY-35");
+        this.props.mapStore.confirmEndMarkerFn(true);
+    }
+
     render() {
         const {endMarkerPoint} = this.props.mapStore;
         return (
@@ -23,7 +28,7 @@ class gotoComponent extends Component {
                     </div>
                     <hr/>
                     <div>
-                        <button className="map-goToShare-btn">
+                        <button className="map-goToShare-btn" onClick={() => this.goToHere()}>
                             {/*<i className="iconfont icon-quzheli"></i>*/}
                             去这里
                         </button>

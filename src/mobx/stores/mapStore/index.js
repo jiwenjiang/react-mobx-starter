@@ -22,7 +22,9 @@ class MapStore {
     @observable accordionData; // 手风琴数据
     @observable mapObj; // map 对象
     @observable mapGL; // map sdk
-    @observable endMarker; // 结束marker
+    @observable startMarker; // 开始marker 对象（mapbox sdk）
+    @observable endMarker; // 结束marker 对象（mapbox sdk）
+    @observable startMarkerPoint; // 开始marker坐标点
     @observable endMarkerPoint; // 结束marker坐标点
     @observable confirmEndMarker; // 确定终点标记
 
@@ -32,7 +34,9 @@ class MapStore {
         this.accordionData = [];
         this.mapObj = null;
         this.mapGL = null;
+        this.startMarker = null;
         this.endMarker = null;
+        this.startMarkerPoint = null;
         this.endMarkerPoint = null;
         this.confirmEndMarker = false;
     }
@@ -123,10 +127,10 @@ class MapStore {
                         name: feature[0]["properties"]["name"]
                     }; // marker 终点坐标
                     if (this.endMarker) {
-                        console.log("marker 存在");
+                        console.log("end marker 存在");
                         this.endMarker.setLngLat(this.endMarkerPoint.point);
                     } else {
-                        console.log("first marker");
+                        console.log("first start marker");
                         let el = document.createElement("div");
                         let img = document.createElement("img");
                         img.src = endImg;
@@ -135,7 +139,23 @@ class MapStore {
                         this.endMarker = new this.mapGL.Marker(el).setLngLat(this.endMarkerPoint.point).addTo(this.mapObj);
                     }
                 } else {
-                    this.startMarker = new this.mapGL.Marker(el).setLngLat(this.endMarkerPoint.point).addTo(this.mapObj);
+                    this.startMarkerPoint = {
+                        point: point.geometry.coordinates,
+                        floor: Number(point.floor) + 1,
+                        name: feature[0]["properties"]["name"]
+                    }; // marker 终点坐标
+                    if (this.startMarker) {
+                        console.log("start marker 存在");
+                        this.startMarker.setLngLat(this.startMarkerPoint.point);
+                    } else {
+                        console.log("first start marker");
+                        let el = document.createElement("div");
+                        let img = document.createElement("img");
+                        img.src = startImg;
+                        img.style.width = "7.3vw";
+                        el.appendChild(img);
+                        this.startMarker = new this.mapGL.Marker(el).setLngLat(this.startMarkerPoint.point).addTo(this.mapObj);
+                    }
                 }
                 // this.confirmEndMarker = true;
                 this.mapObj.flyTo({
@@ -157,11 +177,15 @@ class MapStore {
             const classList = ["map-operators-location-box", "map-logo",
                 "map-operators-scale", "map-operators-zoom-box", "map-operators-floor"];
             for (let v of classList) {
-                console.log(document.getElementsByClassName(v)[0]);
                 document.getElementsByClassName(v)[0].classList.add("dom-transformY");
             }
             document.getElementsByClassName("map-goToShare")[0].classList.add("dom-transformY-30");
         }
+    }
+
+    @action
+    confirmEndMarkerFn(v) {
+        this.confirmEndMarker = v;
     }
 
     @computed get func() {

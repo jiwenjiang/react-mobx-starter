@@ -8,6 +8,7 @@ import Search from "containers/search";
 import * as creeper from "services/mapSDK/mapbox-gl";
 import Operators from "component/map/operators";
 import GotoShare from "component/map/share";
+import RoutePanel from "component/map/routePanel";
 import "./index.less";
 
 
@@ -44,6 +45,7 @@ class mapPage extends Component {
                 {searchStatus && <Search></Search>}
                 <Operators></Operators>
                 <GotoShare></GotoShare>
+                <RoutePanel></RoutePanel>
             </div>
         );
     }
