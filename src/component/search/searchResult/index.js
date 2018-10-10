@@ -2,11 +2,14 @@
  * Created by j_bleach on 2018/9/25 0025.
  */
 
-import React, {PureComponent} from "react";
+import React, {Component} from "react";
 import {List} from "antd-mobile";
 import "./index.less";
+import {inject, observer} from "mobx-react";
 
-class SearchResult extends PureComponent {
+@inject("mapStore", "floorStore", "commonStore")
+@observer
+class SearchResult extends Component {
     state = {
         searchResult: []
     };
@@ -26,6 +29,13 @@ class SearchResult extends PureComponent {
         });
     }
 
+    confirmMarker(v) {
+        console.log(v);
+        // const data = {};
+        this.props.commonStore.changeSearchStatus(false);
+        this.props.mapStore.confirmMarker();
+    }
+
     render() {
         return (
             <div className="search-history-box">
@@ -36,7 +46,7 @@ class SearchResult extends PureComponent {
                                 key={v.id}
                                 thumb={<i className="iconfont icon-didian"
                                           style={{fontSize: "4.5vw", color: "#1cccc6"}}></i>}
-                                extra={<div className="search-result-extra">
+                                extra={<div className="search-result-extra" onClick={() => this.confirmMarker(v)}>
                                     <i className="iconfont icon-quzheli"
                                        style={{
                                            color: "#1cccc6",
@@ -53,7 +63,7 @@ class SearchResult extends PureComponent {
                                     }}>去这里</span>
                                 </div>}>
                                 <p className="search-result-content">{v.tags.name}</p>
-                                <List.Item.Brief>{`在${v.tags.level}楼  距离：${v.distance}米`}</List.Item.Brief>
+                                <List.Item.Brief>{`在${Number(v.tags.level) + 1}楼  距离：${v.distance}米`}</List.Item.Brief>
                             </List.Item>
                         )}
                     </List>

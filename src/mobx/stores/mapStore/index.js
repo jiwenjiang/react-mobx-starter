@@ -109,9 +109,9 @@ class MapStore {
             },
             setPathListView: (paths) => {
                 this.routeHandle(paths);
-                const floorNum = this.startMarkerPoint.floor;
+                const floor = this.startMarkerPoint.floor;
+                const floorNum = floor > 0 ? floor + 1 : floor;
                 floorStore.updateFloor(floorNum);
-                const floor = floorNum - 1;
                 this.mapObj.setLevel(floor);
                 if (this.mapObj.getSource("building-route")) {
                     this.mapObj.removeSource("building-route");
@@ -119,7 +119,6 @@ class MapStore {
                 if (this.mapObj.getLayer("building-layer")) {
                     this.mapObj.removeLayer("building-layer");
                 }
-                console.log("test", toJS(floorStore.routeIndoor[floor]));
                 this.mapObj.addSource("building-route", {
                     type: "geojson",
                     data: toJS(floorStore.routeIndoor[floor])
@@ -199,7 +198,7 @@ class MapStore {
                 if (!this.confirmEndMarker) {
                     this.endMarkerPoint = {
                         point: point.geometry.coordinates,
-                        floor: Number(point.floor) + 1,
+                        floor: Number(point.floor),
                         name: feature[0]["properties"]["name"]
                     }; // marker 终点坐标
                     if (this.endMarker) {
@@ -207,17 +206,13 @@ class MapStore {
                         this.endMarker.setLngLat(this.endMarkerPoint.point);
                     } else {
                         console.log("first end marker");
-                        let el = document.createElement("div");
-                        let img = document.createElement("img");
-                        img.src = endImg;
-                        img.style.width = "7.3vw";
-                        el.appendChild(img);
+                        let el = this.generateDom(endImg);
                         this.endMarker = new this.mapGL.Marker(el).setLngLat(this.endMarkerPoint.point).addTo(this.mapObj);
                     }
                 } else {
                     this.startMarkerPoint = {
                         point: point.geometry.coordinates,
-                        floor: Number(point.floor) + 1,
+                        floor: Number(point.floor),
                         name: feature[0]["properties"]["name"]
                     }; // marker 终点坐标
                     if (this.startMarker) {
@@ -225,16 +220,11 @@ class MapStore {
                         this.startMarker.setLngLat(this.startMarkerPoint.point);
                     } else {
                         console.log("first start marker");
-                        let el = document.createElement("div");
-                        let img = document.createElement("img");
-                        img.src = startImg;
-                        img.style.width = "7.3vw";
-                        el.appendChild(img);
+                        let el = this.generateDom(startImg);
                         this.startMarker = new this.mapGL.Marker(el).setLngLat(this.startMarkerPoint.point).addTo(this.mapObj);
                         this.confirmStartMarkerFn();
                     }
                 }
-                // this.confirmEndMarker = true;
                 this.mapObj.flyTo({
                     center: point.geometry.coordinates,
                     zoom: 19,
@@ -247,6 +237,42 @@ class MapStore {
                 this.checkNodePosition();
             }
         }
+    }
+
+    @action
+    confirmMarker(type, data) {
+        const startMarkerHandle = () => {
+            this.startMarkerPoint = data;
+            if (this.startMarker) {
+                this.startMarker.setLngLat(this.startMarkerPoint.point);
+            } else {
+                const el = this.generateDom(startImg);
+                this.startMarker = new this.mapGL.Marker(el).setLngLat(this.startMarkerPoint.point).addTo(this.mapObj);
+                this.confirmStartMarkerFn();
+            }
+        };
+        const endMarkerHandle = () => {
+            this.endMarkerPoint = data;
+            if (this.endMarker) {
+                this.endMarker.setLngLat(this.endMarkerPoint.point);
+            } else {
+                const el = this.generateDom(startImg);
+                this.endMarker = new this.mapGL.Marker(el).setLngLat(this.endMarkerPoint.point).addTo(this.mapObj);
+                this.confirmStartMarkerFn();
+            }
+        };
+        type === "start"
+            ? startMarkerHandle()
+            : endMarkerHandle();
+    }
+
+    generateDom(src) {
+        let el = document.createElement("div");
+        let img = document.createElement("img");
+        img.src = src;
+        img.style.width = "7.3vw";
+        el.appendChild(img);
+        return el;
     }
 
     checkNodePosition() {
@@ -278,11 +304,11 @@ class MapStore {
         this.routeObj.setLocation({
             type: "Point",
             coordinates: [startLat, startLng, -1]
-        }, "起点", this.startMarkerPoint.floor - 1);
+        }, "起点", this.startMarkerPoint.floor);
         this.routeObj.setLocation({
             type: "Point",
             coordinates: [endLat, endLng, -1]
-        }, "终点", this.endMarkerPoint.floor - 1);
+        }, "终点", this.endMarkerPoint.floor);
     }
 
     @computed get func() {

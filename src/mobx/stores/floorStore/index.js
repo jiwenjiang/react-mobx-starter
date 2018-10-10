@@ -70,8 +70,7 @@ class FloorStore {
         }
         // 路径规划 跨楼层判断
         if (map.mapObj.getLayer("building-layer")) {
-            const floorNum = floor > 0 ? floor - 1 : floor;
-            const geoData = floorStore.routeIndoor[floorNum] ? floorStore.routeIndoor[floorNum] : {
+            const geoData = floorStore.routeIndoor[floor] ? floorStore.routeIndoor[floor] : {
                 type: "FeatureCollection",
                 features: []
             };

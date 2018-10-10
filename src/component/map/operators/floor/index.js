@@ -86,7 +86,7 @@ class floor extends Component {
         this.props.floorStore.updateFloor(v);
         const floor = v > 0 ? v - 1 : v;
         this.props.mapStore.mapObj.setLevel(floor);
-        this.props.floorStore.checkMarkerAndRoute(this.props.mapStore, v);
+        this.props.floorStore.checkMarkerAndRoute(this.props.mapStore, floor);
         this.setState({
             showFloor: false
         });
