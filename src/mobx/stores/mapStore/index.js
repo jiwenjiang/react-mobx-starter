@@ -94,11 +94,12 @@ class MapStore {
         this.listenRoutePlan();
     }
 
-    @action
     listenRoutePlan() {
         this.routeObj.ri = {
             routeSuccess: () => {
-                document.getElementsByClassName("wb-loader")[0].style.display = "none";
+                runInAction(() => {
+                    commonStore.loadingStatus = false;
+                });
                 console.info("路径规划成功");
                 this.routeObj.clearLocation();
             },
@@ -107,45 +108,71 @@ class MapStore {
                 this.routeObj.clearLocation();
             },
             setPathListView: (paths) => {
-                // commonStore.loadingStatus = false;
-                let geojson = {
-                    "type": "FeatureCollection",
-                    "features": []
-                };
-
-                paths.forEach((value) => {
-                    geojson.features.push({
-                        "type": "Feature",
-                        "geometry": value.geometry
-                    });
-                });
-
-                this.mapObj.addSource("line", {
+                this.routeHandle(paths);
+                const floorNum = this.startMarkerPoint.floor;
+                floorStore.updateFloor(floorNum);
+                const floor = floorNum - 1;
+                this.mapObj.setLevel(floor);
+                if (this.mapObj.getSource("building-route")) {
+                    this.mapObj.removeSource("building-route");
+                }
+                if (this.mapObj.getLayer("building-layer")) {
+                    this.mapObj.removeLayer("building-layer");
+                }
+                console.log("test", toJS(floorStore.routeIndoor[floor]));
+                this.mapObj.addSource("building-route", {
                     type: "geojson",
-                    data: geojson
+                    data: toJS(floorStore.routeIndoor[floor])
                 });
 
                 this.mapObj.addLayer({
                     type: "line",
-                    source: "line",
-                    id: "line",
-                    paint: {
-                        "line-color": "blue",
-                        "line-width": 3
-                    },
+                    source: "building-route",
+                    id: "building-layer",
                     layout: {
-                        "line-cap": "round",
-                        "line-join": "round"
+                        "line-join": "round", //连接时显示的线
+                        "line-cap": "round" //导航线尾部
+                    },
+                    paint: {
+                        "line-pattern": "location3",
+                        "line-width": {
+                            base: 10,
+                            stops: [
+                                [18, 6],
+                                [22, 16]
+                            ]
+                        }
                     }
                 });
             },
         };
     }
 
-    // 更新当前楼层
-    @action
-    updateFloor(floor) {
-        this.mapFloor = floor;
+    /**
+     * @author j_bleach
+     * @date 2018-10-10
+     * @Description: 路径处理函数
+     * @param paths:array 路径数组
+     */
+    routeHandle(paths) {
+        paths.forEach(v => {
+            const currentRoute = floorStore.routeIndoor[v.endFloor];
+            if (currentRoute && currentRoute.features && currentRoute.features instanceof Array) {
+                floorStore.routeIndoor[v.endFloor].features.push({
+                    "type": "Feature",
+                    "geometry": v.geometry
+                });
+            } else {
+                floorStore.routeIndoor[v.endFloor] = {
+                    "type": "FeatureCollection",
+                    "features": []
+                };
+                floorStore.routeIndoor[v.endFloor].features.push({
+                    "type": "Feature",
+                    "geometry": v.geometry
+                });
+            }
+        });
     }
 
     // 地图点击处理
@@ -251,11 +278,11 @@ class MapStore {
         this.routeObj.setLocation({
             type: "Point",
             coordinates: [startLat, startLng, -1]
-        }, "起点", floorStore.mapFloor - 1);
+        }, "起点", this.startMarkerPoint.floor - 1);
         this.routeObj.setLocation({
             type: "Point",
             coordinates: [endLat, endLng, -1]
-        }, "终点", floorStore.mapFloor - 1);
+        }, "终点", this.endMarkerPoint.floor - 1);
     }
 
     @computed get func() {

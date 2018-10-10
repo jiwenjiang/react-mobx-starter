@@ -84,32 +84,12 @@ class floor extends Component {
 
     changeFloor(v) {
         this.props.floorStore.updateFloor(v);
-        this.props.mapStore.mapObj.setLevel(v - 1);
-        this.checkMarker(v);
+        const floor = v > 0 ? v - 1 : v;
+        this.props.mapStore.mapObj.setLevel(floor);
+        this.props.floorStore.checkMarkerAndRoute(this.props.mapStore, v);
         this.setState({
             showFloor: false
         });
-    }
-
-    checkMarker(v) {
-        const endMarkerPoint = this.props.mapStore.endMarkerPoint;
-        const startMarkerPoint = this.props.mapStore.startMarkerPoint;
-        const endMarker = this.props.mapStore.endMarker;
-        const startMarker = this.props.mapStore.startMarker;
-        if (endMarkerPoint) {
-            if (endMarkerPoint.floor === v) {
-                endMarker.setLngLat(endMarkerPoint.point);
-            } else {
-                endMarker.setLngLat([0, 0]);
-            }
-        }
-        if (startMarkerPoint) {
-            if (startMarkerPoint.floor === v) {
-                startMarker.setLngLat(startMarkerPoint.point);
-            } else {
-                startMarker.setLngLat([0, 0]);
-            }
-        }
     }
 
     render() {

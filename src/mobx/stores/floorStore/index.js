@@ -14,11 +14,26 @@ class FloorStore {
     @observable mapFloor; // 当前地图楼层
     @observable floorStatus; // 是否显示楼层（是否为室内）
     @observable floorData; // 楼层数据
+    @observable routeIndoor; // 室内路径
+    @observable endRouteIndoor; // 室内终点路径
 
     constructor() {
         this.mapFloor = 1;
         this.floorStatus = false;
         this.floorData = [];
+        /**
+         * @author j_bleach
+         * @date 2018-10-10
+         * @Description: 室内导航路径
+         * @demo:
+         * let routeIndoor = {
+             [floor]:{
+                 "type": "FeatureCollection",
+                 "features": []
+             }
+         };
+         */
+        this.routeIndoor = {};
     }
 
     // 更新当前楼层
@@ -33,6 +48,36 @@ class FloorStore {
         this.floorStatus = event.newState === 1 ? true : false;
     }
 
+    checkMarkerAndRoute(map, floor) {
+        // marker 跨楼层判断
+        const endMarkerPoint = map.endMarkerPoint;
+        const startMarkerPoint = map.startMarkerPoint;
+        const endMarker = map.endMarker;
+        const startMarker = map.startMarker;
+        if (endMarkerPoint) {
+            if (endMarkerPoint.floor === floor) {
+                endMarker.setLngLat(endMarkerPoint.point);
+            } else {
+                endMarker.setLngLat([0, 0]);
+            }
+        }
+        if (startMarkerPoint) {
+            if (startMarkerPoint.floor === floor) {
+                startMarker.setLngLat(startMarkerPoint.point);
+            } else {
+                startMarker.setLngLat([0, 0]);
+            }
+        }
+        // 路径规划 跨楼层判断
+        if (map.mapObj.getLayer("building-layer")) {
+            const floorNum = floor > 0 ? floor - 1 : floor;
+            const geoData = floorStore.routeIndoor[floorNum] ? floorStore.routeIndoor[floorNum] : {
+                type: "FeatureCollection",
+                features: []
+            };
+            map.mapObj.getSource("building-route").setData(geoData);
+        }
+    }
 }
 
 
