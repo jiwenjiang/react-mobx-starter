@@ -6,13 +6,18 @@ import React, {Component} from "react";
 import {observer, inject} from "mobx-react";
 import "./index.less";
 
-@inject("mapStore")
+@inject("commonStore")
 @observer
 class confirmModal extends Component {
     state = {};
 
     confirm() {
-        this.props.confirm()
+        this.props.confirm();
+    }
+
+    cancel() {
+        this.props.cancel && this.props.cancel();
+        this.props.commonStore.changeConfirmModal(false);
     }
 
     render() {
@@ -27,7 +32,7 @@ class confirmModal extends Component {
                             <span>确定</span>
                         </div>
                     </div>
-                    <div className="confirm-modal-btn-cancel">
+                    <div className="confirm-modal-btn-cancel" onClick={() => this.cancel()}>
                         <span>取消</span>
                     </div>
                 </div>

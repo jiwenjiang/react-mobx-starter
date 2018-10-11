@@ -30,10 +30,14 @@ class SearchResult extends Component {
     }
 
     confirmMarker(v) {
-        console.log(v);
-        // const data = {};
+        const data = {
+            point: v.coordinate,
+            floor: Number(v.tags.level),
+            name: v.tags.name
+        };
+        // console.log(data)
+        this.props.mapStore.confirmMarker(this.props.commonStore.searchStatus, data);
         this.props.commonStore.changeSearchStatus(false);
-        this.props.mapStore.confirmMarker();
     }
 
     render() {
@@ -53,14 +57,13 @@ class SearchResult extends Component {
                                            fontSize: "7vw",
                                            display: "block",
                                            marginRight: "1vw"
-                                       }}
-                                       onClick={() => this.deleteRecord(v)}></i>
+                                       }}></i>
                                     <span style={{
                                         fontSize: "3vw",
                                         color: "#1cccc6",
                                         display: "block",
                                         marginTop: "-1vw"
-                                    }}>去这里</span>
+                                    }}>{this.props.commonStore.searchStatus === "start" ? "出发" : "去这里"}</span>
                                 </div>}>
                                 <p className="search-result-content">{v.tags.name}</p>
                                 <List.Item.Brief>{`在${Number(v.tags.level) + 1}楼  距离：${v.distance}米`}</List.Item.Brief>

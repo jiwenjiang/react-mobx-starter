@@ -10,6 +10,7 @@ import Operators from "component/map/operators";
 import GotoShare from "component/map/share";
 import RoutePanel from "component/map/routePanel";
 import ConfirmModal from "component/common/confirmModal";
+import BeginNav from "component/nav/beginNav";
 import startConfirm from "assets/img/startConfirm.png";
 import "./index.less";
 
@@ -24,7 +25,8 @@ class mapPage extends Component {
         // 监听地图加载完成
         map.on("load", () => {
             this.props.mapStore.saveMapObj(map, creeper, route);
-            // console.log("zoom", map.getZoom());
+            // FIXME 手动触发
+            map.zoomIn();
         });
 
         // 监听地图点击
@@ -59,6 +61,7 @@ class mapPage extends Component {
                 {confirmModalStatus && <ConfirmModal {...confirmModalProps}></ConfirmModal>}
                 <Operators></Operators>
                 <GotoShare></GotoShare>
+                <BeginNav></BeginNav>
                 <RoutePanel></RoutePanel>
             </div>
         );

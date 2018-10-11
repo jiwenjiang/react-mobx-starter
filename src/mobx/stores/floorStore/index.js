@@ -54,6 +54,7 @@ class FloorStore {
         const startMarkerPoint = map.startMarkerPoint;
         const endMarker = map.endMarker;
         const startMarker = map.startMarker;
+        console.log("floor", floor);
         if (endMarkerPoint) {
             if (endMarkerPoint.floor === floor) {
                 endMarker.setLngLat(endMarkerPoint.point);
@@ -70,6 +71,7 @@ class FloorStore {
         }
         // 路径规划 跨楼层判断
         if (map.mapObj.getLayer("building-layer")) {
+            console.log("indoor", floorStore.routeIndoor);
             const geoData = floorStore.routeIndoor[floor] ? floorStore.routeIndoor[floor] : {
                 type: "FeatureCollection",
                 features: []

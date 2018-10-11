@@ -15,7 +15,7 @@ import http from "services/http";
 import mapUrl from "config/url/map";
 import {unique} from "services/utils/tool";
 import "./index.less";
-import LoadingComponent from "component/common/loading";
+// import LoadingComponent from "component/common/loading";
 
 @inject("mapStore", "commonStore", "navStore")
 @observer
@@ -103,7 +103,7 @@ class searchPage extends Component {
                 </div>
                 {!showSearchHistory && !showSearchResult && <MapTag/>}
                 {!showSearchHistory && !showSearchResult && <ConfigTag/>}
-                {this.props.commonStore.loadingStatus && <LoadingComponent/>}
+                {/*{this.props.commonStore.loadingStatus && <LoadingComponent/>}*/}
             </div>
         );
     }

@@ -18,7 +18,7 @@ class CommonStore {
 
     constructor() {
         this.loadingStatus = false;
-        this.searchStatus = true;
+        this.searchStatus = "end"; // "start" | "end" 搜索状态分为起点、终点
         this.projectType = "Addressing";
         this.confirmModalStatus = false;
     }

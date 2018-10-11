@@ -7,7 +7,7 @@ import routeImg from "assets/img/route.png";
 import "./index.less";
 
 
-@inject("mapStore")
+@inject("mapStore", "commonStore")
 @observer
 class routePanel extends Component {
     state = {
@@ -29,8 +29,10 @@ class routePanel extends Component {
                 <div className="map-routePanel-head">
                     <img src={routeImg} alt=""/>
                     <div className="map-routePanel-input">
-                        <input type="text" readOnly placeholder="请选择起点" value={startMarkerPoint && startMarkerPoint.name || ""}/>
-                        <input type="text" readOnly value={endMarkerPoint && endMarkerPoint.name || ""}/>
+                        <input type="text" readOnly onFocus={() => this.props.commonStore.changeSearchStatus("start")}
+                               placeholder="请选择起点" value={startMarkerPoint && startMarkerPoint.name || ""}/>
+                        <input type="text" readOnly onFocus={() => this.props.commonStore.changeSearchStatus("end")}
+                               value={endMarkerPoint && endMarkerPoint.name || ""}/>
                     </div>
                 </div>
                 <div className="map-routePanel-way">

@@ -21,6 +21,9 @@ class NavStore {
      */
     @observable mapNavParams; // 地图导航参数
     @observable locateCoordinate; // 定位坐标
+    @observable totalDistance; // 导航总距离
+    @observable navTime; // 导航总距离
+    @observable navRoutes; // 导航路径
 
     constructor() {
         this.mapNavParams = {
@@ -36,6 +39,10 @@ class NavStore {
             inertiaFidumax: 10
         };
         this.locateCoordinate = "104.060763,30.597849";
+        this.totalDistance = null;
+        this.speed = 1.5; // 每秒1.5米
+        this.navTime = 0; // 导航时间
+        this.navRoutes = null;
     }
 
     @action updateLocateCoordinate = (value) => {
@@ -45,6 +52,15 @@ class NavStore {
     // 更新导航参数
     @action updateParams(v) {
         this.mapNavParams = {...this.mapNavParams, ...v};
+    }
+
+    @action recordDistance(v) {
+        this.totalDistance = ~~v;
+        this.navTime = ~~(this.totalDistance / this.speed);
+    }
+
+    @action getNavRoutes(v) {
+        this.navRoutes = v;
     }
 }
 
