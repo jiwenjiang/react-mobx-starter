@@ -26,6 +26,7 @@ class operatorsComponent extends Component {
             extendStyle: "extendSearchStyle",
             focusSearch: () => {
                 this.props.commonStore.changeSearchStatus("end");
+                this.props.commonStore.changeSearchHistory(true);
             }
         };
 
@@ -40,8 +41,7 @@ class operatorsComponent extends Component {
                 <div className="map-operators-search">
                     <SearchInput {...searchProps}></SearchInput>
                 </div>
-                {this.props.commonStore.loadingStatus ? <LoadingComponent /> : <div></div>}
-                {/*{this.props.commonStore.loadingStatus ? <LoadingComponent text="路径规划中，请稍后..."/> : <div></div>}*/}
+                {this.props.commonStore.loadingStatus ? <LoadingComponent/> : <div></div>}
             </div>
         );
     }

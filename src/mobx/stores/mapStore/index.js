@@ -110,6 +110,9 @@ class MapStore {
             },
             routeError: () => {
                 console.error("路径规划失败");
+                runInAction(() => {
+                    commonStore.loadingStatus = false;
+                });
                 this.routeObj.clearLocation();
             },
             setPathListView: (paths) => {
@@ -213,9 +216,8 @@ class MapStore {
                 if (!this.confirmEndMarker) {
                     this.confirmMarker("end", markerData);
                 } else {
-                    this.confirmStartMarkerFn();
                     this.confirmMarker("start", markerData, true);
-
+                    this.confirmStartMarkerFn();
                 }
 
             }
@@ -225,6 +227,10 @@ class MapStore {
     @action
     confirmMarker(type, data, notPlan) {
         const startMarkerHandle = () => {
+            if (this.endMarkerPoint && this.endMarkerPoint.point.toString() == data.point.toString()) {
+                commonStore.changeWarningModal("起点、终点不可相同");
+                return false;
+            }
             this.startMarkerPoint = data;
             if (this.startMarker) {
                 this.startMarker.setLngLat(this.startMarkerPoint.point);
@@ -234,6 +240,10 @@ class MapStore {
             }
         };
         const endMarkerHandle = () => {
+            if (this.startMarkerPoint && this.startMarkerPoint.point.toString() == data.point.toString()) {
+                commonStore.changeWarningModal("起点、终点不可相同");
+                return false;
+            }
             this.endMarkerPoint = data;
             if (this.endMarker) {
                 this.endMarker.setLngLat(this.endMarkerPoint.point);
@@ -305,7 +315,9 @@ class MapStore {
 
     @action
     confirmStartMarkerFn() {
-        commonStore.confirmModalStatus = true;
+        if (!commonStore.warningModalStatus) {
+            commonStore.confirmModalStatus = true;
+        }
     }
 
     @action

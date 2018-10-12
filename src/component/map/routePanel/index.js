@@ -21,6 +21,11 @@ class routePanel extends Component {
         });
     }
 
+    routeFocus(v) {
+        this.props.commonStore.changeSearchStatus(v);
+        this.props.commonStore.changeSearchHistory(true);
+    }
+
     render() {
         const {endMarkerPoint, startMarkerPoint} = this.props.mapStore;
         const {currentType, personType} = this.state;
@@ -29,9 +34,9 @@ class routePanel extends Component {
                 <div className="map-routePanel-head">
                     <img src={routeImg} alt=""/>
                     <div className="map-routePanel-input">
-                        <input type="text" readOnly onFocus={() => this.props.commonStore.changeSearchStatus("start")}
+                        <input type="text" readOnly onFocus={() => this.routeFocus("start")}
                                placeholder="请选择起点" value={startMarkerPoint && startMarkerPoint.name || ""}/>
-                        <input type="text" readOnly onFocus={() => this.props.commonStore.changeSearchStatus("end")}
+                        <input type="text" readOnly onFocus={() => this.routeFocus("end")}
                                value={endMarkerPoint && endMarkerPoint.name || ""}/>
                     </div>
                 </div>

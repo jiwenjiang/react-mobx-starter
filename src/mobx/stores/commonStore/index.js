@@ -15,12 +15,16 @@ class CommonStore {
     @observable searchStatus; // 搜索页面显示
     @observable projectType; // 寻址（车位鲸） Addressing(Car)
     @observable confirmModalStatus; // 确认模态框
+    @observable showSearchHistory; // 展示搜索历史
+    @observable warningModalStatus; // 警告文字
 
     constructor() {
         this.loadingStatus = false;
         this.searchStatus = "end"; // "start" | "end" 搜索状态分为起点、终点
         this.projectType = "Addressing";
         this.confirmModalStatus = false;
+        this.showSearchHistory = false;
+        this.warningModalStatus = null; // String
     }
 
     @action
@@ -34,6 +38,11 @@ class CommonStore {
     }
 
     @action
+    changeSearchHistory(v) {
+        this.showSearchHistory = v;
+    }
+
+    @action
     changeProjectType(status) {
         this.projectType = status;
     }
@@ -41,6 +50,11 @@ class CommonStore {
     @action
     changeConfirmModal(status) {
         this.confirmModalStatus = status;
+    }
+
+    @action
+    changeWarningModal(status) {
+        this.warningModalStatus = status;
     }
 }
 

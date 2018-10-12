@@ -38,6 +38,7 @@ class SearchResult extends Component {
         // console.log(data)
         this.props.mapStore.confirmMarker(this.props.commonStore.searchStatus, data);
         this.props.commonStore.changeSearchStatus(false);
+        this.props.commonStore.changeSearchHistory(false);
     }
 
     render() {

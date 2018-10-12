@@ -15,6 +15,7 @@ import http from "services/http";
 import mapUrl from "config/url/map";
 import {unique} from "services/utils/tool";
 import "./index.less";
+
 // import LoadingComponent from "component/common/loading";
 
 @inject("mapStore", "commonStore", "navStore")
@@ -25,7 +26,6 @@ class searchPage extends Component {
         this.state = {
             carouselData: [], // 走马灯数组
             accordionData: [], // 手风琴数组
-            showSearchHistory: false, // 展示搜索历史
             showSearchResult: false // 展示搜索结果
         };
     }
@@ -37,37 +37,38 @@ class searchPage extends Component {
      * @param v:搜索输入框value
      */
     async toSearch(v) {
-        let params = {
-            zone_id: this.props.mapStore.mapId,
-            page: 1,
-            pageSize: 20,
-            location: this.props.navStore.locateCoordinate,
-            text: v
-        };
-        this.props.commonStore.changeLoadingStatus(true);
-        let response = await http.post(mapUrl.mapSearch, params);
-        this.props.commonStore.changeLoadingStatus(false);
-        this.setState({
-            showSearchHistory: false,
-            showSearchResult: true,
-            searchResultData: response && response.list
-        });
-        const historyRecords = localStorage.historyRecords
-            ? unique([...JSON.parse(localStorage.historyRecords), {name: v}])
-            : [{name: v}];
-        localStorage.historyRecords = JSON.stringify(historyRecords);
+        if (v.trim()) {
+            let params = {
+                zone_id: this.props.mapStore.mapId,
+                page: 1,
+                pageSize: 20,
+                location: this.props.navStore.locateCoordinate,
+                text: v
+            };
+            this.props.commonStore.changeLoadingStatus(true);
+            let response = await http.post(mapUrl.mapSearch, params);
+            this.props.commonStore.changeLoadingStatus(false);
+            this.setState({
+                showSearchResult: true,
+                searchResultData: response && response.list
+            });
+            this.props.commonStore.changeSearchHistory(false);
+            const historyRecords = localStorage.historyRecords
+                ? unique([...JSON.parse(localStorage.historyRecords), {name: v}])
+                : [{name: v}];
+            localStorage.historyRecords = JSON.stringify(historyRecords);
+        }
     }
 
     focusSearch() {
-        this.setState({
-            showSearchHistory: true
-        });
+        this.props.commonStore.changeSearchHistory(true);
     }
 
 
     render() {
-        const {showSearchHistory, showSearchResult, searchResultData} = this.state;
+        const {showSearchResult, searchResultData} = this.state;
         const {carouselData, accordionData} = this.props.mapStore;
+        const {showSearchHistory} = this.props.commonStore;
 
         const searchProps = {
             toSearch: (e) => {

@@ -10,6 +10,7 @@ import Operators from "component/map/operators";
 import GotoShare from "component/map/share";
 import RoutePanel from "component/map/routePanel";
 import ConfirmModal from "component/common/confirmModal";
+import WarningModal from "component/common/warningModal";
 import BeginNav from "component/nav/beginNav";
 import startConfirm from "assets/img/startConfirm.png";
 import "./index.less";
@@ -18,6 +19,10 @@ import "./index.less";
 @inject("mapStore", "commonStore", "floorStore")
 @observer
 class mapPage extends Component {
+    constructor(props) {
+        super(props);
+        // this.searchRef = React.createRef();
+    }
 
     componentDidMount() {
         const map = new creeper.VectorMap("wb-map", this.props.mapStore.mapId, config.mapIp + "/");
@@ -42,7 +47,7 @@ class mapPage extends Component {
 
 
     render() {
-        const {searchStatus, confirmModalStatus} = this.props.commonStore;
+        const {searchStatus, confirmModalStatus, warningModalStatus} = this.props.commonStore;
         const confirmModalProps = {
             text: " 要将此处设为起点吗？",
             icon: startConfirm,
@@ -53,12 +58,22 @@ class mapPage extends Component {
             cancel: () => {
             }
         };
+        const warningModalProps = {
+            text: warningModalStatus,
+            confirm: () => {
+                this.props.commonStore.changeWarningModal(false);
+            },
+        };
+        // const operatorsProps = {
+        //     searchRef: this.searchRef
+        // };
         return (
             <div>
                 <div id="wb-map" className="wb-map-box" width="100vw" height="100vh"
                      style={{width: "100vw", height: "100vh"}}></div>
                 {searchStatus && <Search></Search>}
                 {confirmModalStatus && <ConfirmModal {...confirmModalProps}></ConfirmModal>}
+                {warningModalStatus && <WarningModal {...warningModalProps}></WarningModal>}
                 <Operators></Operators>
                 <GotoShare></GotoShare>
                 <BeginNav></BeginNav>
