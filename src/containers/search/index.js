@@ -76,6 +76,13 @@ class searchPage extends Component {
             },
             focusSearch: () => {
                 this.focusSearch();
+            },
+            iconStatus: showSearchHistory || showSearchResult,
+            goBack: () => {
+                this.setState({
+                    showSearchResult: false
+                });
+                this.props.commonStore.changeSearchHistory(false);
             }
         };
 

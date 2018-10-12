@@ -79,6 +79,11 @@ class FloorStore {
             map.mapObj.getSource("building-route").setData(geoData);
         }
     }
+
+    @action
+    updateRouteIndoor(v) {
+        this.routeIndoor = v;
+    }
 }
 
 

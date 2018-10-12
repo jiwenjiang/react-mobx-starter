@@ -8,7 +8,7 @@ import Hammer from "hammerjs";
 import "./index.less";
 
 
-@inject("mapStore", "navStore")
+@inject("mapStore", "navStore", "floorStore")
 @observer
 class beginNav extends Component {
 
@@ -32,9 +32,6 @@ class beginNav extends Component {
             if (squareDown.scrollTop === 0) {
                 document.getElementsByClassName("nav-route-detail")[0].classList.remove("dom-transformY-100vh");
             }
-        });
-        squareDown.addEventListener("scroll", () => {
-            console.log(squareDown.scrollTop);
         });
     }
 
@@ -107,6 +104,19 @@ class beginNav extends Component {
         }
     }
 
+    exit() {
+        this.props.mapStore.removeMarker("end");
+        document.getElementById("begin-nav").classList.remove("dom-transformY-30");
+        document.getElementsByClassName("map-routePanel")[0].classList.remove("dom-transformY-35");
+        if (this.props.mapStore.startMarkerPoint) {
+            this.props.mapStore.removeMarker("start");
+        }
+        if (this.props.navStore.navRoutes) {
+            this.props.floorStore.updateRouteIndoor({});
+            this.props.floorStore.checkMarkerAndRoute(this.props.mapStore, 0);
+        }
+    }
+
     render() {
         const {totalDistance, navTime, navRoutes} = this.props.navStore;
         return (
@@ -115,20 +125,28 @@ class beginNav extends Component {
                     <div className="map-goToShare-head">
                         <div className="map-goToShare-head-swipe"></div>
                         <div className="map-goToShare-name">
-                            <span className="map-goToShare-name-font nav-font">{totalDistance}米 {navTime}秒</span>
+                            <span className="map-goToShare-name-font nav-font">
+                                {navRoutes ? `${totalDistance}米 ${navTime}秒` : "请选择起点"}
+                                </span>
+                        </div>
+                        <div className="begin-nav-exit" onClick={() => this.exit()}>
+                            <span>退出</span>
                         </div>
                         <hr/>
                     </div>
                     <div className="map-goToShare-share begin-nav-box">
-                        <button className="begin-nav-detail" onClick={() => this.showDetail()}>
+                        <button className={`${navRoutes ? "begin-nav-detail" : "begin-nav-gray-btn"}`}
+                                onClick={() => this.showDetail()}>
                             <i className="iconfont icon-xiangqing"></i>
                             <span> 路线详情</span>
                         </button>
-                        <button className="begin-nav-sim" onClick={() => this.goToHere()}>
+                        <button className={`${navRoutes ? "begin-nav-sim" : "begin-nav-gray-btn"}`}
+                                onClick={() => this.goToHere()}>
                             <i className="iconfont icon-monixianlupipei"></i>
                             <span> 模拟导航</span>
                         </button>
-                        <button className="begin-nav-nav" onClick={() => this.goToHere()}>
+                        <button className={`${navRoutes ? "begin-nav-nav" : "begin-nav-gray-btn"}`}
+                                onClick={() => this.goToHere()}>
                             <i className="iconfont icon-daohang1"></i>
                             <span> 开始导航</span>
                         </button>

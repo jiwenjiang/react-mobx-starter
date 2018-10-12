@@ -297,15 +297,37 @@ class MapStore {
     }
 
     checkNodePosition() {
-        if (!this.confirmEndMarker && this.endMarker) {
+        if (!this.confirmEndMarker) {
+            const type = this.endMarker ? "add" : "remove";
             const classList = ["map-operators-location-box", "map-logo",
                 "map-operators-scale", "map-operators-zoom-box", "map-operators-floor"];
             for (let v of classList) {
                 document.getElementsByClassName(v) && document.getElementsByClassName(v)[0]
-                && document.getElementsByClassName(v)[0].classList.add("dom-transformY");
+                && document.getElementsByClassName(v)[0].classList[type]("dom-transformY");
             }
-            document.getElementById("map-goToShare").classList.add("dom-transformY-30");
+            document.getElementById("map-goToShare").classList[type]("dom-transformY-30");
         }
+    }
+
+    @action
+    removeMarker(type) {
+        const endMarkerPoint = () => {
+            this.endMarkerPoint = null;
+            this.endMarker.remove();
+            this.endMarker = null;
+            this.confirmEndMarkerFn(false);
+            this.checkNodePosition();
+        };
+        const startMarkerPoint = () => {
+            this.startMarkerPoint = null;
+            this.startMarker.remove();
+            this.startMarker = null;
+        };
+        const markerFn = {
+            "start": startMarkerPoint,
+            "end": endMarkerPoint,
+        }[type];
+        markerFn();
     }
 
     @action

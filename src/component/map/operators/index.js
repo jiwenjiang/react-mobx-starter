@@ -27,6 +27,14 @@ class operatorsComponent extends Component {
             focusSearch: () => {
                 this.props.commonStore.changeSearchStatus("end");
                 this.props.commonStore.changeSearchHistory(true);
+            },
+            iconStatus: true,
+            goBack: () => {
+                if (this.props.mapStore.endMarkerPoint) {
+                    this.props.mapStore.removeMarker("end");
+                } else {
+                    this.props.commonStore.changeSearchStatus("end");
+                }
             }
         };
 

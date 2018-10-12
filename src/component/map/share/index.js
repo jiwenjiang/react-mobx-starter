@@ -12,6 +12,8 @@ class gotoComponent extends Component {
 
     goToHere() {
         document.getElementsByClassName("map-routePanel")[0].classList.add("dom-transformY-35");
+        document.getElementById("map-goToShare").classList.remove("dom-transformY-30");
+        document.getElementById("begin-nav").classList.add("dom-transformY-30");
         this.props.mapStore.confirmEndMarkerFn(true);
     }
 
