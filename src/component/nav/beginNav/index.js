@@ -4,6 +4,7 @@
 
 import React, {Component} from "react";
 import {observer, inject} from "mobx-react";
+import Hammer from "hammerjs";
 import "./index.less";
 
 
@@ -15,11 +16,26 @@ class beginNav extends Component {
         document.addEventListener("touchmove", (event) => {
             event.preventDefault();
         }, false);
-    }
-
-    goToHere() {
-        document.getElementsByClassName("map-routePanel")[0].classList.add("dom-transformY-35");
-        this.props.mapStore.confirmEndMarkerFn(true);
+        // swipe dom
+        const squareUp = document.querySelector(".begin-nav .map-goToShare-head");
+        const squareDown = document.querySelector(".nav-route-detail-content");
+        const managerUp = new Hammer.Manager(squareUp);
+        const managerDown = new Hammer.Manager(squareDown);
+        const SwipeUp = new Hammer.Swipe();
+        const SwipeDown = new Hammer.Swipe();
+        managerUp.add(SwipeUp);
+        managerDown.add(SwipeDown);
+        managerUp.on("swipeup", () => {
+            document.getElementsByClassName("nav-route-detail")[0].classList.add("dom-transformY-100vh");
+        });
+        managerDown.on("swipedown", () => {
+            if (squareDown.scrollTop === 0) {
+                document.getElementsByClassName("nav-route-detail")[0].classList.remove("dom-transformY-100vh");
+            }
+        });
+        squareDown.addEventListener("scroll", () => {
+            console.log(squareDown.scrollTop);
+        });
     }
 
     showDetail() {
@@ -97,6 +113,7 @@ class beginNav extends Component {
             <div className="begin-nav-container">
                 <div className="map-goToShare begin-nav" id="begin-nav">
                     <div className="map-goToShare-head">
+                        <div className="map-goToShare-head-swipe"></div>
                         <div className="map-goToShare-name">
                             <span className="map-goToShare-name-font nav-font">{totalDistance}米 {navTime}秒</span>
                         </div>

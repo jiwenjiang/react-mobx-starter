@@ -6,9 +6,6 @@ import React, {Component} from "react";
 import "./index.less";
 import {inject, observer} from "mobx-react";
 
-// import Hammer from "hammerjs";
-
-
 @inject("floorStore", "mapStore")
 @observer
 class floor extends Component {
