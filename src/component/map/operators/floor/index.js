@@ -60,8 +60,10 @@ class floor extends Component {
                 showFloor: true,
                 floorData,
             }, () => {
+                const index = floorData.findIndex(v => this.props.floorStore.mapFloor == v.value);
                 const mapFloor = document.getElementById("map-operators-floor-total");
-                const scrollHeight = mapFloor.scrollHeight;
+                const itemHeight = mapFloor.scrollHeight / floorData.length;
+                const scrollHeight = (index - 1) * itemHeight;
                 mapFloor.scrollTop = scrollHeight;
             });
         }

@@ -71,7 +71,6 @@ class direction extends Component {
     componentDidMount() {
         this.setScale();
         this.props.map.on("zoomend", this.setScale);
-        console.log(this.props.map);
     }
 
     componentWillUnmount() {

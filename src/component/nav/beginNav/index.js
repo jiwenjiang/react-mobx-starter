@@ -11,6 +11,12 @@ import "./index.less";
 @observer
 class beginNav extends Component {
 
+    componentDidMount() {
+        document.addEventListener("touchmove", (event) => {
+            event.preventDefault();
+        }, false);
+    }
+
     goToHere() {
         document.getElementsByClassName("map-routePanel")[0].classList.add("dom-transformY-35");
         this.props.mapStore.confirmEndMarkerFn(true);
@@ -88,7 +94,7 @@ class beginNav extends Component {
     render() {
         const {totalDistance, navTime, navRoutes} = this.props.navStore;
         return (
-            <div>
+            <div className="begin-nav-container">
                 <div className="map-goToShare begin-nav" id="begin-nav">
                     <div className="map-goToShare-head">
                         <div className="map-goToShare-name">
