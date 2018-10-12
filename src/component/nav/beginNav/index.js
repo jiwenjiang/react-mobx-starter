@@ -114,6 +114,7 @@ class beginNav extends Component {
         if (this.props.navStore.navRoutes) {
             this.props.floorStore.updateRouteIndoor({});
             this.props.floorStore.checkMarkerAndRoute(this.props.mapStore, 0);
+            this.props.navStore.getNavRoutes(null);
         }
     }
 
