@@ -26,6 +26,12 @@ class routePanel extends Component {
         this.props.commonStore.changeSearchHistory(true);
     }
 
+    changePersonType(personType) {
+        this.setState({
+            personType
+        });
+    }
+
     render() {
         const {endMarkerPoint, startMarkerPoint} = this.props.mapStore;
         const {currentType, personType} = this.state;
@@ -47,10 +53,10 @@ class routePanel extends Component {
                             className={`map-routePanel-person-btn ${currentType === "person" ? "active-routePanel" : ""}`}>
                             <i className="iconfont icon-hangren_"></i>&nbsp;<span>人</span>
                         </button>
-                        <span className="map-routePanel-way-type"
+                        <span className="map-routePanel-way-type" onClick={() => this.changePersonType(1)}
                               style={currentType === "person" && personType === 1 ? {color: "#33CCCC"} : {color: "#D0CECE"}}><i
                             className="iconfont icon-dianti" style={{fontSize: "3vw"}}></i>&nbsp;电梯</span>
-                        <span className="map-routePanel-way-type"
+                        <span className="map-routePanel-way-type" onClick={() => this.changePersonType(2)}
                               style={currentType === "person" && personType === 2 ? {color: "#33CCCC"} : {color: "#D0CECE"}}
                         ><i
                             className="iconfont icon-futi"></i>&nbsp;楼梯/扶梯</span>

@@ -99,10 +99,10 @@ class floor extends Component {
                 {
                     showFloor && <div className="map-operators-floor-total" id="map-operators-floor-total">
                         {/*<div id="floor" className="swipe-floor"></div>*/}
-                        <ul>
+                        <ul className="canBeScroll">
                             {floorData && floorData.map(v => {
                                 const color = v.value == mapFloor ? "#009999" : "#999999";
-                                return <li key={v.value} style={{color}}
+                                return <li key={v.value} style={{color}} className="canBeScroll"
                                            onClick={() => this.changeFloor(v.value)}>{v.label}</li>;
                             })}
                         </ul>

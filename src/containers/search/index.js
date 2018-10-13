@@ -60,6 +60,12 @@ class searchPage extends Component {
         }
     }
 
+    componentDidMount() {
+        if (this.props.commonStore.mapToSearchStatus) {
+            document.querySelector(".search-container input").focus();
+        }
+    }
+
     focusSearch() {
         this.props.commonStore.changeSearchHistory(true);
     }

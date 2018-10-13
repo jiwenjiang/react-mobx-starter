@@ -43,6 +43,13 @@ class mapPage extends Component {
         map.on("floor.state.change", (event) => {
             this.props.floorStore.changeFloorStatus(event, map);
         });
+
+        // 禁用滑动
+        document.addEventListener("touchmove", (e) => {
+            if (!e.target.classList.contains("canBeScroll") && !e.target.classList.contains("am-list-content")) {
+                e.preventDefault();
+            }
+        });
     }
 
 

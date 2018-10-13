@@ -43,16 +43,16 @@ class SearchResult extends Component {
 
     render() {
         return (
-            <div className="search-history-box">
-                <div className="search-history-content">
+            <div className="search-history-box canBeScroll">
+                <div className="search-history-content canBeScroll">
                     <List>
                         {this.state.searchResult.map(v =>
                             <List.Item
                                 key={v.id}
-                                thumb={<i className="iconfont icon-didian"
+                                thumb={<i className="iconfont icon-didian canBeScroll"
                                           style={{fontSize: "4.5vw", color: "#1cccc6"}}></i>}
-                                extra={<div className="search-result-extra" onClick={() => this.confirmMarker(v)}>
-                                    <i className="iconfont icon-quzheli"
+                                extra={<div className="search-result-extra canBeScroll" onClick={() => this.confirmMarker(v)}>
+                                    <i className="iconfont icon-quzheli canBeScroll"
                                        style={{
                                            color: "#1cccc6",
                                            fontSize: "7vw",
@@ -66,8 +66,8 @@ class SearchResult extends Component {
                                         marginTop: "-1vw"
                                     }}>{this.props.commonStore.searchStatus === "start" ? "出发" : "去这里"}</span>
                                 </div>}>
-                                <p className="search-result-content">{v.tags.name}</p>
-                                <List.Item.Brief>{`在${Number(v.tags.level) + 1}楼  距离：${v.distance}米`}</List.Item.Brief>
+                                <p className="search-result-content canBeScroll">{v.tags.name}</p>
+                                <List.Item.Brief>{`在${v.tags.level >= 0 ? Number(v.tags.level) + 1 : Number(v.tags.level)}楼  距离：${v.distance}米`}</List.Item.Brief>
                             </List.Item>
                         )}
                     </List>

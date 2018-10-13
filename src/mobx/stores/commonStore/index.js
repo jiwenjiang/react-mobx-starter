@@ -17,6 +17,7 @@ class CommonStore {
     @observable confirmModalStatus; // 确认模态框
     @observable showSearchHistory; // 展示搜索历史
     @observable warningModalStatus; // 警告文字
+    @observable mapToSearchStatus; // 地图返回搜索
 
     constructor() {
         this.loadingStatus = false;
@@ -25,6 +26,7 @@ class CommonStore {
         this.confirmModalStatus = false;
         this.showSearchHistory = false;
         this.warningModalStatus = null; // String
+        this.mapToSearchStatus = false;
     }
 
     @action
@@ -55,6 +57,11 @@ class CommonStore {
     @action
     changeWarningModal(status) {
         this.warningModalStatus = status;
+    }
+
+    @action
+    changeMapToSearch(v) {
+        this.mapToSearchStatus = v;
     }
 }
 

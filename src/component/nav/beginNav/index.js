@@ -13,9 +13,6 @@ import "./index.less";
 class beginNav extends Component {
 
     componentDidMount() {
-        document.addEventListener("touchmove", (event) => {
-            event.preventDefault();
-        }, false);
         // swipe dom
         const squareUp = document.querySelector(".begin-nav .map-goToShare-head");
         const squareDown = document.querySelector(".nav-route-detail-content");
@@ -26,7 +23,9 @@ class beginNav extends Component {
         managerUp.add(SwipeUp);
         managerDown.add(SwipeDown);
         managerUp.on("swipeup", () => {
-            document.getElementsByClassName("nav-route-detail")[0].classList.add("dom-transformY-100vh");
+            if (this.props.navStore.navRoutes) {
+                document.getElementsByClassName("nav-route-detail")[0].classList.add("dom-transformY-100vh");
+            }
         });
         managerDown.on("swipedown", () => {
             if (squareDown.scrollTop === 0) {
@@ -36,7 +35,9 @@ class beginNav extends Component {
     }
 
     showDetail() {
-        document.getElementsByClassName("nav-route-detail")[0].classList.add("dom-transformY-100vh");
+        if (this.props.navStore.navRoutes) {
+            document.getElementsByClassName("nav-route-detail")[0].classList.add("dom-transformY-100vh");
+        }
     }
 
     showMap() {
@@ -154,7 +155,7 @@ class beginNav extends Component {
                     </div>
                 </div>
                 <div className="nav-route-detail">
-                    <div className="nav-route-detail-content">
+                    <div className="nav-route-detail-content canBeScroll">
                         <div className="nav-route-detail-head">
                             <span>{totalDistance}米 {navTime}秒</span>
                         </div>
