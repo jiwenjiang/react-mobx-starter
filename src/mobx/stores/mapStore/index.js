@@ -33,7 +33,7 @@ class MapStore {
     @observable confirmEndMarker; // 确定终点标记
 
     constructor() {
-        this.mapId = 2;
+        this.mapId = 1;
         this.carouselData = [];
         this.accordionData = [];
         this.mapObj = null;

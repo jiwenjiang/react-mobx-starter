@@ -14,6 +14,7 @@ import ConfigTag from "component/map/config";
 import http from "services/http";
 import mapUrl from "config/url/map";
 import {unique} from "services/utils/tool";
+import {toJS} from "mobx";
 import "./index.less";
 
 // import LoadingComponent from "component/common/loading";
@@ -97,8 +98,38 @@ class searchPage extends Component {
                 this.toSearch(e);
             },
         };
+        const carouselProps = {
+            data: carouselData,
+            chooseArea: (e) => {
+                const searchResultData = toJS(e).hospServiceFunction && e.hospServiceFunction.map(v => {
+                    return {
+                        coordinate: [v.longitude, v.latitude],
+                        id: v.functionAreaId,
+                        tags: {
+                            name: v.areaName,
+                            level: Number(v.floorId)
+                        }
+                    };
+                });
+                this.setState({
+                    showSearchResult: true,
+                    searchResultData
+                });
+            }
+        };
         const accordionProps = {
-            data: accordionData
+            data: accordionData,
+            confirmMarker: (v) => {
+                const data = {
+                    point: [v.longitude, v.latitude],
+                    floor: Number(v.floorId),
+                    name: v.areaName
+                };
+                // console.log(data)
+                this.props.mapStore.confirmMarker(this.props.commonStore.searchStatus, data);
+                this.props.commonStore.changeSearchStatus(false);
+                this.props.commonStore.changeSearchHistory(false);
+            }
         };
         return (
             <div className="wb-search-page">
@@ -107,7 +138,7 @@ class searchPage extends Component {
                 </div>
                 <div className="search-content">
                     <div className="mt-10 carousel-box carousel-content">
-                        {<CarouselComponent data={carouselData}></CarouselComponent>}
+                        {<CarouselComponent {...carouselProps}></CarouselComponent>}
                     </div>
                     <div className="mt-10 carousel-box">
                         {accordionData.length > 0 && <AccordionComponent {...accordionProps}></AccordionComponent>}

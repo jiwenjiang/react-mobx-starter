@@ -46,7 +46,7 @@ class CarouselComponent extends Component {
                   dotStyle={dotStyle}
                   dotActiveStyle={dotActiveStyle}
                   renderItem={(e) => this.renderItem(e)}
-                  onClick={_el => console.log(_el)}/>
+                  onClick={_el => this.props.chooseArea(_el)}/>
         );
     }
 }

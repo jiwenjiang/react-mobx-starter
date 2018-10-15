@@ -38,7 +38,8 @@ class AccordionComponent extends PureComponent {
     }
 
     renderItem(e) {
-        return <span className="accordion-grid-text">{e.areaName}</span>;
+        return <span className="accordion-grid-text"
+                     onClick={() => this.props.confirmMarker(e)}>{e.areaName}</span>;
     }
 
     changeActive(e) {

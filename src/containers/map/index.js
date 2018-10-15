@@ -5,6 +5,7 @@ import React, {Component} from "react";
 import {observer, inject} from "mobx-react";
 import config from "config";
 import Search from "containers/search";
+import Car from "containers/car";
 import * as creeper from "services/mapSDK/mapbox-gl";
 import Operators from "component/map/operators";
 import GotoShare from "component/map/share";
@@ -54,7 +55,7 @@ class mapPage extends Component {
 
 
     render() {
-        const {searchStatus, confirmModalStatus, warningModalStatus} = this.props.commonStore;
+        const {searchStatus, confirmModalStatus, warningModalStatus, projectType} = this.props.commonStore;
         const confirmModalProps = {
             text: " 要将此处设为起点吗？",
             icon: startConfirm,
@@ -78,7 +79,8 @@ class mapPage extends Component {
             <div>
                 <div id="wb-map" className="wb-map-box" width="100vw" height="100vh"
                      style={{width: "100vw", height: "100vh"}}></div>
-                {searchStatus && <Search></Search>}
+                {projectType == "Addressing" && searchStatus && <Search></Search>}
+                {projectType == "Car" && searchStatus && <Car></Car>}
                 {confirmModalStatus && <ConfirmModal {...confirmModalProps}></ConfirmModal>}
                 {warningModalStatus && <WarningModal {...warningModalProps}></WarningModal>}
                 <Operators></Operators>

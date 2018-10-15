@@ -23,7 +23,7 @@ const reactConfig = (
                 <Route path='/search' component={Search}/>
                 <Route path='/car' component={Car}/>
                 <Route path='/map' component={Map}/>
-                <Redirect path="/" to={{pathname: '/map'}}/>
+                <Redirect path="/" to={{pathname: '/list'}}/>
             </Switch>
         </Router>
     </Provider>

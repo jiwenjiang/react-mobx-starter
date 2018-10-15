@@ -35,7 +35,7 @@ class configPage extends PureComponent {
 
     render() {
         const {getFieldDecorator} = this.props.form;
-        const params = this.props.mapStore.mapNavParams;
+        const params = this.props.navStore.mapNavParams;
         return (
             <div>
                 <form>
