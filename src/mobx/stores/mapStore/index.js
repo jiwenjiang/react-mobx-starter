@@ -8,12 +8,12 @@ import http from "services/http";
 import normalUrl from "config/url/normal";
 import {commonStore} from "../commonStore";
 import {floorStore} from "../floorStore";
+import {navStore} from "../navStore";
 // import {start} from "component/map/marker";
 import {toJS} from "mobx";
 import startImg from "assets/img/start.png";
 import endImg from "assets/img/end.png";
 import "./index.less";
-import {navStore} from "../navStore";
 
 configure({
     enforceActions: "observed"
@@ -347,6 +347,8 @@ class MapStore {
         commonStore.loadingStatus = true;
         const [startLng, startLat] = toJS(this.startMarkerPoint).point;
         const [endLng, endLat] = toJS(this.endMarkerPoint).point;
+        this.routeObj.roadType = navStore.navRoadType;
+        this.routeObj.priorityType = navStore.navPriorityType;
         this.routeObj.setLocation({
             type: "Point",
             coordinates: [startLat, startLng, -1]

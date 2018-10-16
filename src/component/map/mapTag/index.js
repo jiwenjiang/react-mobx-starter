@@ -11,7 +11,6 @@ import {inject, observer} from "mobx-react";
 class mapTag extends Component {
 
     entryMap() {
-        console.log(5555)
         this.props.commonStore.changeSearchStatus(false);
     }
 

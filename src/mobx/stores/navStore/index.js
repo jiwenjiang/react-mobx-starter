@@ -24,6 +24,8 @@ class NavStore {
     @observable totalDistance; // 导航总距离
     @observable navTime; // 导航总距离
     @observable navRoutes; // 导航路径
+    @observable navRoadType; // 导航方式 foot/car
+    @observable navPriorityType; // 跨楼层方式 elevator/stairs
 
     constructor() {
         this.mapNavParams = {
@@ -43,6 +45,8 @@ class NavStore {
         this.speed = 1.5; // 每秒1.5米
         this.navTime = 0; // 导航时间
         this.navRoutes = null;
+        this.navRoadType = "foot";
+        this.navPriorityType = "elevator";
     }
 
     @action updateLocateCoordinate = (value) => {
@@ -61,6 +65,14 @@ class NavStore {
 
     @action getNavRoutes(v) {
         this.navRoutes = v;
+    }
+
+    @action changeRoadType(v) {
+        this.navRoadType = v;
+    }
+
+    @action changePriorityType(v) {
+        this.navPriorityType = v;
     }
 }
 

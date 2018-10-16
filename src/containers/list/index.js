@@ -5,6 +5,7 @@ import React, {Component} from "react";
 import {List} from "antd-mobile";
 import {observer, inject} from "mobx-react";
 import {Link} from "react-router-dom";
+import {blue} from "./a";
 
 const {Item} = List;
 
@@ -20,11 +21,12 @@ class listPage extends Component {
     };
 
     componentDidMount() {
+        new blue("5555");
     }
 
     chooseArea(id) {
         this.props.mapStore.updateMapId(id);
-        this.props.mapStore.getMapServices(id)
+        this.props.mapStore.getMapServices(id);
     }
 
     render() {
