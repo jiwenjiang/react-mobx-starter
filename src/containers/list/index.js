@@ -5,7 +5,7 @@ import React, {Component} from "react";
 import {List} from "antd-mobile";
 import {observer, inject} from "mobx-react";
 import {Link} from "react-router-dom";
-import {blue} from "./a";
+import loc from "services/locSdk";
 
 const {Item} = List;
 
@@ -21,7 +21,15 @@ class listPage extends Component {
     };
 
     componentDidMount() {
-        new blue("5555");
+        // 定位sdk
+        loc.init({
+            timeout: 111,
+            locType: ["ibeacon", "gps"],
+            complete: () => {
+                console.log(1, "chenggong");
+                loc.startLocation();
+            }
+        });
     }
 
     chooseArea(id) {
