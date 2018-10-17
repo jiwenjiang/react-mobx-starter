@@ -18,8 +18,7 @@ const gpsFn = (target) => {
 
         geo_success(data) {
             // console.log(data);
-            this.gpsCoords = data.coords;
-            this.startSuccess();
+            this.startSuccess({code: 1, msg: "gps定位启动"});
         }
 
         static geo_error(err) {
@@ -31,6 +30,11 @@ const gpsFn = (target) => {
                 enableHighAccuracy: true,
                 timeout: this.timeout
             });
+        }
+
+        stopGpsSearch() {
+            navigator.geolocation.clearWatch(gps.gpsWatchId);
+            this.stopLocationComplete({code: 1, msg: "gps定位停止"});
         }
     };
 };

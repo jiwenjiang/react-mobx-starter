@@ -24,10 +24,22 @@ class listPage extends Component {
         // 定位sdk
         loc.init({
             timeout: 111,
-            locType: ["ibeacon", "gps"],
+            locType: ["ibeacon"],
+            mapId: 2,
             complete: () => {
                 console.log(1, "chenggong");
-                loc.startLocation();
+                loc.startLocation({
+                    complete: () => {
+                    }
+                });
+            },
+            error: (err) => {
+                console.log("throw", err);
+            }
+        });
+        loc.onLocation({
+            complete: (data) => {
+                console.log("complete", data);
             }
         });
     }

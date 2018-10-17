@@ -5,16 +5,28 @@
 
 import wx from "weixin-js-sdk";
 
+const INTERVAL = 500; // 服务器时间间隔
+const POINTLENTH = 3; // 质心点计算数组长度
 
 const blueToothFn = (target) => {
     const signUrl = `https://map.parkbobo.com/location/weixin/v1/jsSdkSign`;
-    const body = `url=${encodeURIComponent(window.location.href.split("#")[0])}`;
+    const getIbeconUrl = `https://map.parkbobo.com/location/weka/v1/classify`;
+    const signBody = `url=${encodeURIComponent(window.location.href.split("#")[0])}`;
+    let phoneType = "ios";
+    let ibeaconArr = []; // 蓝牙地位点集合
+    const ua = navigator.userAgent.toLowerCase();
+    if (/iphone|ipad|ipod/.test(ua)) {
+        phoneType = `ios`;
+    } else if (/android/.test(ua)) {
+        phoneType = `android`;
+    }
     return class bluetooth extends target {
         constructor() {
             super();
         }
 
         getSignature() {
+            console.log("请求签名");
             // 注销页面，停止微信
             window.onunload = () => {
                 wx.stopSearchBeacons();
@@ -25,7 +37,7 @@ const blueToothFn = (target) => {
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded",
                 },
-                body
+                body: signBody
             }).then((response) => response.json()).then((data) => {
                 this.configWx(data.data);
                 this.initIbeacon = true;
@@ -55,7 +67,12 @@ const blueToothFn = (target) => {
         }
 
         stopIbeaconSearch() {
-            wx.stopSearchBeacons();
+            wx.stopSearchBeacons({
+                complete: () => {
+                    console.log("停止蓝牙");
+                    this.stopLocationComplete({code: 0, msg: "蓝牙停止"});
+                },
+            });
         }
 
         /**
@@ -64,38 +81,51 @@ const blueToothFn = (target) => {
          * @Description: 开始搜索
          * @param name:String
          * @return name:String
-        */
+         */
         startIbeaconSearch() {
-            let t = Date.now();
-            let l = !1;
-            let c = void 0;
-            window.addEventListener("devicemotion", () => {
-                Date.now() - t < 80 || (t = Date.now(),
-                !1 === l && wx.stopSearchBeacons({
-                    complete: () => {
-                        this.searchIbeacon();
-                    }
-                }),
-                    l = !0,
-                c && clearTimeout(c),
-                    c = setTimeout(() => {
-                        l = !1,
+            console.log("进入蓝牙");
+            wx.ready(() => {
+                let time = Date.now();
+                let flag = false;
+                let timeId = void 0;
+                window.addEventListener("devicemotion", () => {
+                    if (Date.now() - time >= 80) {
+                        time = Date.now();
+                        if (false === flag) {
+                            wx.stopSearchBeacons({
+                                complete: () => {
+                                    console.log("启动蓝牙搜索");
+                                    ibeaconArr = [];
+                                    this.searchIbeacon();
+                                },
+                                fail: (err) => {
+                                    console.log("stop fail", err);
+                                }
+                            });
+                        }
+                        flag = true;
+                        timeId && clearTimeout(timeId);
+                        timeId = setTimeout(() => {
+                            flag = false;
                             wx.stopSearchBeacons();
-                    }, 500));
+                        }, 500);
+                    }
+                });
+                this.onSearchBeacons();
             });
+
         }
 
         /**
          * @author j_bleach
          * @date 2018-10-16
          * @Description: 搜索蓝牙点
-         * @param name:String
-         * @return name:String
-        */
+         */
         searchIbeacon() {
             wx.startSearchBeacons({
                 ticket: "",
                 complete: (t) => {
+                    this.startSuccess({code: 0, msg: `室内定位启动，${t.errMsg}`});
                     let n = t.errMsg;
                     if ("startSearchBeacons:already started" === n) {
                         return wx.stopSearchBeacons(() => {
@@ -112,19 +142,107 @@ const blueToothFn = (target) => {
             });
         }
 
+        /**
+         * @author j_bleach
+         * @date 2018-10-17
+         * @Description: 监听蓝牙点
+         */
         onSearchBeacons() {
-            const ua = navigator.userAgent.toLowerCase();
-            let type = "ios";
-            if (/iphone|ipad|ipod/.test(ua)) {
-                type = `ios`;
-            } else if (/android/.test(ua)) {
-                type = `android`;
-            }
-            window.wx.onSearchBeacons({ //监听iBeacon设备更新事件
-                complete: (argv) => {
-                    console.log(argv);
+            wx.onSearchBeacons({ //监听iBeacon设备更新事件
+                complete: (data) => {
+                    console.log("blue", data);
+                    this.getIbeaconPoints(data);
                 }
             });
+        }
+
+        /**
+         * @author j_bleach
+         * @date 2018-10-17
+         * @Description: 获取蓝牙点
+         */
+        getIbeaconPoints(data) {
+            let filterData = data.beacons && data.beacons
+                .filter(v => v.rssi != 0)
+                .map(v => {
+                    return {rssi: v.rssi, device: `${v.major}_${v.minor}`};
+                });
+            if (filterData.length === 0) {
+                // this.onSuccess();
+            } else {
+                filterData = JSON.stringify([filterData]);
+                const getIbeaconBody = `mapId=${this.mapId}&datajson=${filterData}
+            &interval=${INTERVAL}&type=wx_${phoneType}`;
+                fetch(getIbeconUrl, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    },
+                    body: getIbeaconBody
+                }).then((response) => response.json()).then((data) => {
+                    // console.log("handle", data);
+                    if (data.code == 0) {
+                        const res = data.data;
+                        const Polygon = this.setPolygonLocation(res);
+                        const ibeaconObj = {
+                            isOutdoor: 0,
+                            longitude: res.lon,
+                            latitude: res.lat,
+                            buildingId: res.building,
+                            level: res.level,
+                            fiducialLat: res.fiducialLat,
+                            fiducialLon: res.fiducialLon,
+                            locType: "ibeacon",
+                            ...Polygon
+                        };
+                        this.onSuccess(ibeaconObj);
+                    }
+                }).catch((err) => {
+                    // this.initError(err);
+                    console.log(err);
+                });
+            }
+        }
+
+        /**
+         * @author j_bleach
+         * @date 2018-10-17
+         * @Description: 计算质心点
+         * @param data:array
+         * @return Polygon:obj
+         */
+        setPolygonLocation(data) {
+            if (ibeaconArr.length < POINTLENTH) {
+                ibeaconArr.push(data);
+                return {
+                    polygonLon: 0,
+                    polygonLat: 0
+                };
+            } else {
+                ibeaconArr.push(data);
+                const inputArr = ibeaconArr && ibeaconArr.map((v, i) => {
+                    return {...v, timestamp: new Date().getTime() + i * 2000};
+                });
+                const polygonLocation = this.polygonV2(inputArr);
+                ibeaconArr.shift();
+                return polygonLocation;
+            }
+        }
+
+        /**
+         * @author j_bleach
+         * @date 2018-08-23
+         * @Description: 更新质心点算法 polygonV2
+         * @param points:Array
+         */
+        polygonV2(points) {
+            let m = 0, x = 0, y = 0;
+            for (let i = 0; i < points.length; i++) {
+                m += points[i].timestamp;
+                x += (points[i].lon * points[i].timestamp);
+                y += (points[i].lat * points[i].timestamp);
+            }
+            return {polygonLon: x / m, polygonLat: y / m};
         }
     };
 };

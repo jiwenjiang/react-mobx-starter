@@ -24,14 +24,17 @@ class Loc {
     gpsCoords = null;
     locType = [];
 
+
     init({
              timeout,
              locType,
+             mapId,
              complete = () => {
              },
              error = () => {
              }
          }) {
+        this.mapId = mapId;
         this.timeout = timeout; // 超时时间
         this.locType = locType; // 定位类型
         this.initComplete = complete; // 初始化成功函数
@@ -46,21 +49,52 @@ class Loc {
         }
     }
 
-    startLocation(
-        startLocationComplete = () => {
-        },
-        startLocationError = () => {
-        }
-    ) {
-        this.startLocationComplete = startLocationComplete;
-        this.startLocationError = startLocationError;
-        this.startIbeaconSearch();
-        this.startGpsSearch();
+    // 开启定位
+    startLocation({
+                      complete = () => {
+                      },
+                      error = () => {
+                      }
+                  }) {
+        this.startLocationComplete = complete;
+        this.startLocationError = error;
+        this.locType && this.locType.includes("gps") && this.startGpsSearch();
+        this.locType && this.locType.includes("ibeacon") && this.startIbeaconSearch();
     }
 
-    startSuccess() {
-        // console.log("start succ");
-        // console.log(this.gpsCoords);
+    // 开启成功
+    startSuccess(response) {
+        this.startLocationComplete(response);
+    }
+
+    // 停止定位
+    stopLocation(
+        {
+            complete = () => {
+            },
+            error = () => {
+            }
+        }
+    ) {
+        this.stopLocationComplete = complete;
+        this.locType && this.locType.includes("gps") && this.stopGpsSearch();
+        this.locType && this.locType.includes("ibeacon") && this.stopIbeaconSearch();
+    }
+
+    // 监听定位
+    onLocation(
+        {
+            complete = () => {
+            },
+            error = () => {
+            }
+        }
+    ) {
+        this.onLocationComplete = complete;
+    }
+
+    onSuccess(data) {
+        this.onLocationComplete(data);
     }
 }
 
