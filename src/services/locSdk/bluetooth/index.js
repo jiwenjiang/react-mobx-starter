@@ -7,6 +7,7 @@ import wx from "weixin-js-sdk";
 
 const INTERVAL = 500; // 服务器时间间隔
 const POINTLENTH = 3; // 质心点计算数组长度
+const CHANGE_GPS = 5000; // 搜索不到蓝牙5000ms后，切换gps
 
 const blueToothFn = (target) => {
     const signUrl = `https://map.parkbobo.com/location/weixin/v1/jsSdkSign`;
@@ -14,6 +15,7 @@ const blueToothFn = (target) => {
     const signBody = `url=${encodeURIComponent(window.location.href.split("#")[0])}`;
     let phoneType = "ios";
     let ibeaconArr = []; // 蓝牙地位点集合
+    let gpsTimeId = null; // gps定时器标记
     const ua = navigator.userAgent.toLowerCase();
     if (/iphone|ipad|ipod/.test(ua)) {
         phoneType = `ios`;
@@ -111,9 +113,12 @@ const blueToothFn = (target) => {
                         }, 500);
                     }
                 });
-                this.onSearchBeacons();
+                if (!this.initGps) {
+                    this.onSearchBeacons();
+                } else {
+                    this.onSearchBeaconsWithGps();
+                }
             });
-
         }
 
         /**
@@ -125,6 +130,7 @@ const blueToothFn = (target) => {
             wx.startSearchBeacons({
                 ticket: "",
                 complete: (t) => {
+                    console.log("开启成功", t);
                     this.startSuccess({code: 0, msg: `室内定位启动，${t.errMsg}`});
                     let n = t.errMsg;
                     if ("startSearchBeacons:already started" === n) {
@@ -138,6 +144,9 @@ const blueToothFn = (target) => {
                     "startSearchBeacons:bluetooth power off" === n
                         ? this.startLocationError("蓝牙未打开，请打开蓝牙后，重新打开页面")
                         : "startSearchBeacons:location service disable" === n && this.startLocationError("地理位置服务未打开");
+                },
+                fail: (t) => {
+                    console.log("开启失败", t);
                 }
             });
         }
@@ -150,8 +159,29 @@ const blueToothFn = (target) => {
         onSearchBeacons() {
             wx.onSearchBeacons({ //监听iBeacon设备更新事件
                 complete: (data) => {
-                    console.log("blue", data);
                     this.getIbeaconPoints(data);
+                }
+            });
+        }
+
+        /**
+         * @author j_bleach
+         * @date 2018-10-18
+         * @Description: 监听蓝牙点（超时切换gps）
+         * @param name:String
+         * @return name:String
+         */
+        onSearchBeaconsWithGps() {
+            console.log("进入蓝牙定时搜索");
+            wx.onSearchBeacons({ //监听iBeacon设备更新事件
+                complete: (data) => {
+                    this.getIbeaconPoints(data);
+                    this.currentLocation = "ibeacon";
+                    gpsTimeId && clearTimeout(gpsTimeId);
+                    gpsTimeId = setTimeout(() => {
+                        console.log("定时器执行", this);
+                        this.currentLocation = "gps";
+                    }, CHANGE_GPS);
                 }
             });
         }
@@ -180,7 +210,6 @@ const blueToothFn = (target) => {
                     },
                     body: getIbeaconBody
                 }).then((response) => response.json()).then((data) => {
-                    // console.log("handle", data);
                     if (data.code == 0) {
                         const res = data.data;
                         const Polygon = this.setPolygonLocation(res);
@@ -195,7 +224,7 @@ const blueToothFn = (target) => {
                             locType: "ibeacon",
                             ...Polygon
                         };
-                        this.onSuccess(ibeaconObj);
+                        this.onSuccessIbeacon(ibeaconObj);
                     }
                 }).catch((err) => {
                     // this.initError(err);

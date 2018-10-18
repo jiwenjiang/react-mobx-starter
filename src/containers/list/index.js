@@ -23,8 +23,8 @@ class listPage extends Component {
     componentDidMount() {
         // 定位sdk
         loc.init({
-            timeout: 111,
-            locType: ["ibeacon"],
+            timeout: 50000,
+            locType: ["gps", "ibeacon"],
             mapId: 2,
             complete: () => {
                 console.log(1, "chenggong");

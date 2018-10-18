@@ -93,8 +93,16 @@ class Loc {
         this.onLocationComplete = complete;
     }
 
-    onSuccess(data) {
-        this.onLocationComplete(data);
+    onSuccessGps(data) {
+        this.gpsCoords = data;
+        if (!this.initIbeacon || this.currentLocation !== "ibeacon") {
+            this.onLocationComplete(this.gpsCoords);
+        }
+    }
+
+    onSuccessIbeacon(data) {
+        this.ibeaconCoords = data;
+        this.onLocationComplete(this.ibeaconCoords);
     }
 }
 
