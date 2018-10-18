@@ -84,6 +84,20 @@ class FloorStore {
     updateRouteIndoor(v) {
         this.routeIndoor = v;
     }
+
+    /**
+     * @author j_bleach
+     * @date 2018-10-18
+     * @Description: 根据蓝牙点切换楼层
+     * @param map:地图对象
+     * @param floor:楼层
+     */
+    @action
+    listenIbeacon(map, floor) {
+        this.updateFloor(floor);
+        map.setLevel(floor);
+        this.checkMarkerAndRoute(map, floor);
+    }
 }
 
 

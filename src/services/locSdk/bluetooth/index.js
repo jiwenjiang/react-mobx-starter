@@ -1,13 +1,12 @@
 /**
  * Created by j_bleach on 2018/10/16 0016.
  */
-/*eslint-disable*/
 
 import wx from "weixin-js-sdk";
 
 const INTERVAL = 500; // 服务器时间间隔
 const POINTLENTH = 3; // 质心点计算数组长度
-const CHANGE_GPS = 5000; // 搜索不到蓝牙5000ms后，切换gps
+const CHANGE_GPS = 3000; // 搜索不到蓝牙5000ms后，切换gps
 
 const blueToothFn = (target) => {
     const signUrl = `https://map.parkbobo.com/location/weixin/v1/jsSdkSign`;
@@ -175,13 +174,17 @@ const blueToothFn = (target) => {
             console.log("进入蓝牙定时搜索");
             wx.onSearchBeacons({ //监听iBeacon设备更新事件
                 complete: (data) => {
-                    this.getIbeaconPoints(data);
-                    this.currentLocation = "ibeacon";
-                    gpsTimeId && clearTimeout(gpsTimeId);
-                    gpsTimeId = setTimeout(() => {
-                        console.log("定时器执行", this);
-                        this.currentLocation = "gps";
-                    }, CHANGE_GPS);
+                    data.beacons = data.beacons && data.beacons.filter(v => v.rssi != 0);
+                    if (data.beacons && data.beacons.length > 0) {
+                        this.getIbeaconPoints(data);
+                        this.currentLocation = "ibeacon";
+                        // console.log("接收到有效的蓝牙搜索信号", data);
+                        gpsTimeId && clearTimeout(gpsTimeId);
+                        gpsTimeId = setTimeout(() => {
+                            console.log("定时器执行", this);
+                            this.currentLocation = "gps";
+                        }, CHANGE_GPS);
+                    }
                 }
             });
         }
@@ -193,7 +196,6 @@ const blueToothFn = (target) => {
          */
         getIbeaconPoints(data) {
             let filterData = data.beacons && data.beacons
-                .filter(v => v.rssi != 0)
                 .map(v => {
                     return {rssi: v.rssi, device: `${v.major}_${v.minor}`};
                 });

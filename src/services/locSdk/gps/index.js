@@ -1,7 +1,6 @@
 /**
  * Created by j_bleach on 2018/10/16 0016.
  */
-/*eslint-disable*/
 const gpsFn = (target) => {
     return class gps extends target {
         static gpsWatchId = null;
@@ -31,7 +30,6 @@ const gpsFn = (target) => {
                 locType: "gps",
                 timestamp: res.timestamp
             };
-            console.log("gps", res);
             this.onSuccessGps(gpsObj);
         };
 
@@ -40,14 +38,15 @@ const gpsFn = (target) => {
         }
 
         startGpsSearch() {
-            console.log("jinru gps");
+            console.log("进入gps");
             gps.gpsWatchId = navigator.geolocation.watchPosition(this.geo_success, gps.geo_error, {
-                enableHighAccuracy: true
+                enableHighAccuracy: true,
+                timeout: this.timeout
             });
         }
 
         stopGpsSearch() {
-            console.log("qingchu");
+            console.log("停止gps");
             navigator.geolocation.clearWatch(gps.gpsWatchId);
             this.stopLocationComplete({code: 1, msg: "gps定位停止"});
         }

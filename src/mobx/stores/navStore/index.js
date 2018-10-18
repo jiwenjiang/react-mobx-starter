@@ -26,6 +26,8 @@ class NavStore {
     @observable navRoutes; // 导航路径
     @observable navRoadType; // 导航方式 foot/car
     @observable navPriorityType; // 跨楼层方式 elevator/stairs
+    @observable freeMarker; // 自由模式marker
+    @observable freeMarkerPoint; // 自由模式marker 坐标点
 
     constructor() {
         this.mapNavParams = {
@@ -47,6 +49,8 @@ class NavStore {
         this.navRoutes = null;
         this.navRoadType = "foot";
         this.navPriorityType = "elevator";
+        this.freeMarker = null;
+        this.freeMarkerPoint = null;
     }
 
     @action updateLocateCoordinate = (value) => {

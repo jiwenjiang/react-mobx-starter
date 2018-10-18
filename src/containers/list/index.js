@@ -5,7 +5,6 @@ import React, {Component} from "react";
 import {List} from "antd-mobile";
 import {observer, inject} from "mobx-react";
 import {Link} from "react-router-dom";
-import loc from "services/locSdk";
 
 const {Item} = List;
 
@@ -21,27 +20,6 @@ class listPage extends Component {
     };
 
     componentDidMount() {
-        // 定位sdk
-        loc.init({
-            timeout: 50000,
-            locType: ["gps", "ibeacon"],
-            mapId: 2,
-            complete: () => {
-                console.log(1, "chenggong");
-                loc.startLocation({
-                    complete: () => {
-                    }
-                });
-            },
-            error: (err) => {
-                console.log("throw", err);
-            }
-        });
-        loc.onLocation({
-            complete: (data) => {
-                console.log("complete", data);
-            }
-        });
     }
 
     chooseArea(id) {

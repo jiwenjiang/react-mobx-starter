@@ -82,8 +82,8 @@ class floor extends Component {
     }
 
     changeFloor(v) {
-        this.props.floorStore.updateFloor(v);
-        const floor = v > 0 ? v - 1 : v;
+        const floor = v >= 0 ? v - 1 : v;
+        this.props.floorStore.updateFloor(floor);
         this.props.mapStore.mapObj.setLevel(floor);
         this.props.floorStore.checkMarkerAndRoute(this.props.mapStore, floor);
         this.setState({
@@ -109,7 +109,7 @@ class floor extends Component {
                     </div>
                 }
                 <div className="map-operators-floor-current" onClick={() => this.calcFloorHeight()}>
-                    {mapFloor > 0 ? `${mapFloor}F` : `B${-mapFloor}`}
+                    {mapFloor >= 0 ? `${mapFloor + 1}F` : `B${-mapFloor}`}
                 </div>
             </div>
             };

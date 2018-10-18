@@ -22,7 +22,7 @@ class CommonStore {
     constructor() {
         this.loadingStatus = false;
         this.searchStatus = null; // "start" | "end" 搜索状态分为起点、终点
-        this.projectType = "Car";
+        this.projectType = "Addressing";
         this.confirmModalStatus = false;
         this.showSearchHistory = false;
         this.warningModalStatus = null; // String
