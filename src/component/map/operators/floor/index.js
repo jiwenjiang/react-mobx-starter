@@ -57,7 +57,10 @@ class floor extends Component {
                 showFloor: true,
                 floorData,
             }, () => {
-                const index = floorData.findIndex(v => this.props.floorStore.mapFloor == v.value);
+                const referFloor = this.props.floorStore.mapFloor >= 0
+                    ? this.props.floorStore.mapFloor + 1
+                    : this.props.floorStore.mapFloor;
+                const index = floorData.findIndex(v => referFloor == v.value);
                 const mapFloor = document.getElementById("map-operators-floor-total");
                 const itemHeight = mapFloor.scrollHeight / floorData.length;
                 const scrollHeight = (index - 1) * itemHeight;
@@ -94,6 +97,7 @@ class floor extends Component {
     render() {
         const {showFloor, floorData} = this.state;
         const {mapFloor, floorStatus} = this.props.floorStore;
+        const referFloor = mapFloor >= 0 ? mapFloor + 1 : mapFloor;
         return <div>
             {floorStatus && <div className="map-operators-floor">
                 {
@@ -101,7 +105,7 @@ class floor extends Component {
                         {/*<div id="floor" className="swipe-floor"></div>*/}
                         <ul className="canBeScroll">
                             {floorData && floorData.map(v => {
-                                const color = v.value == mapFloor ? "#009999" : "#999999";
+                                const color = v.value == referFloor ? "#009999" : "#999999";
                                 return <li key={v.value} style={{color}} className="canBeScroll"
                                            onClick={() => this.changeFloor(v.value)}>{v.label}</li>;
                             })}
@@ -109,7 +113,7 @@ class floor extends Component {
                     </div>
                 }
                 <div className="map-operators-floor-current" onClick={() => this.calcFloorHeight()}>
-                    {mapFloor >= 0 ? `${mapFloor + 1}F` : `B${-mapFloor}`}
+                    {mapFloor >= 0 ? `${Number(mapFloor) + 1}F` : `B${-Number(mapFloor)}`}
                 </div>
             </div>
             };

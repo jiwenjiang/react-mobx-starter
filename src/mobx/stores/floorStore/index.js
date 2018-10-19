@@ -18,7 +18,7 @@ class FloorStore {
     @observable endRouteIndoor; // 室内终点路径
 
     constructor() {
-        this.mapFloor = 1;
+        this.mapFloor = 0;
         this.floorStatus = false;
         this.floorData = [];
         /**
@@ -39,7 +39,7 @@ class FloorStore {
     // 更新当前楼层
     @action
     updateFloor(floor) {
-        this.mapFloor = floor;
+        this.mapFloor = floor && Number(floor);
     }
 
     // 更改楼层显示状态
@@ -94,8 +94,9 @@ class FloorStore {
      */
     @action
     listenIbeacon(map, floor) {
+        // const floorNum = floor >= 0 ? Number(floor) + 1 : floor;
         this.updateFloor(floor);
-        map.setLevel(floor);
+        map.mapObj.setLevel(floor);
         this.checkMarkerAndRoute(map, floor);
     }
 }

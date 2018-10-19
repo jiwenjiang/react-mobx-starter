@@ -24,9 +24,15 @@ class gotoComponent extends Component {
                 <div className="map-goToShare-head">
                     <div className="map-goToShare-name">
                         <span className="map-goToShare-name-font">{endMarkerPoint && endMarkerPoint.name}</span>
-                        <span className="map-goToShare-name-floor">
-                            &emsp;({endMarkerPoint && endMarkerPoint.floor >= 0 ? `${endMarkerPoint.floor + 1}F` : `B${-(endMarkerPoint && endMarkerPoint.floor)}`})
+                        {endMarkerPoint && (endMarkerPoint.floor || endMarkerPoint.floor == 0)
+                            ? <span className="map-goToShare-name-floor">
+                            &emsp;({endMarkerPoint && endMarkerPoint.floor >= 0
+                                ? `${endMarkerPoint.floor + 1}F`
+                                : `B${-(endMarkerPoint && endMarkerPoint.floor)}`})
                         </span>
+                            : <span className="map-goToShare-name-floor">
+                            &emsp;(室外)
+                        </span>}
                     </div>
                     <hr/>
                     <div>

@@ -8,7 +8,7 @@ import Hammer from "hammerjs";
 import "./index.less";
 
 
-@inject("mapStore", "navStore", "floorStore")
+@inject("mapStore", "navStore", "floorStore", "commonStore")
 @observer
 class beginNav extends Component {
 
@@ -121,6 +121,7 @@ class beginNav extends Component {
 
     render() {
         const {totalDistance, navTime, navRoutes} = this.props.navStore;
+        const {searchStatus} = this.props.commonStore;
         return (
             <div className="begin-nav-container">
                 <div className="map-goToShare begin-nav" id="begin-nav">
@@ -154,30 +155,32 @@ class beginNav extends Component {
                         </button>
                     </div>
                 </div>
-                <div className="nav-route-detail">
-                    <div className="nav-route-detail-content canBeScroll">
-                        <div className="nav-route-detail-head">
-                            <span>{totalDistance}米 {navTime}秒</span>
-                        </div>
-                        <ul className="nav-route-detail-body">
-                            {navRoutes && navRoutes.map((v, i) => this.renderList(v, i))}
-                        </ul>
-                        <div className="nav-route-detail-foot begin-nav">
-                            <button className="begin-nav-detail" onClick={() => this.showMap()}>
-                                <i className="iconfont icon-fanhui"></i>
-                                <span> 查看地图</span>
-                            </button>
-                            <button className="begin-nav-sim" onClick={() => this.goToHere()}>
-                                <i className="iconfont icon-monixianlupipei"></i>
-                                <span> 模拟导航</span>
-                            </button>
-                            <button className="begin-nav-nav" onClick={() => this.goToHere()}>
-                                <i className="iconfont icon-daohang1"></i>
-                                <span> 开始导航</span>
-                            </button>
+                {
+                    !searchStatus && <div className="nav-route-detail">
+                        <div className="nav-route-detail-content canBeScroll">
+                            <div className="nav-route-detail-head">
+                                <span>{totalDistance}米 {navTime}秒</span>
+                            </div>
+                            <ul className="nav-route-detail-body">
+                                {navRoutes && navRoutes.map((v, i) => this.renderList(v, i))}
+                            </ul>
+                            <div className="nav-route-detail-foot begin-nav">
+                                <button className="begin-nav-detail" onClick={() => this.showMap()}>
+                                    <i className="iconfont icon-fanhui"></i>
+                                    <span> 查看地图</span>
+                                </button>
+                                <button className="begin-nav-sim" onClick={() => this.goToHere()}>
+                                    <i className="iconfont icon-monixianlupipei"></i>
+                                    <span> 模拟导航</span>
+                                </button>
+                                <button className="begin-nav-nav" onClick={() => this.goToHere()}>
+                                    <i className="iconfont icon-daohang1"></i>
+                                    <span> 开始导航</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
+                }
             </div>
         );
     }

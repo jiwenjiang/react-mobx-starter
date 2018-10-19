@@ -33,7 +33,7 @@ class MapStore {
     @observable confirmEndMarker; // 确定终点标记
 
     constructor() {
-        this.mapId = 1;
+        this.mapId = 2;
         this.carouselData = [];
         this.accordionData = [];
         this.mapObj = null;
@@ -166,18 +166,18 @@ class MapStore {
         let totalDistance = 0;
         paths.forEach(v => {
             totalDistance += v.distance;
-            const currentRoute = floorStore.routeIndoor[v.endFloor];
+            const currentRoute = floorStore.routeIndoor[v.startFloor];
             if (currentRoute && currentRoute.features && currentRoute.features instanceof Array) {
-                floorStore.routeIndoor[v.endFloor].features.push({
+                floorStore.routeIndoor[v.startFloor].features.push({
                     "type": "Feature",
                     "geometry": v.geometry
                 });
             } else {
-                floorStore.routeIndoor[v.endFloor] = {
+                floorStore.routeIndoor[v.startFloor] = {
                     "type": "FeatureCollection",
                     "features": []
                 };
-                floorStore.routeIndoor[v.endFloor].features.push({
+                floorStore.routeIndoor[v.startFloor].features.push({
                     "type": "Feature",
                     "geometry": v.geometry
                 });
@@ -226,6 +226,7 @@ class MapStore {
 
     @action
     confirmMarker(type, data, notPlan) {
+        // if (data.floor || data.floor == 0) {
         const startMarkerHandle = () => {
             if (this.endMarkerPoint && this.endMarkerPoint.point.toString() == data.point.toString()) {
                 commonStore.changeWarningModal("起点、终点不可相同");
@@ -248,6 +249,7 @@ class MapStore {
             if (this.endMarker) {
                 this.endMarker.setLngLat(this.endMarkerPoint.point);
             } else {
+                console.log(toJS(this.endMarkerPoint.point));
                 const el = this.generateDom(endImg);
                 this.endMarker = new this.mapGL.Marker(el).setLngLat(this.endMarkerPoint.point).addTo(this.mapObj);
             }
@@ -256,7 +258,7 @@ class MapStore {
             ? startMarkerHandle()
             : endMarkerHandle();
         // 切换楼层
-        this.changeFloor(data.floor);
+        data.floor && this.changeFloor(data.floor);
         this.mapObj.flyTo({
             center: data.point,
             zoom: 19,
@@ -271,6 +273,7 @@ class MapStore {
         if (this.startMarkerPoint && this.endMarkerPoint && !notPlan) {
             this.planRoute();
         }
+        // }
     }
 
     /**
@@ -290,8 +293,8 @@ class MapStore {
     }
 
     changeFloor(floor) {
-        const floorNum = floor >= 0 ? floor + 1 : floor;
-        floorStore.updateFloor(floorNum);
+        // const floorNum = floor >= 0 ? floor + 1 : floor;
+        floorStore.updateFloor(floor);
         this.mapObj.setLevel(floor);
         floorStore.checkMarkerAndRoute(this, floor);
     }

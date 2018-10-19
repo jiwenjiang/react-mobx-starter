@@ -40,7 +40,7 @@ class mapPage extends Component {
         map.on("load", () => {
             this.props.mapStore.saveMapObj(map, creeper, route);
             // FIXME 手动触发
-            map.zoomIn();
+            map.zoomTo(19);
         });
 
         // 监听地图点击
@@ -59,7 +59,11 @@ class mapPage extends Component {
                 e.preventDefault();
             }
         });
+        // nav
+        // nav.init(loc)
 
+        // nav.freeCallback(complete:(d)=>caa)
+        // nav.navCallback({route:r,complete:(d)=>caa})
         // 定位sdk
         loc.init({
             timeout: 50000,
@@ -76,15 +80,19 @@ class mapPage extends Component {
                 console.log("throw", err);
             }
         });
+
         loc.onLocation({
             complete: (data) => {
                 this.setMarker(data);
+                //
                 if (data.level && data.level != this.props.floorStore.mapFloor) {
+                    console.log("entry change level", data.level, this.props.floorStore.mapFloor);
                     this.props.floorStore.listenIbeacon(this.props.mapStore.mapObj, data.level);
                 }
-                console.log(`${data.locType == "ibeacon" ? "蓝牙点" : "gps"}`, data);
+                // console.log(`${data.locType == "ibeacon" ? "蓝牙点" : "gps"}`, data);
             }
         });
+
     }
 
     setMarker(data) {

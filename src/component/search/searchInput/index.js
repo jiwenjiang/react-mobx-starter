@@ -10,6 +10,7 @@ class SearchComponent extends PureComponent {
         this.state = {
             inputValue: ""
         };
+        this.searchWatchId = null;
     }
 
     submit(e) {
@@ -19,6 +20,16 @@ class SearchComponent extends PureComponent {
 
     focusSearch() {
         this.props.focusSearch();
+    }
+
+    inputChange(e) {
+        this.setState({
+            inputValue: e.target.value
+        });
+        this.searchWatchId && clearTimeout(this.searchWatchId);
+        this.searchWatchId = setTimeout(() => {
+            this.props.toSearch(this.state.inputValue);
+        }, 300);
     }
 
     goBack() {
@@ -43,9 +54,7 @@ class SearchComponent extends PureComponent {
                         <i className="wbIcon-search iconfont icon-fanhui1" style={{fontSize: "4.5vw"}}
                            onClick={() => this.goBack()}></i>
                         <input type="search" value={this.state.inputValue}
-                               onChange={(e) => this.setState({
-                                   inputValue: e.target.value
-                               })}
+                               onChange={(e) => this.inputChange(e)}
                                onFocus={() => this.focusSearch()}
                                placeholder={placeholder}/>
                         <i className="wbIcon-mic iconfont icon-mic" style={{fontSize: "5vw"}}></i>
