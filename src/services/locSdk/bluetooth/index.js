@@ -50,6 +50,7 @@ const blueToothFn = (target) => {
 
         // 配置微信
         configWx(sign) {
+            console.log("配置成功");
             wx.config({
                 debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
                 appId: sign.appid, // 必填，公众号的唯一标识
@@ -60,7 +61,8 @@ const blueToothFn = (target) => {
                 jsApiList: ["openWXDeviceLib", "closeWXDeviceLib",
                     "onWXDeviceBluetoothStateChange", "startSearchBeacons",
                     "stopSearchBeacons", "onSearchBeacons", "startRecord", "stopRecord",
-                    "translateVoice", "onMenuShareAppMessage", "getLocation"] // 必填，需要使用的JS接口列表
+                    "translateVoice", "onMenuShareAppMessage", "getLocation",
+                    "openBluetoothAdapter", "onWXDeviceBluetoothStateChange", "getBluetoothAdapterState"] // 必填，需要使用的JS接口列表
             });
             wx.error((res) => {
                 this.initError(res);
@@ -80,8 +82,6 @@ const blueToothFn = (target) => {
          * @author j_bleach
          * @date 2018-10-16
          * @Description: 开始搜索
-         * @param name:String
-         * @return name:String
          */
         startIbeaconSearch() {
             console.log("进入蓝牙");
@@ -112,6 +112,17 @@ const blueToothFn = (target) => {
                         }, 500);
                     }
                 });
+                wx.invoke("getBluetoothAdapterState", {
+                    complete: (data) => {
+                        console.log("lanya111", data);
+                    }
+                });
+                wx.invoke("openBluetoothAdapter", {
+                    complete: () => {
+                        wx.on("onWXDeviceBluetoothStateChange", (data) => console.log("蓝牙33", data));
+                    }
+                });
+
                 if (!this.initGps) {
                     this.onSearchBeacons();
                 } else {
@@ -129,7 +140,6 @@ const blueToothFn = (target) => {
             wx.startSearchBeacons({
                 ticket: "",
                 complete: (t) => {
-                    console.log("开启成功", t);
                     this.startSuccess({code: 0, msg: `室内定位启动，${t.errMsg}`});
                     let n = t.errMsg;
                     if ("startSearchBeacons:already started" === n) {
@@ -141,11 +151,11 @@ const blueToothFn = (target) => {
                         this.searchIbeacon();
                     }
                     "startSearchBeacons:bluetooth power off" === n
-                        ? this.startLocationError("蓝牙未打开，请打开蓝牙后，重新打开页面")
+                        ? this.startLocationError("蓝牙未打开")
                         : "startSearchBeacons:location service disable" === n && this.startLocationError("地理位置服务未打开");
                 },
                 fail: (t) => {
-                    console.log("开启失败", t);
+                    console.log("sdk-开启失败", t);
                 }
             });
         }

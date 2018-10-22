@@ -2,7 +2,7 @@
  * Created by j_bleach on 2018/9/27 0027.
  */
 import React, {Component} from "react";
-import {observer, inject} from "mobx-react";
+import {inject, observer} from "mobx-react";
 import config from "config";
 import Search from "containers/search";
 import Car from "containers/car";
@@ -12,13 +12,14 @@ import GotoShare from "component/map/share";
 import RoutePanel from "component/map/routePanel";
 import ConfirmModal from "component/common/confirmModal";
 import WarningModal from "component/common/warningModal";
+import NoticeComponent from "component/common/notice";
 import BeginNav from "component/nav/beginNav";
 import startConfirm from "assets/img/startConfirm.png";
 import "./index.less";
 import loc from "services/locSdk";
 
 
-@inject("mapStore", "commonStore", "floorStore")
+@inject("mapStore", "commonStore", "floorStore", "navStore")
 @observer
 class mapPage extends Component {
     constructor(props) {
@@ -56,7 +57,7 @@ class mapPage extends Component {
         // 禁用滑动
         document.addEventListener("touchmove", (e) => {
             if (!e.target.classList.contains("canBeScroll") && !e.target.classList.contains("am-list-content")) {
-                e.preventDefault();
+                // e.preventDefault();
             }
         });
         // nav
@@ -70,24 +71,32 @@ class mapPage extends Component {
             locType: ["gps", "ibeacon"],
             mapId: this.props.mapStore.mapId,
             complete: () => {
-                console.log("初始化成功！");
+                console.log("初始化完成");
                 loc.startLocation({
-                    complete: () => {
+                    complete: (data) => {
+                        console.log("map-开启成功", data);
+                    },
+                    error: (err) => {
+                        console.log("map-开启失败", err);
                     }
                 });
             },
             error: (err) => {
-                console.log("throw", err);
+                console.log("init", err);
             }
         });
 
         loc.onLocation({
             complete: (data) => {
                 this.setMarker(data);
-                //
-                if (data.level && data.level != this.props.floorStore.mapFloor) {
+                // console.log("map-on", data);
+                if (this.props.commonStore.detectLocation && data.level && data.level != this.props.floorStore.mapFloor) {
                     console.log("entry change level", data.level, this.props.floorStore.mapFloor);
-                    this.props.floorStore.listenIbeacon(this.props.mapStore.mapObj, data.level);
+                    this.props.floorStore.listenIbeacon(this.props.mapStore, data.level);
+                }
+                if (!this.props.navStore.freeMarker && this.props.navStore.firstLocation) {
+                    console.log("entry first locate");
+                    this.props.navStore.changeFreeMarker(this.props.mapStore, data);
                 }
                 // console.log(`${data.locType == "ibeacon" ? "蓝牙点" : "gps"}`, data);
             }
@@ -146,7 +155,10 @@ class mapPage extends Component {
 
 
     render() {
-        const {searchStatus, confirmModalStatus, warningModalStatus, projectType} = this.props.commonStore;
+        const {
+            searchStatus, confirmModalStatus,
+            warningModalStatus, projectType, noticeProps
+        } = this.props.commonStore;
         const confirmModalProps = {
             text: " 要将此处设为起点吗？",
             icon: startConfirm,
@@ -163,6 +175,8 @@ class mapPage extends Component {
                 this.props.commonStore.changeWarningModal(false);
             },
         };
+
+
         // const operatorsProps = {
         //     searchRef: this.searchRef
         // };
@@ -174,6 +188,7 @@ class mapPage extends Component {
                 {projectType == "Car" && searchStatus && <Car></Car>}
                 {confirmModalStatus && <ConfirmModal {...confirmModalProps}></ConfirmModal>}
                 {warningModalStatus && <WarningModal {...warningModalProps}></WarningModal>}
+                {noticeProps && NoticeComponent(noticeProps)}
                 <Operators></Operators>
                 <GotoShare></GotoShare>
                 <BeginNav></BeginNav>

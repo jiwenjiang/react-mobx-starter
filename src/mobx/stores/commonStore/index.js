@@ -18,6 +18,9 @@ class CommonStore {
     @observable showSearchHistory; // 展示搜索历史
     @observable warningModalStatus; // 警告文字
     @observable mapToSearchStatus; // 地图返回搜索
+    @observable noticeProps; // 地图返回搜索
+    @observable detectLocation; // 监听定位
+    @observable locationStatus; // 定位状态  中定位（locating） 去定位 （toLocate）三维（locate3D）
 
     constructor() {
         this.loadingStatus = false;
@@ -27,6 +30,9 @@ class CommonStore {
         this.showSearchHistory = false;
         this.warningModalStatus = null; // String
         this.mapToSearchStatus = false;
+        this.noticeProps = null;
+        this.detectLocation = true;
+        this.locationStatus = "toLocate";
     }
 
     @action
@@ -62,6 +68,11 @@ class CommonStore {
     @action
     changeMapToSearch(v) {
         this.mapToSearchStatus = v;
+    }
+
+    @action
+    changeDetectLocation(status) {
+        this.detectLocation = status;
     }
 }
 

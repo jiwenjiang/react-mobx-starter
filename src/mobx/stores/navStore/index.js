@@ -2,6 +2,9 @@
  * Created by j_bleach on 2018/9/20 0020.
  */
 import {observable, action} from "mobx";
+import locateHalfImg from "assets/img/locate-half.png";
+import locateImg from "assets/img/locate.png";
+import {floorStore} from "../floorStore";
 
 class NavStore {
     /**
@@ -28,6 +31,7 @@ class NavStore {
     @observable navPriorityType; // 跨楼层方式 elevator/stairs
     @observable freeMarker; // 自由模式marker
     @observable freeMarkerPoint; // 自由模式marker 坐标点
+    @observable firstLocation; // 首次定位
 
     constructor() {
         this.mapNavParams = {
@@ -51,6 +55,7 @@ class NavStore {
         this.navPriorityType = "elevator";
         this.freeMarker = null;
         this.freeMarkerPoint = null;
+        this.firstLocation = true;
     }
 
     @action updateLocateCoordinate = (value) => {
@@ -77,6 +82,53 @@ class NavStore {
 
     @action changePriorityType(v) {
         this.navPriorityType = v;
+    }
+
+    @action changeFreeMarker(map, data) {
+        console.log("changeFree", data);
+        if (data.locType === "gps") {
+            if (data.accuracy <= 10) {
+                this.freeMarkerPoint = {
+                    point: [data.longitude, data.latitude],
+                    floor: 0,
+                    name: "gps"
+                };
+            } else {
+                return false;
+            }
+        }
+        if (data.locType === "ibeacon") {
+            this.freeMarkerPoint = {
+                point: [data.longitude, data.latitude],
+                floor: data.level,
+                name: "ibeacon"
+            };
+        }
+        this.changeFirstLocation(false);
+        console.log("free point ", this.freeMarkerPoint);
+        if (this.freeMarker) {
+            this.freeMarker.setLngLat(this.freeMarkerPoint.point);
+        } else {
+            console.log("paint");
+            const imgSrc = data.locType === "gps"
+                ? locateImg
+                : floorStore.mapFloor == data.floor
+                    ? locateImg : locateHalfImg;
+            const el = map.generateDom(imgSrc);
+            this.freeMarker = new map.mapGL.Marker(el).setLngLat(this.freeMarkerPoint.point).addTo(map.mapObj);
+        }
+    }
+
+    @action checkFreeMarker(map) {
+        this.freeMarker.remove();
+        this.freeMarker = null;
+        const imgSrc = floorStore.mapFloor == this.freeMarkerPoint.floor ? locateImg : locateHalfImg;
+        const el = map.generateDom(imgSrc);
+        this.freeMarker = new map.mapGL.Marker(el).setLngLat(this.freeMarkerPoint.point).addTo(map.mapObj);
+    }
+
+    @action changeFirstLocation(status) {
+        this.firstLocation = status;
     }
 }
 

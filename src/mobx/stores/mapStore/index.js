@@ -284,6 +284,7 @@ class MapStore {
      * @return HTMLElement
      */
     generateDom(src) {
+        console.log("el!!!!!!");
         let el = document.createElement("div");
         let img = document.createElement("img");
         img.src = src;

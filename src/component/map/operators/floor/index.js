@@ -6,7 +6,7 @@ import React, {Component} from "react";
 import "./index.less";
 import {inject, observer} from "mobx-react";
 
-@inject("floorStore", "mapStore")
+@inject("floorStore", "mapStore", "navStore", "commonStore")
 @observer
 class floor extends Component {
     state = {
@@ -86,9 +86,14 @@ class floor extends Component {
 
     changeFloor(v) {
         const floor = v >= 0 ? v - 1 : v;
-        this.props.floorStore.updateFloor(floor);
-        this.props.mapStore.mapObj.setLevel(floor);
-        this.props.floorStore.checkMarkerAndRoute(this.props.mapStore, floor);
+        this.props.commonStore.changeDetectLocation(false); // 取消定位检测
+        this.props.floorStore.updateFloor(floor); // 更新楼层（mobx）
+        this.props.mapStore.mapObj.setLevel(floor); //  更新楼层
+        this.props.floorStore.checkMarkerAndRoute(this.props.mapStore, floor); // 终点，起点，路径检测
+        if (this.props.navStore.freeMarker) {
+            this.props.navStore.checkFreeMarker(this.props.mapStore);
+        }
+
         this.setState({
             showFloor: false
         });
