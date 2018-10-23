@@ -86,6 +86,7 @@ class NavStore {
 
     @action changeFreeMarker(map, data) {
         console.log("changeFree", data);
+        this.changeFirstLocation(false);
         if (data.locType === "gps") {
             if (data.accuracy <= 10) {
                 this.freeMarkerPoint = {
@@ -94,6 +95,7 @@ class NavStore {
                     name: "gps"
                 };
             } else {
+                this.changeFirstLocation(true);
                 return false;
             }
         }
@@ -104,17 +106,15 @@ class NavStore {
                 name: "ibeacon"
             };
         }
-        this.changeFirstLocation(false);
-        console.log("free point ", this.freeMarkerPoint);
         if (this.freeMarker) {
             this.freeMarker.setLngLat(this.freeMarkerPoint.point);
         } else {
-            console.log("paint");
+            console.log("paint", floorStore.mapFloor, this.freeMarkerPoint.floor);
             const imgSrc = data.locType === "gps"
                 ? locateImg
-                : floorStore.mapFloor == data.floor
+                : floorStore.mapFloor == this.freeMarkerPoint.floor
                     ? locateImg : locateHalfImg;
-            const el = map.generateDom(imgSrc);
+            const el = map.generateDom(imgSrc, "freeMarker");
             this.freeMarker = new map.mapGL.Marker(el).setLngLat(this.freeMarkerPoint.point).addTo(map.mapObj);
         }
     }
@@ -122,6 +122,7 @@ class NavStore {
     @action checkFreeMarker(map) {
         this.freeMarker.remove();
         this.freeMarker = null;
+        console.log("checkFloor", floorStore.mapFloor, this.freeMarkerPoint.floor);
         const imgSrc = floorStore.mapFloor == this.freeMarkerPoint.floor ? locateImg : locateHalfImg;
         const el = map.generateDom(imgSrc);
         this.freeMarker = new map.mapGL.Marker(el).setLngLat(this.freeMarkerPoint.point).addTo(map.mapObj);
@@ -129,6 +130,14 @@ class NavStore {
 
     @action changeFirstLocation(status) {
         this.firstLocation = status;
+    }
+
+    orientateMarker(angle, map) {
+        if (this.freeMarker) {
+            let freeMarker = document.getElementsByClassName("freeMarker")[0];
+            freeMarker.style.transformOrigin = "50% 50%";
+            freeMarker.style.transform = "rotate(" + (angle + map.transform.angle * (180 / Math.PI)) + "deg)";
+        }
     }
 }
 

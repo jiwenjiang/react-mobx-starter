@@ -17,7 +17,7 @@ import BeginNav from "component/nav/beginNav";
 import startConfirm from "assets/img/startConfirm.png";
 import "./index.less";
 import loc from "services/locSdk";
-
+import nav from "services/navSDK";
 
 @inject("mapStore", "commonStore", "floorStore", "navStore")
 @observer
@@ -60,11 +60,6 @@ class mapPage extends Component {
                 // e.preventDefault();
             }
         });
-        // nav
-        // nav.init(loc)
-
-        // nav.freeCallback(complete:(d)=>caa)
-        // nav.navCallback({route:r,complete:(d)=>caa})
         // 定位sdk
         loc.init({
             timeout: 50000,
@@ -97,11 +92,24 @@ class mapPage extends Component {
                 if (!this.props.navStore.freeMarker && this.props.navStore.firstLocation) {
                     console.log("entry first locate");
                     this.props.navStore.changeFreeMarker(this.props.mapStore, data);
+                    nav.init(loc);
                 }
                 // console.log(`${data.locType == "ibeacon" ? "蓝牙点" : "gps"}`, data);
             }
         });
 
+        nav.compass({
+            complete: (alpha) => {
+                this.props.navStore.orientateMarker(alpha, map);
+            }
+        });
+
+        nav.startFree({
+            complete: (data) => {
+                console.log("update", data);
+                this.props.navStore.changeFreeMarker(this.props.mapStore, data);
+            }
+        });
     }
 
     setMarker(data) {

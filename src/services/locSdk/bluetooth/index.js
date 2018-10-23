@@ -184,6 +184,7 @@ const blueToothFn = (target) => {
             console.log("进入蓝牙定时搜索");
             wx.onSearchBeacons({ //监听iBeacon设备更新事件
                 complete: (data) => {
+                    // console.log("搜索", data.beacons);
                     data.beacons = data.beacons && data.beacons.filter(v => v.rssi != 0);
                     if (data.beacons && data.beacons.length > 0) {
                         this.getIbeaconPoints(data);
@@ -207,7 +208,7 @@ const blueToothFn = (target) => {
         getIbeaconPoints(data) {
             let filterData = data.beacons && data.beacons
                 .map(v => {
-                    return {rssi: v.rssi, device: `${v.major}_${v.minor}`};
+                    return {rssi: ~~Number(v.rssi), device: `${v.major}_${v.minor}`};
                 });
             if (filterData.length === 0) {
                 // this.onSuccess();
@@ -222,6 +223,7 @@ const blueToothFn = (target) => {
                     },
                     body: getIbeaconBody
                 }).then((response) => response.json()).then((data) => {
+                    // console.log("res", data);
                     if (data.code == 0) {
                         const res = data.data;
                         const Polygon = this.setPolygonLocation(res);

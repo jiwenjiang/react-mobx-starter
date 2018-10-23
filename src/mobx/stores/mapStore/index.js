@@ -281,14 +281,17 @@ class MapStore {
      * @date 2018-10-11
      * @Description: 生成marker
      * @param src:String marker路径
+     * @param className:String 样式名
      * @return HTMLElement
      */
-    generateDom(src) {
-        console.log("el!!!!!!");
+    generateDom(src, classString) {
         let el = document.createElement("div");
         let img = document.createElement("img");
         img.src = src;
         img.style.width = "7.3vw";
+        if (classString) {
+            img.className = classString;
+        }
         el.appendChild(img);
         return el;
     }
