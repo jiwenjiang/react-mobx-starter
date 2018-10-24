@@ -35,9 +35,10 @@ class Nav {
             }
         }
     ) {
-        if (this.loc.currentPosition) {
-            this.startCorrectFreeLocate(loc);
-        }
+        console.log("dayin", this.loc);
+        // if (this.loc.currentPosition) {
+        //     this.startCorrectFreeLocate(loc);
+        // }
         this.onFreeStep = complete;
     }
 }
