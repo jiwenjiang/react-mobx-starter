@@ -5,6 +5,7 @@ import {observable, action} from "mobx";
 import locateHalfImg from "assets/img/locate-half.png";
 import locateImg from "assets/img/locate.png";
 import {floorStore} from "../floorStore";
+import {toJS} from "mobx";
 
 class NavStore {
     /**
@@ -84,7 +85,7 @@ class NavStore {
         this.navPriorityType = v;
     }
 
-    @action changeFreeMarker(map, data) {
+    @action initFreeMarker(map, data) {
         console.log("changeFree", data);
         this.changeFirstLocation(false);
         if (data.locType === "gps") {
@@ -122,10 +123,30 @@ class NavStore {
     @action checkFreeMarker(map) {
         this.freeMarker.remove();
         this.freeMarker = null;
-        console.log("checkFloor", floorStore.mapFloor, this.freeMarkerPoint.floor);
+        // console.log("checkFloor", floorStore.mapFloor, this.freeMarkerPoint.floor);
         const imgSrc = floorStore.mapFloor == this.freeMarkerPoint.floor ? locateImg : locateHalfImg;
-        const el = map.generateDom(imgSrc);
+        const el = map.generateDom(imgSrc, "freeMarker");
         this.freeMarker = new map.mapGL.Marker(el).setLngLat(this.freeMarkerPoint.point).addTo(map.mapObj);
+    }
+
+    @action moveFreeMarker(map, data) {
+        this.freeMarkerPoint = {
+            point: [data.longitude, data.latitude],
+            floor: data.level,
+            name: data.locType
+        };
+
+        if (this.freeMarker) {
+            console.log("move", toJS(this.freeMarkerPoint.point));
+            this.freeMarker.setLngLat(toJS(this.freeMarkerPoint.point));
+        } else {
+            const imgSrc = data.locType === "gps"
+                ? locateImg
+                : floorStore.mapFloor == this.freeMarkerPoint.floor
+                    ? locateImg : locateHalfImg;
+            const el = map.generateDom(imgSrc, "freeMarker");
+            this.freeMarker = new map.mapGL.Marker(el).setLngLat(this.freeMarkerPoint.point).addTo(map.mapObj);
+        }
     }
 
     @action changeFirstLocation(status) {

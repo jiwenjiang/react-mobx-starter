@@ -66,7 +66,6 @@ class mapPage extends Component {
             locType: ["gps", "ibeacon"],
             mapId: this.props.mapStore.mapId,
             complete: () => {
-                console.log("初始化完成");
                 loc.startLocation({
                     complete: (data) => {
                         console.log("map-开启成功", data);
@@ -86,13 +85,18 @@ class mapPage extends Component {
                 this.setMarker(data);
                 // console.log("map-on", data);
                 if (this.props.commonStore.detectLocation && data.level && data.level != this.props.floorStore.mapFloor) {
-                    console.log("entry change level", data.level, this.props.floorStore.mapFloor);
+                    // console.log("entry change level", data.level, this.props.floorStore.mapFloor);
                     this.props.floorStore.listenIbeacon(this.props.mapStore, data.level);
                 }
                 if (!this.props.navStore.freeMarker && this.props.navStore.firstLocation) {
-                    console.log("entry first locate");
-                    this.props.navStore.changeFreeMarker(this.props.mapStore, data);
+                    // console.log("entry first locate");
+                    this.props.navStore.initFreeMarker(this.props.mapStore, data);
                     nav.init(loc);
+                    nav.startFree({
+                        complete: (data) => {
+                            this.props.navStore.moveFreeMarker(this.props.mapStore, data);
+                        }
+                    });
                 }
                 // console.log(`${data.locType == "ibeacon" ? "蓝牙点" : "gps"}`, data);
             }
@@ -104,12 +108,20 @@ class mapPage extends Component {
             }
         });
 
-        nav.startFree({
-            complete: (data) => {
-                console.log("update", data);
-                this.props.navStore.changeFreeMarker(this.props.mapStore, data);
-            }
-        });
+    }
+
+    setMoveMarker(data) {
+        console.log("move", data);
+        if (this.moveMarker) {
+            this.moveMarker.setLngLat([data.longitude, data.latitude]);
+        } else {
+            let el = document.createElement("div");
+            el.style.background = "yellow";
+            el.style.width = "10px";
+            el.style.height = "10px";
+            this.moveMarker = new this.props.mapStore.mapGL.Marker(el).setLngLat([data.longitude, data.latitude])
+                .addTo(this.props.mapStore.mapObj);
+        }
     }
 
     setMarker(data) {

@@ -11,10 +11,13 @@ import correctLocate from "./correctLocate";
 @correctLocate
 class Nav {
     init(loc) {
+        // console.log("loc", loc);
+        if (loc.currentPosition) {
+            this.currentPoint = loc.currentPosition;
+            this.initStepper(loc);
+        }
         this.loc = loc;
-        this.currentPoint = loc.currentPoint;
         this.initCompass();
-        this.initStepper();
     }
 
     compass(
@@ -32,6 +35,9 @@ class Nav {
             }
         }
     ) {
+        if (this.loc.currentPosition) {
+            this.startCorrectFreeLocate(loc);
+        }
         this.onFreeStep = complete;
     }
 }

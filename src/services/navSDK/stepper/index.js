@@ -37,7 +37,29 @@ const stepperFn = (target) => {
             super();
         }
 
-        initStepper() {
+        initStepper(loc) {
+            // 重置当前位置至质心点
+            this.initPolygonLocate = setInterval(() => {
+                if (loc.currentPosition.locType === "ibeacon") {
+                    if (loc.currentPosition.polygonLon) {
+                        this.currentPoint = {
+                            isOutdoor: loc.currentPosition.isOutdoor,
+                            buildingId: loc.currentPosition.buildingId,
+                            level: loc.currentPosition.level,
+                            locType: loc.currentPosition.locType,
+                            orientation: this.alpha,
+                            longitude: loc.currentPosition.polygonLon,
+                            latitude: loc.currentPosition.polygonLat
+                        };
+                        console.log("重置质心点");
+                        clearInterval(this.initPolygonLocate);
+                        this.onFreeStep(this.currentPoint);
+                    }
+                } else {
+                    clearInterval(this.initPolygonLocate);
+                }
+            }, 500);
+            // 步进器
             window.addEventListener("devicemotion", (e) => {
                 let n = e.accelerationIncludingGravity;
                 this.checkInAccSensor(n.x, n.y, n.z);
@@ -76,17 +98,21 @@ const stepperFn = (target) => {
         //计算结果
         step(v, M) {
             totalDistance = totalDistance + M;
-            let stepDistance = window.parseFloat(M / 1000).toFixed(3);
-            // console.log("当前步长", stepDistance);
+            let stepDistance = window.parseFloat(M / 1000 / 1000);
             // console.log("当前角度", this.alpha);
             const output = destination([this.currentPoint.longitude, this.currentPoint.latitude],
-                stepDistance, this.alpha, {units: "miles"});
+                stepDistance, this.alpha);
             this.currentPoint = {
-                ...this.currentPoint,
+                isOutdoor: this.currentPoint.isOutdoor,
+                buildingId: this.currentPoint.buildingId,
+                level: this.currentPoint.level,
+                locType: this.currentPoint.locType,
+                orientation: this.alpha,
                 longitude: output.geometry.coordinates[0],
                 latitude: output.geometry.coordinates[1]
             };
             this.onFreeStep(this.currentPoint);
+            this.initPolygonLocate && clearInterval(this.initPolygonLocate);
         }
 
         machine(t) {
@@ -123,8 +149,8 @@ const stepperFn = (target) => {
                 clearTimeout(timer);
             }
 
-            timer = setTimeout(function () {
-                handleMessage();
+            timer = setTimeout(() => {
+                this.handleMessage();
             }, sleTime || 0);
         }
 

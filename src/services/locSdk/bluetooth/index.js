@@ -27,7 +27,6 @@ const blueToothFn = (target) => {
         }
 
         getSignature() {
-            console.log("请求签名");
             // 注销页面，停止微信
             window.onunload = () => {
                 wx.stopSearchBeacons();
@@ -50,7 +49,6 @@ const blueToothFn = (target) => {
 
         // 配置微信
         configWx(sign) {
-            console.log("配置成功");
             wx.config({
                 debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
                 appId: sign.appid, // 必填，公众号的唯一标识
@@ -192,7 +190,7 @@ const blueToothFn = (target) => {
                         // console.log("接收到有效的蓝牙搜索信号", data);
                         gpsTimeId && clearTimeout(gpsTimeId);
                         gpsTimeId = setTimeout(() => {
-                            console.log("定时器执行", this);
+                            console.log("定时器执行");
                             this.currentLocation = "gps";
                         }, CHANGE_GPS);
                     }
