@@ -51,7 +51,6 @@ const stepperFn = (target) => {
                             longitude: loc.currentPosition.polygonLon,
                             latitude: loc.currentPosition.polygonLat
                         };
-                        console.log("重置质心点");
                         clearInterval(this.initPolygonLocate);
                         this.onFreeStep(this.currentPoint);
                     }

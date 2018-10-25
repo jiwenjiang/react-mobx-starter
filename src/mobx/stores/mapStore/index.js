@@ -103,7 +103,7 @@ class MapStore {
                 runInAction(() => {
                     commonStore.loadingStatus = false;
                 });
-                console.info("路径规划成功");
+                commonStore.baiduVoiceUrl("重新规划路径");
                 this.routeObj.clearLocation();
                 document.getElementById("map-goToShare").classList.remove("dom-transformY-30");
                 document.getElementById("begin-nav").classList.add("dom-transformY-30");
@@ -162,6 +162,7 @@ class MapStore {
      * @param paths:array 路径数组
      */
     routeHandle(paths) {
+        console.log(paths);
         floorStore.routeIndoor = {};
         let totalDistance = 0;
         paths.forEach(v => {

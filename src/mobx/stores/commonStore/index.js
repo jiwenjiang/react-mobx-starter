@@ -5,6 +5,8 @@
 import {observable, action, autorun, computed, configure, runInAction} from "mobx";
 import http from "services/http";
 import normalUrl from "config/url/normal";
+import audioSrc from "assets/audio/routePlan.mp3";
+
 
 configure({
     enforceActions: "observed"
@@ -21,6 +23,7 @@ class CommonStore {
     @observable noticeProps; // 地图返回搜索
     @observable detectLocation; // 监听定位
     @observable locationStatus; // 定位状态  中定位（locating） 去定位 （toLocate）三维（locate3D）
+    @observable baiduVoice; // 百度语音
 
     constructor() {
         this.loadingStatus = false;
@@ -33,6 +36,27 @@ class CommonStore {
         this.noticeProps = null;
         this.detectLocation = true;
         this.locationStatus = "toLocate";
+        this.baiduVoice = null;
+    }
+
+    @action
+    async getBaiduToken(mapId) {
+        this.mapId = mapId;
+        try {
+            const data = await http.put(normalUrl.getBaiduToken);
+            runInAction(() => {
+                this.baiduVoice = `http://tsn.baidu.com/text2audio?lan=zh&ctp=1&cuid=abcdxxx&tok=${data.access_token}&vol=9&per=0&spd=5&pit=5`;
+            });
+        } catch (e) {
+            throw e;
+        }
+    }
+
+    @action baiduVoiceUrl(text) {
+        this.baiduVoice = `${this.baiduVoice}&tex=${text}`;
+        const audio = document.getElementById("wb-audio");
+        audio.src = audioSrc;
+        audio.play();
     }
 
     @action
@@ -74,6 +98,7 @@ class CommonStore {
     changeDetectLocation(status) {
         this.detectLocation = status;
     }
+
 }
 
 

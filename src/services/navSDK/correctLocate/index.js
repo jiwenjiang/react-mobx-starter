@@ -10,12 +10,12 @@ const correctLocateFn = (target) => {
         }
 
         startCorrectFreeLocate(loc) {
-            console.log("entry 纠偏");
-            // this.correctNavLocateWatchId && clearTimeout(this.correctNavLocateWatchId);
+            console.log("entry 纠偏", this);
+            this.correctNavLocateWatchId && clearTimeout(this.correctNavLocateWatchId);
             this.correctFreeLocateTimer = () => {
                 this.correctFreeLocateWatchId = setTimeout(() => {
                     this.correctFreeLocateTimer && this.correctFreeLocateTimer();
-                    this.chooseCorrectMode(loc);
+                    this.chooseFreeCorrectMode(loc);
                 }, 1000);
             };
             this.correctFreeLocateTimer();
@@ -30,7 +30,8 @@ const correctLocateFn = (target) => {
             }, 5000);
         }
 
-        chooseCorrectMode(loc) {
+        chooseFreeCorrectMode(loc) {
+            console.log("纠偏中");
             const locate = loc.currentPosition;
             const correctMode = {
                 "ibeacon": this.correctFreeLocateIndoor,
@@ -45,7 +46,7 @@ const correctLocateFn = (target) => {
          * @Description:
          * @param loc:object 当前定位点
          */
-        correctFreeLocateIndoor(loc) {
+        correctFreeLocateIndoor = (loc) => {
             // 如果存在纠偏标志，则返回
             if (this.correctFlag) {
                 return false;
@@ -64,17 +65,20 @@ const correctLocateFn = (target) => {
                 if (ibeaconToFiducial < 3) {
                     // 当前点至蓝牙点大于2米
                     if (currentToIbeacon > 2) {
+                        console.log("当前点至蓝牙点大于2米");
                         const point = {...this.currentPoint, longitude: loc.longitude, latitude: loc.latitude};
                         this.updateFreeCurrentPoint(point);
                     }
                 } else {
                     // 当前点距离置信点大于10米
                     if (currentToFiducial > 10) {
+                        console.log("当前点距离置信点大于10米");
                         const point = {...this.currentPoint, longitude: loc.fiducialLon, latitude: loc.fiducialLat};
                         this.updateFreeCurrentPoint(point);
                     } else {
                         // 当前点距离蓝牙点大于5米
                         if (currentToIbeacon > 5) {
+                            console.log("当前点距离蓝牙点大于5米");
                             const mid = calcMidPoint(ibeaconPoint, currentPoint);
                             const point = {...this.currentPoint, longitude: mid[0], latitude: mid[1]};
                             this.updateFreeCurrentPoint(point);
@@ -85,12 +89,14 @@ const correctLocateFn = (target) => {
                 if (loc.polygonLon) {
                     // 质心点和当前位置距离大于5小于10
                     if (currentToPolygon > 5 && currentToPolygon < 10) {
+                        console.log("质心点和当前位置距离大于5小于10");
                         const mid = calcMidPoint(polygonPoint, currentPoint);
                         const point = {...this.currentPoint, longitude: mid[0], latitude: mid[1]};
                         this.updateFreeCurrentPoint(point);
                     } else {
                         //  质心点和当前位置距离大于 10
                         if (currentToPolygon > 10) {
+                            console.log("质心点和当前位置距离大于 10");
                             const point = {
                                 ...this.currentPoint,
                                 longitude: loc.polygonLon, latitude: loc.polygonLat
@@ -100,7 +106,8 @@ const correctLocateFn = (target) => {
                     }
                 }
             }
-        }
+        };
+
     };
 };
 

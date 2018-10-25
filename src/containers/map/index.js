@@ -4,6 +4,7 @@
 import React, {Component} from "react";
 import {inject, observer} from "mobx-react";
 import config from "config";
+// import {getQueryString} from "services/utils/tool";
 import Search from "containers/search";
 import Car from "containers/car";
 import * as creeper from "services/mapSDK/mapbox-gl";
@@ -42,6 +43,7 @@ class mapPage extends Component {
             this.props.mapStore.saveMapObj(map, creeper, route);
             // FIXME 手动触发
             map.zoomTo(19);
+            this.props.commonStore.getBaiduToken();
         });
 
         // 监听地图点击
@@ -110,20 +112,6 @@ class mapPage extends Component {
 
     }
 
-    setMoveMarker(data) {
-        console.log("move", data);
-        if (this.moveMarker) {
-            this.moveMarker.setLngLat([data.longitude, data.latitude]);
-        } else {
-            let el = document.createElement("div");
-            el.style.background = "yellow";
-            el.style.width = "10px";
-            el.style.height = "10px";
-            this.moveMarker = new this.props.mapStore.mapGL.Marker(el).setLngLat([data.longitude, data.latitude])
-                .addTo(this.props.mapStore.mapObj);
-        }
-    }
-
     setMarker(data) {
         if (this.props.mapStore.mapObj && this.props.mapStore.mapGL) {
             if (data.locType === "ibeacon") {
@@ -177,7 +165,7 @@ class mapPage extends Component {
     render() {
         const {
             searchStatus, confirmModalStatus,
-            warningModalStatus, projectType, noticeProps
+            warningModalStatus, projectType, noticeProps,
         } = this.props.commonStore;
         const confirmModalProps = {
             text: " 要将此处设为起点吗？",
@@ -213,6 +201,7 @@ class mapPage extends Component {
                 <GotoShare></GotoShare>
                 <BeginNav></BeginNav>
                 <RoutePanel></RoutePanel>
+                <audio id="wb-audio" autoPlay preload="true"></audio>
             </div>
         );
     }

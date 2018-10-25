@@ -5,6 +5,7 @@
 import React, {Component} from "react";
 import {observer, inject} from "mobx-react";
 import Hammer from "hammerjs";
+import nav from "services/navSDK";
 import "./index.less";
 
 
@@ -105,6 +106,13 @@ class beginNav extends Component {
         }
     }
 
+    simNav() {
+        nav.startSim({
+            complete: () => {
+            }
+        });
+    }
+
     exit() {
         this.props.mapStore.removeMarker("end");
         document.getElementById("begin-nav").classList.remove("dom-transformY-30");
@@ -144,7 +152,7 @@ class beginNav extends Component {
                             <span> 路线详情</span>
                         </button>
                         <button className={`${navRoutes ? "begin-nav-sim" : "begin-nav-gray-btn"}`}
-                                onClick={() => this.goToHere()}>
+                                onClick={() => this.simNav()}>
                             <i className="iconfont icon-monixianlupipei"></i>
                             <span> 模拟导航</span>
                         </button>

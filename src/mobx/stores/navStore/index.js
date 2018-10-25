@@ -86,7 +86,6 @@ class NavStore {
     }
 
     @action initFreeMarker(map, data) {
-        console.log("changeFree", data);
         this.changeFirstLocation(false);
         if (data.locType === "gps") {
             if (data.accuracy <= 10) {
@@ -120,10 +119,15 @@ class NavStore {
         }
     }
 
+    /**
+     * @author j_bleach
+     * @date 2018-10-25
+     * @Description: 跨楼层切换marker样式
+     * @param map:mapobj
+    */
     @action checkFreeMarker(map) {
         this.freeMarker.remove();
         this.freeMarker = null;
-        // console.log("checkFloor", floorStore.mapFloor, this.freeMarkerPoint.floor);
         const imgSrc = floorStore.mapFloor == this.freeMarkerPoint.floor ? locateImg : locateHalfImg;
         const el = map.generateDom(imgSrc, "freeMarker");
         this.freeMarker = new map.mapGL.Marker(el).setLngLat(this.freeMarkerPoint.point).addTo(map.mapObj);
@@ -137,7 +141,6 @@ class NavStore {
         };
 
         if (this.freeMarker) {
-            console.log("move", toJS(this.freeMarkerPoint.point));
             this.freeMarker.setLngLat(toJS(this.freeMarkerPoint.point));
         } else {
             const imgSrc = data.locType === "gps"

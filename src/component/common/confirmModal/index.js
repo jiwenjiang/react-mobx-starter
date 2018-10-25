@@ -4,6 +4,7 @@
 /*eslint-disable*/
 import React, {Component} from "react";
 import {observer, inject} from "mobx-react";
+import audioSrc from "assets/audio/routePlan.mp3";
 import "./index.less";
 
 @inject("commonStore")
@@ -12,6 +13,9 @@ class confirmModal extends Component {
     state = {};
 
     confirm() {
+        const audio = document.getElementById("wb-audio");
+        audio.src = audioSrc;
+        audio.play();
         this.props.confirm();
     }
 

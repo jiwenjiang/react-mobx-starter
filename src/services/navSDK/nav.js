@@ -4,11 +4,13 @@
 import compass from "./compass";
 import stepper from "./stepper";
 import correctLocate from "./correctLocate";
+import simNavigation from "./simNav";
 
 /*eslint-disable*/
 @compass
 @stepper
 @correctLocate
+@simNavigation
 class Nav {
     init(loc) {
         // console.log("loc", loc);
@@ -35,11 +37,24 @@ class Nav {
             }
         }
     ) {
-        console.log("dayin", this.loc);
-        // if (this.loc.currentPosition) {
-        //     this.startCorrectFreeLocate(loc);
-        // }
+        if (this.loc.currentPosition) {
+            this.startCorrectFreeLocate(this.loc);
+        }
         this.onFreeStep = complete;
+    }
+
+    startSim(
+        {
+            routeData = [],
+            speed = 1,
+            complete = () => {
+            },
+            error = () => {
+            }
+        }
+    ) {
+        this.startSimNavigation();
+        this.onSimStep = complete;
     }
 }
 
