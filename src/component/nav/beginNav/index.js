@@ -7,6 +7,7 @@ import {observer, inject} from "mobx-react";
 import Hammer from "hammerjs";
 import nav from "services/navSDK";
 import "./index.less";
+import {toJS} from "mobx";
 
 
 @inject("mapStore", "navStore", "floorStore", "commonStore")
@@ -108,6 +109,8 @@ class beginNav extends Component {
 
     simNav() {
         nav.startSim({
+            routeData: toJS(this.props.navStore.originPaths),
+            speed: 1,
             complete: () => {
             }
         });

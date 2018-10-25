@@ -1,12 +1,16 @@
 /**
  * Created by j_bleach on 2018/10/23 0023.
  */
+/*eslint-disable*/
+
 import compass from "./compass";
 import stepper from "./stepper";
 import correctLocate from "./correctLocate";
 import simNavigation from "./simNav";
+import {preHandleData} from "./utils";
 
-/*eslint-disable*/
+// import {pointToLineDistance} from "@turf/turf";
+
 @compass
 @stepper
 @correctLocate
@@ -53,7 +57,13 @@ class Nav {
             }
         }
     ) {
-        this.startSimNavigation();
+        // const routePath = routeData.concat().splice(1, routeData.length - 2);
+        console.log(111, routeData);
+        let isCross = routeData[0]["startFloor"] === routeData[routeData.length - 1]["endFloor"] ? false : true; //是否跨楼层导航
+        preHandleData(routeData);
+
+        // for (let v of)
+        //     this.startSimNavigation();
         this.onSimStep = complete;
     }
 }

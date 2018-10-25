@@ -162,7 +162,7 @@ class MapStore {
      * @param paths:array 路径数组
      */
     routeHandle(paths) {
-        console.log(paths);
+        navStore.changeOriginPaths(paths);
         floorStore.routeIndoor = {};
         let totalDistance = 0;
         paths.forEach(v => {

@@ -33,6 +33,7 @@ class NavStore {
     @observable freeMarker; // 自由模式marker
     @observable freeMarkerPoint; // 自由模式marker 坐标点
     @observable firstLocation; // 首次定位
+    @observable originPaths; // 原始路径
 
     constructor() {
         this.mapNavParams = {
@@ -57,10 +58,15 @@ class NavStore {
         this.freeMarker = null;
         this.freeMarkerPoint = null;
         this.firstLocation = true;
+        this.originPaths = null;
     }
 
     @action updateLocateCoordinate = (value) => {
         this.locateCoordinate = value;
+    };
+
+    @action changeOriginPaths = (paths) => {
+        this.originPaths = paths;
     };
 
     // 更新导航参数
@@ -124,7 +130,7 @@ class NavStore {
      * @date 2018-10-25
      * @Description: 跨楼层切换marker样式
      * @param map:mapobj
-    */
+     */
     @action checkFreeMarker(map) {
         this.freeMarker.remove();
         this.freeMarker = null;
