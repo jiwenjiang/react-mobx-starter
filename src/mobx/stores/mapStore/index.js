@@ -359,12 +359,12 @@ class MapStore {
         this.routeObj.priorityType = navStore.navPriorityType;
         this.routeObj.setLocation({
             type: "Point",
-            coordinates: [startLat, startLng, -1]
-        }, "起点", this.startMarkerPoint.floor);
-        this.routeObj.setLocation({
-            type: "Point",
             coordinates: [endLat, endLng, -1]
         }, "终点", this.endMarkerPoint.floor);
+        this.routeObj.setLocation({
+            type: "Point",
+            coordinates: [startLat, startLng, -1]
+        }, "起点", this.startMarkerPoint.floor);
     }
 
     @computed get func() {

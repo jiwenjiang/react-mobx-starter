@@ -4,6 +4,7 @@
 import {observable, action} from "mobx";
 import locateHalfImg from "assets/img/locate-half.png";
 import locateImg from "assets/img/locate.png";
+import navImg from "assets/img/nav.png";
 import {floorStore} from "../floorStore";
 import {toJS} from "mobx";
 
@@ -31,9 +32,12 @@ class NavStore {
     @observable navRoadType; // 导航方式 foot/car
     @observable navPriorityType; // 跨楼层方式 elevator/stairs
     @observable freeMarker; // 自由模式marker
+    @observable navMarker; // 导航模式marker
     @observable freeMarkerPoint; // 自由模式marker 坐标点
+    @observable navMarkerPoint; // 导航模式marker 坐标点
     @observable firstLocation; // 首次定位
     @observable originPaths; // 原始路径
+    @observable navMode; // 导航模式 free 自由 、sim 模拟 、real 实时
 
     constructor() {
         this.mapNavParams = {
@@ -56,17 +60,26 @@ class NavStore {
         this.navRoadType = "foot";
         this.navPriorityType = "elevator";
         this.freeMarker = null;
-        this.freeMarkerPoint = null;
+        this.navMarker = null;
+        this.navMarkerPoint = null;
         this.firstLocation = true;
         this.originPaths = null;
+        this.navMode = "free";
     }
 
+    // 更新当前定位点
     @action updateLocateCoordinate = (value) => {
         this.locateCoordinate = value;
     };
 
+    // 更新原始路径
     @action changeOriginPaths = (paths) => {
         this.originPaths = paths;
+    };
+
+    // 更新导航模式
+    @action changeNavMode = (mode) => {
+        this.navMode = mode;
     };
 
     // 更新导航参数
@@ -140,26 +153,50 @@ class NavStore {
     }
 
     @action moveFreeMarker(map, data) {
-        this.freeMarkerPoint = {
-            point: [data.longitude, data.latitude],
-            floor: data.level,
-            name: data.locType
-        };
+        if (this.navMode === "free") {
+            this.freeMarkerPoint = {
+                point: [data.longitude, data.latitude],
+                floor: data.level,
+                name: data.locType
+            };
 
-        if (this.freeMarker) {
-            this.freeMarker.setLngLat(toJS(this.freeMarkerPoint.point));
-        } else {
-            const imgSrc = data.locType === "gps"
-                ? locateImg
-                : floorStore.mapFloor == this.freeMarkerPoint.floor
-                    ? locateImg : locateHalfImg;
-            const el = map.generateDom(imgSrc, "freeMarker");
-            this.freeMarker = new map.mapGL.Marker(el).setLngLat(this.freeMarkerPoint.point).addTo(map.mapObj);
+            if (this.freeMarker) {
+                this.freeMarker.setLngLat(toJS(this.freeMarkerPoint.point));
+            } else {
+                const imgSrc = data.locType === "gps"
+                    ? locateImg
+                    : floorStore.mapFloor == this.freeMarkerPoint.floor
+                        ? locateImg : locateHalfImg;
+                const el = map.generateDom(imgSrc, "freeMarker");
+                this.freeMarker = new map.mapGL.Marker(el).setLngLat(this.freeMarkerPoint.point).addTo(map.mapObj);
+            }
+        }
+    }
+
+    @action moveNavMarker(map, data) {
+        if (this.navMode !== "free") {
+            // this.navMarkerPoint = {
+            //     point: [data.longitude, data.latitude],
+            //     floor: data.level,
+            //     name: data.locType
+            // };
+
+            if (this.navMarker) {
+                this.navMarker.setLngLat(data);
+            } else {
+                const el = map.generateDom(navImg, "freeMarker");
+                this.navMarker = new map.mapGL.Marker(el).setLngLat(data).addTo(map.mapObj);
+            }
         }
     }
 
     @action changeFirstLocation(status) {
         this.firstLocation = status;
+    }
+
+    @action removeFreeMarker() {
+        this.freeMarker.remove();
+        this.freeMarker = null;
     }
 
     orientateMarker(angle, map) {

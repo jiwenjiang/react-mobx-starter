@@ -108,10 +108,15 @@ class beginNav extends Component {
     }
 
     simNav() {
+        this.props.navStore.changeNavMode("sim");
+        this.props.navStore.freeMarker && this.props.navStore.removeFreeMarker();
         nav.startSim({
             routeData: toJS(this.props.navStore.originPaths),
             speed: 1,
-            complete: () => {
+            complete: (data) => {
+                console.log(data);
+                // console.log(b);
+                // this.props.navStore.moveNavMarker(this.props.mapStore, data);
             }
         });
     }

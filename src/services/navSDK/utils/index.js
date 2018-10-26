@@ -2,7 +2,7 @@
  * Created by j_bleach on 2018/10/24 0024.
  */
 /*eslint-disable*/
-import {point, distance, midpoint, lineString, length} from "@turf/turf";
+import {point, distance, midpoint, lineString, length, along} from "@turf/turf";
 
 /**
  * @author j_bleach
@@ -38,7 +38,8 @@ const calcMidPoint = (point1, point2) => {
 const preHandleData = (route) => {
     let pointCollects = []; // 点集合
     let handleRoute = []; // 处理后路径
-    let totalDistance = 0; // 总距离
+    let routeLength = 0; // 总距离
+    let animateArray = []; // 细化点集合
     let parseTurnType = (turnType) => {
         let turnText = {
             0: "起点",
@@ -51,7 +52,7 @@ const preHandleData = (route) => {
         return turnText;
     };
     for (let i = 1; i < route.length - 1; i++) {
-        totalDistance += route[i].distance;
+        // totalDistance += route[i].distance;
         let item = route[i];
         item.LineCoordinates = [];
         item.turnTypeText = parseTurnType(route[i].turnType);
@@ -72,13 +73,18 @@ const preHandleData = (route) => {
         handleRoute.push(item);
     }
     let routeLine = lineString(pointCollects);
+    routeLength = length(routeLine) * 1000;
+    for (let i = 0, j = 0; i < routeLength * 10; i += 1) {
+        j += 1 / 10 / 1000;
+        let segment = along(routeLine, j);
+        animateArray.push(segment.geometry.coordinates);
+    }
     console.log("turf 长度", length(routeLine));
-    console.log("点集合", routeLine);
-    console.log("距离", totalDistance);
+    console.log("点集合", animateArray);
     return {
-        pointCollects,
         handleRoute,
-        totalDistance
+        routeLength,
+        animateArray
     };
 };
 export {calcDistanceFn, calcMidPoint, preHandleData};

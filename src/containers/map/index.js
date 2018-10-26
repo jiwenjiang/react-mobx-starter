@@ -96,6 +96,7 @@ class mapPage extends Component {
                     nav.init(loc);
                     nav.startFree({
                         complete: (data) => {
+                            console.log("自由模式监听", data);
                             this.props.navStore.moveFreeMarker(this.props.mapStore, data);
                         }
                     });

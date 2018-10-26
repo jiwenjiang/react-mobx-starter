@@ -1,16 +1,127 @@
 /**
  * Created by j_bleach on 2018/10/25 0025.
  */
+/*eslint-disable*/
+import {pointToLineDistance, point, lineString, distance, bearingToAzimuth, bearing} from "@turf/turf";
+
 const simNavigationFn = (target) => {
     return class simNavigation extends target {
         constructor() {
             super();
         }
 
-        startSimNavigation() {
-            console.log("开始模拟导航", this.currentPoint);
+        startSimNavigation = (originData, handleData) => {
+            // 清除自由模式纠偏
             this.correctFreeLocateTimer = null;
             clearTimeout(this.correctFreeLocateWatchId);
+            //
+            const {animateArray, handleRoute, routeLength} = handleData;
+            // 判断是否跨楼层
+            let crossIndex = handleRoute.findIndex(v => v.crossType == 10 || v.crossType == 12);
+
+            console.log(222, handleRoute);
+            // console.log("动画移动数组", animateArray);
+            // console.log("处理后数组", handleRoute);
+            // console.log("长度", routeLength);
+            let completeLength = 0;
+            let currentLineIndex = 0;
+            let animateId = null;
+            let voiceRecorder = {};
+            console.log(4444, handleRoute[1].LineCoordinates[0]);
+            const animate = () => {
+                if (animateArray.length > completeLength) {
+                    animateId = window.requestAnimationFrame(animate);
+                    let currentPoint = animateArray[completeLength];
+                    let geoPoint = point(currentPoint);
+                    const distanceArr = [];
+                    for (let v of handleRoute) {
+                        let line = lineString(v.LineCoordinates);
+                        distanceArr.push((pointToLineDistance(geoPoint, line) * 1000));
+                    }
+                    // console.log(distanceArr);
+                    currentLineIndex = distanceArr.findIndex(v => v == Math.min(...distanceArr));
+                    const leftDistance = routeLength - (completeLength / 10);
+                    const simResult = this.simNavLogic(currentPoint, currentLineIndex, handleRoute, voiceRecorder);
+                    const output = {
+                        leftDistance,
+                        currentLon: currentPoint[0],
+                        currentLat: currentPoint[1],
+                        level: simResult.currentFloor,
+                        totalDistance: routeLength,
+                        bearing: simResult.currentBearing,
+                        turn: simResult.turnType,
+                        text: simResult.text,
+                        voice: simResult.voice
+                    };
+                    this.onSimStep(output);
+                    completeLength++;
+                } else {
+                    console.log("取消");
+                    window.cancelAnimationFrame(animateId);
+                }
+            };
+            animate();
+        };
+
+        // 模拟导航逻辑
+        simNavLogic(currentPoint, currentLineIndex, handleRoute, voiceRecorder) {
+            const currentFloor = handleRoute[currentLineIndex].startFloor; // 当前楼层
+            const currentLine = handleRoute[currentLineIndex].LineCoordinates; // 当前路径
+            const startPoint = point(currentLine[0]); // 当前路径终点
+            const endPoint = point(currentLine[currentLine.length - 1]); // 当前路径终点
+            const lineDistance = handleRoute[currentLineIndex].distance;
+            const turnTypeText = handleRoute[currentLineIndex].turnTypeText;
+            const turnType = handleRoute[currentLineIndex].turnType;
+            const currentStartDistance = distance(currentPoint, startPoint) * 1000; // 当前起点距离
+            const currentEndDistance = ~~distance(currentPoint, endPoint) * 1000; // 当前终点距离
+            const currentBearing = bearingToAzimuth(bearing(startPoint, endPoint)); // 当前方向
+            let text = ""; // 文字提示
+            let voice = ""; // 语音提示
+            // 大于起点1米开始提示
+            if (currentStartDistance > 1) {
+                if (currentLineIndex != (handleRoute.length - 1)) {
+                    if (lineDistance < 5) {
+                        text = `请按路线行走`;
+                    } else {
+                        if (currentEndDistance >= 8) {
+                            text = `请直行${currentEndDistance}米`;
+                            if (!voiceRecorder[`${currentLineIndex}1`]) {
+                                voice = "请直行";
+                                voiceRecorder[`${currentLineIndex}1`] = true;
+                            }
+                        }
+                        if (currentEndDistance <= 8 && currentEndDistance >= 5) {
+                            text = `前方${currentEndDistance}米${turnTypeText}`;
+                            if (!voiceRecorder[`${currentLineIndex}2`]) {
+                                voice = `前方${turnTypeText}`;
+                                voiceRecorder[`${currentLineIndex}2`] = true;
+                            }
+                        }
+                        if (currentEndDistance <= 3) {
+                            text = `${turnTypeText}`;
+                            if (!voiceRecorder[`${currentLineIndex}3`]) {
+                                voice = `${turnTypeText}`;
+                                voiceRecorder[`${currentLineIndex}3`] = true;
+                            }
+                        }
+                    }
+                } else {
+                    if (currentStartDistance >= 5) {
+                        text = `前方${currentEndDistance}米到达终点`;
+                        if (!voiceRecorder[`${currentLineIndex}4`]) {
+                            voice = `前方${turnTypeText}米到达终点`;
+                            voiceRecorder[`${currentLineIndex}4`] = true;
+                        }
+                    }
+                }
+            }
+            return {
+                text,
+                voice,
+                currentBearing,
+                currentFloor,
+                turnType
+            };
         }
     };
 };
