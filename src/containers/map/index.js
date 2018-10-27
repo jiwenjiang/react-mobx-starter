@@ -96,7 +96,7 @@ class mapPage extends Component {
                     nav.init(loc);
                     nav.startFree({
                         complete: (data) => {
-                            console.log("自由模式监听", data);
+                            // console.log("自由模式监听", data);
                             this.props.navStore.moveFreeMarker(this.props.mapStore, data);
                         }
                     });
@@ -168,8 +168,9 @@ class mapPage extends Component {
             searchStatus, confirmModalStatus,
             warningModalStatus, projectType, noticeProps,
         } = this.props.commonStore;
+        const {freeMarker} = this.props.navStore;
         const confirmModalProps = {
-            text: " 要将此处设为起点吗？",
+            text: ` 要将此处设为${freeMarker ? "终" : "起"}点吗？`,
             icon: startConfirm,
             confirm: () => {
                 this.props.mapStore.planRoute();

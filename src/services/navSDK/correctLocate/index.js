@@ -31,7 +31,6 @@ const correctLocateFn = (target) => {
         }
 
         chooseFreeCorrectMode(loc) {
-            console.log("纠偏中");
             const locate = loc.currentPosition;
             const correctMode = {
                 "ibeacon": this.correctFreeLocateIndoor,

@@ -57,15 +57,9 @@ class Nav {
             }
         }
     ) {
-        // const routePath = routeData.concat().splice(1, routeData.length - 2);
-        console.log(111, routeData);
         this.onSimStep = complete;
-        let isCross = routeData[0]["startFloor"] === routeData[routeData.length - 1]["endFloor"] ? false : true; //是否跨楼层导航
         const handleData = preHandleData(routeData);
         this.startSimNavigation(routeData, handleData);
-
-        // for (let v of)
-        //     this.startSimNavigation();
     }
 }
 

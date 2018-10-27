@@ -25,7 +25,7 @@ class NavStore {
      * @param name:inertiaFidumax 当前点与质心点距离大于10
      */
     @observable mapNavParams; // 地图导航参数
-    @observable locateCoordinate; // 定位坐标
+    @observable locateCoordinate; // 定位坐标(搜索用)
     @observable totalDistance; // 导航总距离
     @observable navTime; // 导航总距离
     @observable navRoutes; // 导航路径
@@ -111,7 +111,7 @@ class NavStore {
                 this.freeMarkerPoint = {
                     point: [data.longitude, data.latitude],
                     floor: 0,
-                    name: "gps"
+                    name: "当前位置"
                 };
             } else {
                 this.changeFirstLocation(true);
@@ -122,13 +122,12 @@ class NavStore {
             this.freeMarkerPoint = {
                 point: [data.longitude, data.latitude],
                 floor: data.level,
-                name: "ibeacon"
+                name: "当前位置"
             };
         }
         if (this.freeMarker) {
             this.freeMarker.setLngLat(this.freeMarkerPoint.point);
         } else {
-            console.log("paint", floorStore.mapFloor, this.freeMarkerPoint.floor);
             const imgSrc = data.locType === "gps"
                 ? locateImg
                 : floorStore.mapFloor == this.freeMarkerPoint.floor
@@ -157,7 +156,7 @@ class NavStore {
             this.freeMarkerPoint = {
                 point: [data.longitude, data.latitude],
                 floor: data.level,
-                name: data.locType
+                name: "当前位置"
             };
 
             if (this.freeMarker) {
@@ -175,12 +174,6 @@ class NavStore {
 
     @action moveNavMarker(map, data) {
         if (this.navMode !== "free") {
-            // this.navMarkerPoint = {
-            //     point: [data.longitude, data.latitude],
-            //     floor: data.level,
-            //     name: data.locType
-            // };
-
             if (this.navMarker) {
                 this.navMarker.setLngLat(data);
             } else {

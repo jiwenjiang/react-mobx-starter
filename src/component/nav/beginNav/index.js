@@ -116,7 +116,7 @@ class beginNav extends Component {
             complete: (data) => {
                 console.log(data);
                 // console.log(b);
-                // this.props.navStore.moveNavMarker(this.props.mapStore, data);
+                this.props.navStore.moveNavMarker(this.props.mapStore, [data.currentLon, data.currentLat]);
             }
         });
     }

@@ -1,7 +1,8 @@
 /**
  * Created by j_bleach on 2018/9/30 0030.
  */
-import {observable, action, autorun, configure} from "mobx";
+import {observable, action, autorun, configure, toJS} from "mobx";
+import {beizerFn} from "services/utils/beizer";
 // import http from "services/http";
 // import normalUrl from "config/url/normal";
 // import {commonStore} from "../commonStore";
@@ -56,14 +57,14 @@ class FloorStore {
         const startMarker = map.startMarker;
         console.log("floor", floor);
         if (endMarkerPoint) {
-            if (endMarkerPoint.floor === floor) {
+            if (endMarkerPoint.floor == floor) {
                 endMarker.setLngLat(endMarkerPoint.point);
             } else {
                 endMarker.setLngLat([0, 0]);
             }
         }
         if (startMarkerPoint) {
-            if (startMarkerPoint.floor === floor) {
+            if (startMarkerPoint.floor == floor) {
                 startMarker.setLngLat(startMarkerPoint.point);
             } else {
                 startMarker.setLngLat([0, 0]);
@@ -72,7 +73,7 @@ class FloorStore {
         // 路径规划 跨楼层判断
         if (map.mapObj.getLayer("building-layer")) {
             console.log("indoor", floorStore.routeIndoor);
-            const geoData = floorStore.routeIndoor[floor] ? floorStore.routeIndoor[floor] : {
+            const geoData = floorStore.routeIndoor[floor] ? beizerFn(toJS(floorStore.routeIndoor[floor].features)) : {
                 type: "FeatureCollection",
                 features: []
             };

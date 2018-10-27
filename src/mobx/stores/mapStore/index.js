@@ -15,6 +15,8 @@ import startImg from "assets/img/start.png";
 import endImg from "assets/img/end.png";
 import "./index.less";
 
+import {beizerFn} from "services/utils/beizer";
+
 configure({
     enforceActions: "observed"
 });
@@ -127,9 +129,10 @@ class MapStore {
                 if (this.mapObj.getSource("building-route")) {
                     this.mapObj.removeSource("building-route");
                 }
+                // console.log(toJS(floorStore.routeIndoor[floor].features));
                 this.mapObj.addSource("building-route", {
                     type: "geojson",
-                    data: toJS(floorStore.routeIndoor[floor])
+                    data: beizerFn(toJS(floorStore.routeIndoor[floor].features))
                 });
 
                 this.mapObj.addLayer({
@@ -214,13 +217,18 @@ class MapStore {
                     floor: Number(point.floor),
                     name: feature[0]["properties"]["name"]
                 };
-                if (!this.confirmEndMarker) {
-                    this.confirmMarker("end", markerData);
-                } else {
-                    this.confirmMarker("start", markerData, true);
+                if (navStore.freeMarker) {
+                    this.confirmMarker("start", navStore.freeMarkerPoint, true);
+                    this.confirmMarker("end", markerData, true);
                     this.confirmStartMarkerFn();
+                } else {
+                    if (!this.confirmEndMarker) {
+                        this.confirmMarker("end", markerData);
+                    } else {
+                        this.confirmMarker("start", markerData, true);
+                        this.confirmStartMarkerFn();
+                    }
                 }
-
             }
         }
     }
@@ -234,6 +242,7 @@ class MapStore {
                 return false;
             }
             this.startMarkerPoint = data;
+            console.log(11111, toJS(this.startMarkerPoint));
             if (this.startMarker) {
                 this.startMarker.setLngLat(this.startMarkerPoint.point);
             } else {
@@ -250,9 +259,9 @@ class MapStore {
             if (this.endMarker) {
                 this.endMarker.setLngLat(this.endMarkerPoint.point);
             } else {
-                console.log(toJS(this.endMarkerPoint.point));
                 const el = this.generateDom(endImg);
                 this.endMarker = new this.mapGL.Marker(el).setLngLat(this.endMarkerPoint.point).addTo(this.mapObj);
+                console.log("end", toJS(this.endMarkerPoint));
             }
         };
         type === "start"

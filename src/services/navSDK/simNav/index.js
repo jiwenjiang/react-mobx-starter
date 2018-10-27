@@ -17,17 +17,10 @@ const simNavigationFn = (target) => {
             //
             const {animateArray, handleRoute, routeLength} = handleData;
             // 判断是否跨楼层
-            let crossIndex = handleRoute.findIndex(v => v.crossType == 10 || v.crossType == 12);
-
-            console.log(222, handleRoute);
-            // console.log("动画移动数组", animateArray);
-            // console.log("处理后数组", handleRoute);
-            // console.log("长度", routeLength);
             let completeLength = 0;
             let currentLineIndex = 0;
             let animateId = null;
             let voiceRecorder = {};
-            console.log(4444, handleRoute[1].LineCoordinates[0]);
             const animate = () => {
                 if (animateArray.length > completeLength) {
                     animateId = window.requestAnimationFrame(animate);
