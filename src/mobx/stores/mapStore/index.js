@@ -242,7 +242,6 @@ class MapStore {
                 return false;
             }
             this.startMarkerPoint = data;
-            console.log(11111, toJS(this.startMarkerPoint));
             if (this.startMarker) {
                 this.startMarker.setLngLat(this.startMarkerPoint.point);
             } else {
@@ -328,6 +327,7 @@ class MapStore {
 
     @action
     removeMarker(type) {
+        console.log(type);
         const endMarkerPoint = () => {
             this.endMarkerPoint = null;
             this.endMarker.remove();

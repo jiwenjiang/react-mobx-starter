@@ -51,15 +51,18 @@ class Nav {
         {
             routeData = [],
             speed = 1,
+            onSimNav = () => {
+            },
             complete = () => {
             },
             error = () => {
             }
         }
     ) {
-        this.onSimStep = complete;
-        const handleData = preHandleData(routeData);
-        this.startSimNavigation(routeData, handleData);
+        this.onSimStep = onSimNav;
+        this.simComplete = complete;
+        const handleData = preHandleData(routeData, speed);
+        this.startSimNavigation(routeData, handleData, speed);
     }
 }
 

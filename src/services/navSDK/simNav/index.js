@@ -10,7 +10,7 @@ const simNavigationFn = (target) => {
             super();
         }
 
-        startSimNavigation = (originData, handleData) => {
+        startSimNavigation = (originData, handleData, speed = 1) => {
             // 清除自由模式纠偏
             this.correctFreeLocateTimer = null;
             clearTimeout(this.correctFreeLocateWatchId);
@@ -33,7 +33,7 @@ const simNavigationFn = (target) => {
                     }
                     // console.log(distanceArr);
                     currentLineIndex = distanceArr.findIndex(v => v == Math.min(...distanceArr));
-                    const leftDistance = routeLength - (completeLength / 10);
+                    const leftDistance = routeLength - (completeLength / 50 / speed);
                     const simResult = this.simNavLogic(currentPoint, currentLineIndex, handleRoute, voiceRecorder);
                     const output = {
                         leftDistance,
@@ -50,6 +50,7 @@ const simNavigationFn = (target) => {
                     completeLength++;
                 } else {
                     console.log("取消");
+                    this.simComplete();
                     window.cancelAnimationFrame(animateId);
                 }
             };
@@ -66,7 +67,7 @@ const simNavigationFn = (target) => {
             const turnTypeText = handleRoute[currentLineIndex].turnTypeText;
             const turnType = handleRoute[currentLineIndex].turnType;
             const currentStartDistance = distance(currentPoint, startPoint) * 1000; // 当前起点距离
-            const currentEndDistance = ~~distance(currentPoint, endPoint) * 1000; // 当前终点距离
+            const currentEndDistance = ~~(distance(currentPoint, endPoint) * 1000); // 当前终点距离
             const currentBearing = bearingToAzimuth(bearing(startPoint, endPoint)); // 当前方向
             let text = ""; // 文字提示
             let voice = ""; // 语音提示
@@ -99,10 +100,10 @@ const simNavigationFn = (target) => {
                         }
                     }
                 } else {
-                    if (currentStartDistance >= 5) {
+                    if (currentStartDistance >= 2) {
                         text = `前方${currentEndDistance}米到达终点`;
                         if (!voiceRecorder[`${currentLineIndex}4`]) {
-                            voice = `前方${turnTypeText}米到达终点`;
+                            voice = `前方${currentEndDistance}米到达终点`;
                             voiceRecorder[`${currentLineIndex}4`] = true;
                         }
                     }

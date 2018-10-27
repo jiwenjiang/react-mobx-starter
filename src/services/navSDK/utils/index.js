@@ -35,7 +35,7 @@ const calcMidPoint = (point1, point2) => {
  * @param route:[{}]
  * @return name:String
  */
-const preHandleData = (route) => {
+const preHandleData = (route, speed = 1) => {
     let pointCollects = []; // 点集合
     let handleRoute = []; // 处理后路径
     let routeLength = 0; // 总距离
@@ -74,13 +74,11 @@ const preHandleData = (route) => {
     }
     let routeLine = lineString(pointCollects);
     routeLength = length(routeLine) * 1000;
-    for (let i = 0, j = 0; i < routeLength * 10; i += 1) {
-        j += 1 / 10 / 1000;
+    for (let i = 0, j = 0; i < routeLength * (50 / speed); i += 1) {
+        j += 1 / (50 / speed) / 1000;
         let segment = along(routeLine, j);
         animateArray.push(segment.geometry.coordinates);
     }
-    console.log("turf 长度", length(routeLine));
-    console.log("点集合", animateArray);
     return {
         handleRoute,
         routeLength,

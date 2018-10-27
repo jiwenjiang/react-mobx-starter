@@ -1,7 +1,7 @@
 /**
  * Created by j_bleach on 2018/10/11 0011.
  */
-
+/*eslint-disable*/
 import React, {Component} from "react";
 import {observer, inject} from "mobx-react";
 import Hammer from "hammerjs";
@@ -110,13 +110,53 @@ class beginNav extends Component {
     simNav() {
         this.props.navStore.changeNavMode("sim");
         this.props.navStore.freeMarker && this.props.navStore.removeFreeMarker();
+
+        // 操作dom
+        document.getElementsByClassName("map-routePanel")[0].classList.remove("dom-transformY-35");
+        document.getElementById("begin-nav").classList.remove("dom-transformY-30");
+        document.getElementById("nav-bottom").classList.add("dom-transformY-30");
+        let changeFlag = true;
+        setInterval(() => {
+            changeFlag = true;
+        }, 3000);
+        let bearing = null;
         nav.startSim({
             routeData: toJS(this.props.navStore.originPaths),
             speed: 1,
-            complete: (data) => {
-                console.log(data);
-                // console.log(b);
+            onSimNav: (data) => {
                 this.props.navStore.moveNavMarker(this.props.mapStore, [data.currentLon, data.currentLat]);
+                this.props.navStore.updateNavData(data);
+                if (bearing && bearing != data.bearing) {
+                    changeFlag = false;
+                    this.props.mapStore.mapObj.flyTo({
+                        center: [data.currentLon, data.currentLat],
+                        zoom: 20,
+                        speed: 0.1,
+                        curve: 1.6,
+                        bearing: data.bearing,
+                        easing(t) {
+                            return t;
+                        }
+                    });
+                }
+                if (changeFlag) {
+                    changeFlag = false;
+                    this.props.mapStore.mapObj.flyTo({
+                        center: [data.currentLon, data.currentLat],
+                        zoom: 20,
+                        speed: 0.5,
+                        curve: 1,
+                        bearing: data.bearing,
+                        easing(t) {
+                            return t;
+                        }
+                    });
+                }
+                bearing = data.bearing;
+            },
+            complete: () => {
+                document.getElementById("nav-bottom").classList.remove("dom-transformY-30");
+                this.props.navStore.completeNav(this.props.mapStore);
             }
         });
     }

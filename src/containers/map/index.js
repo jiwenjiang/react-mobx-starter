@@ -11,6 +11,8 @@ import * as creeper from "services/mapSDK/mapbox-gl";
 import Operators from "component/map/operators";
 import GotoShare from "component/map/share";
 import RoutePanel from "component/map/routePanel";
+import NavBottom from "component/nav/nav-bottom";
+import NavPanel from "component/nav/navPanel";
 import ConfirmModal from "component/common/confirmModal";
 import WarningModal from "component/common/warningModal";
 import NoticeComponent from "component/common/notice";
@@ -168,13 +170,19 @@ class mapPage extends Component {
             searchStatus, confirmModalStatus,
             warningModalStatus, projectType, noticeProps,
         } = this.props.commonStore;
-        const {freeMarker} = this.props.navStore;
+        const {freeMarker, navMode} = this.props.navStore;
         const confirmModalProps = {
             text: ` 要将此处设为${freeMarker ? "终" : "起"}点吗？`,
             icon: startConfirm,
             confirm: () => {
                 this.props.mapStore.planRoute();
                 this.props.commonStore.changeConfirmModal(false);
+                if (freeMarker) {
+                    document.getElementsByClassName("map-routePanel")[0].classList.add("dom-transformY-35");
+                    document.getElementById("map-goToShare").classList.remove("dom-transformY-30");
+                    document.getElementById("begin-nav").classList.add("dom-transformY-30");
+                    this.props.mapStore.confirmEndMarkerFn(true);
+                }
             },
             cancel: () => {
             }
@@ -194,7 +202,7 @@ class mapPage extends Component {
             <div>
                 <div id="wb-map" className="wb-map-box" width="100vw" height="100vh"
                      style={{width: "100vw", height: "100vh"}}></div>
-                {projectType == "Addressing" && searchStatus && <Search></Search>}
+                {projectType == "Addressing" && searchStatus && 0 && <Search></Search>}
                 {projectType == "Car" && searchStatus && <Car></Car>}
                 {confirmModalStatus && <ConfirmModal {...confirmModalProps}></ConfirmModal>}
                 {warningModalStatus && <WarningModal {...warningModalProps}></WarningModal>}
@@ -203,6 +211,8 @@ class mapPage extends Component {
                 <GotoShare></GotoShare>
                 <BeginNav></BeginNav>
                 <RoutePanel></RoutePanel>
+                <NavBottom></NavBottom>
+                {navMode !== "free" && <NavPanel></NavPanel>}
                 <audio id="wb-audio" autoPlay preload="true"></audio>
             </div>
         );

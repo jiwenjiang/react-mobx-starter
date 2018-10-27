@@ -38,6 +38,7 @@ class NavStore {
     @observable firstLocation; // 首次定位
     @observable originPaths; // 原始路径
     @observable navMode; // 导航模式 free 自由 、sim 模拟 、real 实时
+    @observable navRealData; // 导航实时数据
 
     constructor() {
         this.mapNavParams = {
@@ -65,6 +66,7 @@ class NavStore {
         this.firstLocation = true;
         this.originPaths = null;
         this.navMode = "free";
+        this.navRealData = null;
     }
 
     // 更新当前定位点
@@ -192,12 +194,33 @@ class NavStore {
         this.freeMarker = null;
     }
 
+    @action removeNavMarker() {
+        this.navMarker.remove();
+        this.navMarker = null;
+        this.navMarkerPoint = null;
+    }
+
     orientateMarker(angle, map) {
         if (this.freeMarker) {
             let freeMarker = document.getElementsByClassName("freeMarker")[0];
             freeMarker.style.transformOrigin = "50% 50%";
             freeMarker.style.transform = "rotate(" + (angle + map.transform.angle * (180 / Math.PI)) + "deg)";
         }
+    }
+
+    @action updateNavData(data) {
+        this.navRealData = data;
+    }
+
+    // 导航完成(清楚marker,导航线)
+    @action completeNav(map) {
+        this.changeNavMode("free");
+        this.removeNavMarker();
+        map.removeMarker("start");
+        map.removeMarker("end");
+        floorStore.updateRouteIndoor({});
+        floorStore.checkMarkerAndRoute(map, 0);
+        this.getNavRoutes(null);
     }
 }
 

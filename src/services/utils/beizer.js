@@ -81,12 +81,12 @@ const beizerFn = (arr) => {
             let options = {units: "kilometers"};
             let p0distance = distance([startPoint.x, startPoint.y], [endPoint.x, endPoint.y], options);
             let p2distance = distance([nextendPoint.x, nextendPoint.y], [endPoint.x, endPoint.y], options);
-            let p0d = 0.002;
-            let p2d = 0.002;
-            if (p0distance < 0.005) {
+            let p0d = 0.0005;
+            let p2d = 0.0005;
+            if (p0distance < 0.002) {
                 p0d = p0distance / 3.0;
             }
-            if (p2distance < 0.005) {
+            if (p2distance < 0.002) {
                 p2d = p2distance / 3.0;
             }
             // if(p0distance<=p2distance){
