@@ -117,7 +117,7 @@ class beginNav extends Component {
         document.getElementById("begin-nav").classList.remove("dom-transformY-30");
         document.getElementById("nav-bottom").classList.add("dom-transformY-30");
         let changeFlag = true;
-        setInterval(() => {
+        const navTimer = setInterval(() => {
             changeFlag = true;
         }, 3000);
         let bearing = null;
@@ -154,9 +154,10 @@ class beginNav extends Component {
                     });
                 }
                 if (data.level != this.props.floorStore.mapFloor) {
-                    const floor = data.level >= 0 ? data.level - 1 : data.level;
+                    // const floor = data.level >= 0 ? data.level - 1 : data.level;
+                    console.log(data.level);
                     this.props.floorStore.updateFloor(data.level);
-                    this.props.mapStore.mapObj.setLevel(floor); //  更新楼层
+                    this.props.mapStore.mapObj.setLevel(data.level); //  更新楼层
                     this.props.floorStore.checkMarkerAndRoute(this.props.mapStore, data.level); // 终点，起点，路径检测
                 }
                 bearing = data.bearing;
@@ -164,6 +165,7 @@ class beginNav extends Component {
             complete: () => {
                 document.getElementById("nav-bottom").classList.remove("dom-transformY-30");
                 this.props.navStore.completeNav(this.props.mapStore);
+                clearInterval(navTimer);
             }
         });
     }
