@@ -8,6 +8,7 @@ import Hammer from "hammerjs";
 import nav from "services/navSDK";
 import "./index.less";
 import {toJS} from "mobx";
+import floor from "component/map/operators/floor";
 
 
 @inject("mapStore", "navStore", "floorStore", "commonStore")
@@ -151,6 +152,12 @@ class beginNav extends Component {
                             return t;
                         }
                     });
+                }
+                if (data.level != this.props.floorStore.mapFloor) {
+                    const floor = data.level >= 0 ? data.level - 1 : data.level;
+                    this.props.floorStore.updateFloor(data.level);
+                    this.props.mapStore.mapObj.setLevel(floor); //  更新楼层
+                    this.props.floorStore.checkMarkerAndRoute(this.props.mapStore, data.level); // 终点，起点，路径检测
                 }
                 bearing = data.bearing;
             },
