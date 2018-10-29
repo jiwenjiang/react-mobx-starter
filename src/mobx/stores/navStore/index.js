@@ -28,7 +28,7 @@ class NavStore {
     @observable locateCoordinate; // 定位坐标(搜索用)
     @observable totalDistance; // 导航总距离
     @observable navTime; // 导航总距离
-    @observable navRoutes; // 导航路径
+    @observable navRoutes; // 原始导航路径
     @observable navRoadType; // 导航方式 foot/car
     @observable navPriorityType; // 跨楼层方式 elevator/stairs
     @observable freeMarker; // 自由模式marker
@@ -36,9 +36,9 @@ class NavStore {
     @observable freeMarkerPoint; // 自由模式marker 坐标点
     @observable navMarkerPoint; // 导航模式marker 坐标点
     @observable firstLocation; // 首次定位
-    @observable originPaths; // 原始路径
     @observable navMode; // 导航模式 free 自由 、sim 模拟 、real 实时
     @observable navRealData; // 导航实时数据
+    @observable initLocation; // 初始化定位
 
     constructor() {
         this.mapNavParams = {
@@ -64,9 +64,9 @@ class NavStore {
         this.navMarker = null;
         this.navMarkerPoint = null;
         this.firstLocation = true;
-        this.originPaths = null;
         this.navMode = "free";
         this.navRealData = null;
+        this.initLocation = false;
     }
 
     // 更新当前定位点
@@ -74,15 +74,14 @@ class NavStore {
         this.locateCoordinate = value;
     };
 
-    // 更新原始路径
-    @action changeOriginPaths = (paths) => {
-        this.originPaths = paths;
-    };
-
     // 更新导航模式
     @action changeNavMode = (mode) => {
         this.navMode = mode;
     };
+
+    @action updateInitLocation(v) {
+        this.initLocation = v;
+    }
 
     // 更新导航参数
     @action updateParams(v) {
@@ -94,6 +93,7 @@ class NavStore {
         this.navTime = ~~(this.totalDistance / this.speed);
     }
 
+    // 更新原始路径
     @action getNavRoutes(v) {
         this.navRoutes = v;
     }
@@ -218,6 +218,7 @@ class NavStore {
         this.removeNavMarker();
         map.removeMarker("start");
         map.removeMarker("end");
+        map.mapObj.resetNorth();
         floorStore.updateRouteIndoor({});
         floorStore.checkMarkerAndRoute(map, 0);
         this.getNavRoutes(null);

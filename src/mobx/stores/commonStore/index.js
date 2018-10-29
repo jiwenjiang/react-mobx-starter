@@ -98,7 +98,6 @@ class CommonStore {
     changeDetectLocation(status) {
         this.detectLocation = status;
     }
-
 }
 
 

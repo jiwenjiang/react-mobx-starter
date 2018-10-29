@@ -58,6 +58,13 @@ class mapPage extends Component {
             this.props.floorStore.changeFloorStatus(event, map);
         });
 
+        // 监听地图移动
+        map.on("touchmove", () => {
+            if (this.props.navStore.initLocation) {
+                this.props.navStore.updateInitLocation(false);
+            }
+        });
+
         // 禁用滑动
         document.addEventListener("touchmove", (e) => {
             if (!e.target.classList.contains("canBeScroll") && !e.target.classList.contains("am-list-content")) {
@@ -95,6 +102,7 @@ class mapPage extends Component {
                 if (!this.props.navStore.freeMarker && this.props.navStore.firstLocation) {
                     // console.log("entry first locate");
                     this.props.navStore.initFreeMarker(this.props.mapStore, data);
+                    this.props.navStore.updateInitLocation(true);
                     nav.init(loc);
                     nav.startFree({
                         complete: (data) => {

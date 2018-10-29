@@ -86,7 +86,6 @@ class floor extends Component {
 
     changeFloor(v) {
         const floor = v >= 0 ? v - 1 : v;
-        console.log(floor);
         this.props.commonStore.changeDetectLocation(false); // 取消定位检测
         this.props.floorStore.updateFloor(floor); // 更新楼层（mobx）
         this.props.mapStore.mapObj.setLevel(floor); //  更新楼层
@@ -94,7 +93,7 @@ class floor extends Component {
         if (this.props.navStore.freeMarker) {
             this.props.navStore.checkFreeMarker(this.props.mapStore);
         }
-
+        this.props.navStore.updateInitLocation(false);
         this.setState({
             showFloor: false
         });

@@ -2,7 +2,7 @@
  * Created by j_bleach on 2018/10/24 0024.
  */
 /*eslint-disable*/
-import {point, distance, midpoint, lineString, length, along} from "@turf/turf";
+import {point, distance, midpoint, lineString, length, along, bearing, destination} from "@turf/turf";
 
 /**
  * @author j_bleach
@@ -31,11 +31,11 @@ const calcMidPoint = (point1, point2) => {
 /**
  * @author j_bleach
  * @date 2018-10-25
- * @Description:
+ * @Description: 预处理模拟导航数据
  * @param route:[{}]
- * @return name:String
+ * @param speed:number
  */
-const preHandleData = (route, speed = 1) => {
+const preHandleSimData = (route, speed = 1) => {
     let pointCollects = []; // 点集合
     let handleRoute = []; // 处理后路径
     let routeLength = 0; // 总距离
@@ -85,4 +85,174 @@ const preHandleData = (route, speed = 1) => {
         animateArray
     };
 };
-export {calcDistanceFn, calcMidPoint, preHandleData};
+/**
+ * @author j_bleach
+ * @date 2018-10-29
+ * @Description: 预处理真实导航数据
+ * @param route:[{}]
+ */
+const preHandleRealData = (route) => {
+    let pointCollects = []; // 点集合
+    let handleRoute = []; // 处理后路径
+    let routeLength = 0; // 总距离
+    let handleRouteFloor = {};
+    let parseTurnType = (turnType) => {
+        let turnText = {
+            0: "起点",
+            1: "直行",
+            2: "左转",
+            3: "右转",
+            4: "",
+            5: "终点"
+        }[turnType];
+        return turnText;
+    };
+    for (let i = 1; i < route.length - 1; i++) {
+        // totalDistance += route[i].distance;
+        let item = route[i];
+        item.LineCoordinates = [];
+        item.turnTypeText = parseTurnType(route[i].turnType);
+        if (route[i]["geometry"]["type"] === "LineString") {
+            for (let k = 0; k < route[i]["geometry"]["coordinates"].length; k++) {
+                item.LineCoordinates.push(route[i]["geometry"]["coordinates"][k]);
+                pointCollects.push(route[i]["geometry"]["coordinates"][k]);
+            }
+        }
+        if (route[i]["geometry"]["type"] === "MultiLineString") {
+            for (let m = 0; m < route[i]["geometry"]["coordinates"].length; m++) {
+                for (let n = 0; n < route[i]["geometry"]["coordinates"][m].length; n++) {
+                    item.LineCoordinates.push(route[i]["geometry"]["coordinates"][m][n]);
+                    pointCollects.push(route[i]["geometry"]["coordinates"][m][n]);
+                }
+            }
+        }
+        handleRoute.push(item);
+    }
+
+    // for(let i=0; i<handleRoute)
+    console.log(handleRoute);
+    let routeLine = lineString(pointCollects);
+    routeLength = length(routeLine) * 1000;
+    return {
+        handleRoute,
+        routeLength,
+    };
+};
+
+// 贝塞尔处理
+const beizerFn = (arr) => {
+
+    let lines = arr;
+
+    function getStartEndArr() {
+        let startEndArr = new Array();
+        for (let i = 0; i < lines.length; i++) {
+            const pointObj = lines[i].geometry;
+            if (pointObj.type == "LineString") {
+                startEndArr.push({"x": pointObj.coordinates[0][0], "y": pointObj.coordinates[0][1]});
+                startEndArr.push({
+                    "x": pointObj.coordinates[pointObj.coordinates.length - 1][0],
+                    "y": pointObj.coordinates[pointObj.coordinates.length - 1][1]
+                });
+            } else if (pointObj.type == "MultiLineString") {
+                startEndArr.push({"x": pointObj.coordinates[0][0][0], "y": pointObj.coordinates[0][0][1]});
+                startEndArr.push({
+                    "x": pointObj.coordinates[pointObj.coordinates.length - 1][pointObj.coordinates[pointObj.coordinates.length - 1].length - 1][0],
+                    "y": pointObj.coordinates[pointObj.coordinates.length - 1][pointObj.coordinates[pointObj.coordinates.length - 1].length - 1][1]
+                });
+            }
+        }
+        return startEndArr;
+    }
+
+    function bezierLine(startPoint, endPoint, controlPoint) {
+        let mControlPoints = new Array();
+        mControlPoints[0] = startPoint;
+        mControlPoints[1] = controlPoint;
+        mControlPoints[2] = endPoint;
+        let points = new Array();
+        let order = 2;
+        let delta = 0.01;
+        for (let t = 0; t < 1; t += delta) {
+            let x = deCasteljauX(order, 0, t);
+            let y = deCasteljauY(order, 0, t);
+            points.push([x, y]);
+        }
+
+        function deCasteljauX(i, j, t) {
+            if (i == 1) {
+                return (1 - t) * mControlPoints[j].x + t * mControlPoints[j + 1].x;
+            }
+            return (1 - t) * deCasteljauX(i - 1, j, t) + t * deCasteljauX(i - 1, j + 1, t);
+        }
+
+        function deCasteljauY(i, j, t) {
+            if (i == 1) {
+                return (1 - t) * mControlPoints[j].y + t * mControlPoints[j + 1].y;
+            }
+            return (1 - t) * deCasteljauY(i - 1, j, t) + t * deCasteljauY(i - 1, j + 1, t);
+        }
+
+        return points;
+    }
+
+    function beizer() {
+        let startEndArr = getStartEndArr();
+        let c = new Array();
+        for (let i = 0; i < startEndArr.length - 3; i += 2) {
+            let startPoint = startEndArr[i];
+            let endPoint = new Object();
+            if (startEndArr.length < i + 5) {
+                endPoint = startEndArr[i + 1];
+            } else {
+                endPoint = startEndArr[i + 2];
+            }
+            let nextendPoint = startEndArr[i + 3];
+            let p0bearing = bearing([endPoint.x, endPoint.y], [startPoint.x, startPoint.y]);
+            let p2bearing = bearing([endPoint.x, endPoint.y], [nextendPoint.x, nextendPoint.y]);
+            let options = {units: "kilometers"};
+            let p0distance = distance([startPoint.x, startPoint.y], [endPoint.x, endPoint.y], options);
+            let p2distance = distance([nextendPoint.x, nextendPoint.y], [endPoint.x, endPoint.y], options);
+            let p0d = 0.0005;
+            let p2d = 0.0005;
+            if (p0distance < 0.002) {
+                p0d = p0distance / 3.0;
+            }
+            if (p2distance < 0.002) {
+                p2d = p2distance / 3.0;
+            }
+            // if(p0distance<=p2distance){
+            //     if(p0distance<0.005){
+            //         p0d = p0distance/3.0;
+            //     }
+            // }else{
+            //     if (p2distance<0.005){
+            //         p2d = p2distance/3.0;
+            //     }
+            // }
+            // console.log(p0d)
+            // console.log(p2d)
+            let p0 = destination([endPoint.x, endPoint.y], p0d, p0bearing, options);
+            let p2 = destination([endPoint.x, endPoint.y], p2d, p2bearing, options);
+            let p1 = endPoint;
+
+            let beziPoint = bezierLine({
+                "x": p0.geometry.coordinates[0],
+                "y": p0.geometry.coordinates[1]
+            }, {"x": p2.geometry.coordinates[0], "y": p2.geometry.coordinates[1]}, p1);
+            if (i == 0) {
+                c.push([startPoint.x, startPoint.y]);
+            }
+            c.push(...beziPoint);
+            if (startEndArr.length < i + 5) {
+                c.push([nextendPoint.x, nextendPoint.y]);
+            }
+        }
+        // console.log(c.join(" "));
+        c = lineString(c);
+        return c;
+    }
+
+    return beizer();
+};
+export {calcDistanceFn, calcMidPoint, preHandleSimData, preHandleRealData, beizerFn};

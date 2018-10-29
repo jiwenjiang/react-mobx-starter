@@ -7,7 +7,7 @@ import compass from "./compass";
 import stepper from "./stepper";
 import correctLocate from "./correctLocate";
 import simNavigation from "./simNav";
-import {preHandleData} from "./utils";
+import {preHandleSimData, beizerFn} from "./utils";
 
 // import {pointToLineDistance} from "@turf/turf";
 
@@ -61,8 +61,28 @@ class Nav {
     ) {
         this.onSimStep = onSimNav;
         this.simComplete = complete;
-        const handleData = preHandleData(routeData, speed);
+        const handleData = preHandleSimData(routeData, speed);
         this.startSimNavigation(routeData, handleData, speed);
+    }
+
+    startNav(
+        {
+            routeData = [],
+            onNav = () => {
+            },
+            complete = () => {
+            },
+            error = () => {
+            }
+        }
+    ) {
+        this.onNavStep = onNav;
+        this.navComplete = complete;
+        const handleData = preHandleSimData(routeData);
+        console.log(55, handleData);
+        const beizerData = beizerFn(routeData);
+        console.log(beizerData);
+        // this.startSimNavigation(routeData, handleData);
     }
 }
 

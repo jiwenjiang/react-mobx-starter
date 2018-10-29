@@ -52,6 +52,9 @@ const simNavigationFn = (target) => {
                     console.log("取消");
                     this.simComplete();
                     window.cancelAnimationFrame(animateId);
+                    if (this.loc.currentPosition) {
+                        this.startCorrectFreeLocate(this.loc);
+                    }
                 }
             };
             animate();
@@ -66,6 +69,9 @@ const simNavigationFn = (target) => {
             const lineDistance = handleRoute[currentLineIndex].distance;
             const turnTypeText = handleRoute[currentLineIndex].turnTypeText;
             const turnType = handleRoute[currentLineIndex].turnType;
+            const nextCrossType = currentLineIndex < handleRoute.length - 1
+                ? handleRoute[currentLineIndex + 1].crossType
+                : null; // 跨楼层类型
             const currentStartDistance = distance(currentPoint, startPoint) * 1000; // 当前起点距离
             const currentEndDistance = ~~(distance(currentPoint, endPoint) * 1000); // 当前终点距离
             const currentBearing = bearingToAzimuth(bearing(startPoint, endPoint)); // 当前方向
@@ -92,9 +98,23 @@ const simNavigationFn = (target) => {
                             }
                         }
                         if (currentEndDistance <= 3) {
-                            text = `${turnTypeText}`;
+                            if (nextCrossType == 19) {
+                                text = `${turnTypeText}`;
+                            } else if (nextCrossType == 10 || nextCrossType == 12) {
+                                const startFloor = Number(handleRoute[currentLineIndex + 1].startFloor);
+                                const endFloor = Number(handleRoute[currentLineIndex + 1].endFloor);
+                                const type = startFloor > endFloor ? "下至" : "上至";
+                                text = `请${type}${endFloor >= 0 ? endFloor + 1 : endFloor}楼`;
+                            }
                             if (!voiceRecorder[`${currentLineIndex}3`]) {
-                                voice = `${turnTypeText}`;
+                                if (nextCrossType == 19) {
+                                    voice = `${turnTypeText}`;
+                                } else if (nextCrossType == 10 || nextCrossType == 12) {
+                                    const startFloor = Number(handleRoute[currentLineIndex + 1].startFloor);
+                                    const endFloor = Number(handleRoute[currentLineIndex + 1].endFloor);
+                                    const type = startFloor > endFloor ? "下至" : "上至";
+                                    voice = `请${type}${endFloor >= 0 ? endFloor + 1 : endFloor}楼`;
+                                }
                                 voiceRecorder[`${currentLineIndex}3`] = true;
                             }
                         }

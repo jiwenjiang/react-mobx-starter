@@ -122,7 +122,7 @@ class beginNav extends Component {
         }, 3000);
         let bearing = null;
         nav.startSim({
-            routeData: toJS(this.props.navStore.originPaths),
+            routeData: toJS(this.props.navStore.navRoutes),
             speed: 1,
             onSimNav: (data) => {
                 this.props.navStore.moveNavMarker(this.props.mapStore, [data.currentLon, data.currentLat]);
@@ -170,6 +170,16 @@ class beginNav extends Component {
         });
     }
 
+    realNav() {
+        nav.startNav({
+            routeData: this.props.navStore.navRoutes,
+            onNav: () => {
+            },
+            complete: () => {
+            },
+        });
+    }
+
     exit() {
         this.props.mapStore.removeMarker("end");
         document.getElementById("begin-nav").classList.remove("dom-transformY-30");
@@ -214,7 +224,7 @@ class beginNav extends Component {
                             <span> 模拟导航</span>
                         </button>
                         <button className={`${navRoutes ? "begin-nav-nav" : "begin-nav-gray-btn"}`}
-                                onClick={() => this.goToHere()}>
+                                onClick={() => this.realNav()}>
                             <i className="iconfont icon-daohang1"></i>
                             <span> 开始导航</span>
                         </button>
