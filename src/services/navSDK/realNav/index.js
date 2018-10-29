@@ -1,66 +1,26 @@
 /**
- * Created by j_bleach on 2018/10/25 0025.
+ * Created by j_bleach on 2018/10/29 0029.
  */
+/*eslint-disable*/
 import {pointToLineDistance, point, lineString, distance, bearingToAzimuth, bearing} from "@turf/turf";
 
 const simNavigationFn = (target) => {
-    return class simNavigation extends target {
+    return class realNavigation extends target {
         constructor() {
             super();
         }
 
-        startSimNavigation = (handleData, speed = 1) => {
+        startRealNavigation = (handleData) => {
+            console.log(44444, handleData);
             // 清除自由模式纠偏
             this.correctFreeLocateTimer = null;
             clearTimeout(this.correctFreeLocateWatchId);
             //
-            const {animateArray, handleRoute, routeLength} = handleData;
-            // 判断是否跨楼层
-            let completeLength = 0;
-            let currentLineIndex = 0;
-            let animateId = null;
-            let voiceRecorder = {};
-            const animate = () => {
-                if (animateArray.length > completeLength) {
-                    animateId = window.requestAnimationFrame(animate);
-                    let currentPoint = animateArray[completeLength];
-                    let geoPoint = point(currentPoint);
-                    const distanceArr = [];
-                    for (let v of handleRoute) {
-                        let line = lineString(v.LineCoordinates);
-                        distanceArr.push((pointToLineDistance(geoPoint, line) * 1000));
-                    }
-                    // console.log(distanceArr);
-                    currentLineIndex = distanceArr.findIndex(v => v == Math.min(...distanceArr));
-                    const leftDistance = routeLength - (completeLength / 50 / speed);
-                    const simResult = this.simNavLogic(currentPoint, currentLineIndex, handleRoute, voiceRecorder);
-                    const output = {
-                        leftDistance,
-                        currentLon: currentPoint[0],
-                        currentLat: currentPoint[1],
-                        level: simResult.currentFloor,
-                        totalDistance: routeLength,
-                        bearing: simResult.currentBearing,
-                        turn: simResult.turnType,
-                        text: simResult.text,
-                        voice: simResult.voice
-                    };
-                    this.onSimStep(output);
-                    completeLength++;
-                } else {
-                    console.log("取消");
-                    this.simComplete();
-                    window.cancelAnimationFrame(animateId);
-                    if (this.loc.currentPosition) {
-                        this.startCorrectFreeLocate(this.loc);
-                    }
-                }
-            };
-            animate();
+
         };
 
         // 模拟导航逻辑
-        simNavLogic(currentPoint, currentLineIndex, handleRoute, voiceRecorder) {
+        realNavLogic(currentPoint, currentLineIndex, handleRoute, voiceRecorder) {
             const currentFloor = handleRoute[currentLineIndex].startFloor; // 当前楼层
             const currentLine = handleRoute[currentLineIndex].LineCoordinates; // 当前路径
             const startPoint = point(currentLine[0]); // 当前路径终点

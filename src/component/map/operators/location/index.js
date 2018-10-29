@@ -32,8 +32,9 @@ class location extends Component {
     render() {
         const {freeMarker, initLocation} = this.props.navStore;
         return <div className="map-operators-location-box" onClick={() => this.location()}>
-            <i className={`iconfont ${freeMarker && initLocation ? "icon-dingwei1 map-operators-located" : "icon-dingwei map-operators-location"}
-            `}></i>
+            <i className={`iconfont ${freeMarker && initLocation
+                ? "icon-dingwei1 map-operators-located"
+                : "icon-dingwei map-operators-location"}`}></i>
         </div>;
     }
 }

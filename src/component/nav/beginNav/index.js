@@ -172,7 +172,7 @@ class beginNav extends Component {
 
     realNav() {
         nav.startNav({
-            routeData: this.props.navStore.navRoutes,
+            routeData: toJS(this.props.navStore.navRoutes),
             onNav: () => {
             },
             complete: () => {
@@ -244,11 +244,11 @@ class beginNav extends Component {
                                     <i className="iconfont icon-fanhui"></i>
                                     <span> 查看地图</span>
                                 </button>
-                                <button className="begin-nav-sim" onClick={() => this.goToHere()}>
+                                <button className="begin-nav-sim" onClick={() => this.simNav()}>
                                     <i className="iconfont icon-monixianlupipei"></i>
                                     <span> 模拟导航</span>
                                 </button>
-                                <button className="begin-nav-nav" onClick={() => this.goToHere()}>
+                                <button className="begin-nav-nav" onClick={() => this.realNav()}>
                                     <i className="iconfont icon-daohang1"></i>
                                     <span> 开始导航</span>
                                 </button>

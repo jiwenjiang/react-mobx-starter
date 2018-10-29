@@ -129,7 +129,7 @@ class MapStore {
                 if (this.mapObj.getSource("building-route")) {
                     this.mapObj.removeSource("building-route");
                 }
-                // console.log(toJS(floorStore.routeIndoor[floor].features));
+                console.log(111, toJS(floorStore.routeIndoor[floor].features));
                 this.mapObj.addSource("building-route", {
                     type: "geojson",
                     data: beizerFn(toJS(floorStore.routeIndoor[floor].features))
@@ -259,7 +259,6 @@ class MapStore {
             } else {
                 const el = this.generateDom(endImg);
                 this.endMarker = new this.mapGL.Marker(el).setLngLat(this.endMarkerPoint.point).addTo(this.mapObj);
-                console.log("end", toJS(this.endMarkerPoint));
             }
         };
         type === "start"
@@ -326,7 +325,6 @@ class MapStore {
 
     @action
     removeMarker(type) {
-        console.log(type);
         const endMarkerPoint = () => {
             this.endMarkerPoint = null;
             this.endMarker.remove();

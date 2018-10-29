@@ -7,7 +7,8 @@ import compass from "./compass";
 import stepper from "./stepper";
 import correctLocate from "./correctLocate";
 import simNavigation from "./simNav";
-import {preHandleSimData, beizerFn} from "./utils";
+import realNavigation from "./realNav";
+import {preHandleSimData, beizerFn, preHandleRealData} from "./utils";
 
 // import {pointToLineDistance} from "@turf/turf";
 
@@ -15,6 +16,7 @@ import {preHandleSimData, beizerFn} from "./utils";
 @stepper
 @correctLocate
 @simNavigation
+@realNavigation
 class Nav {
     init(loc) {
         // console.log("loc", loc);
@@ -62,7 +64,7 @@ class Nav {
         this.onSimStep = onSimNav;
         this.simComplete = complete;
         const handleData = preHandleSimData(routeData, speed);
-        this.startSimNavigation(routeData, handleData, speed);
+        this.startSimNavigation(handleData, speed);
     }
 
     startNav(
@@ -78,11 +80,9 @@ class Nav {
     ) {
         this.onNavStep = onNav;
         this.navComplete = complete;
-        const handleData = preHandleSimData(routeData);
-        console.log(55, handleData);
-        const beizerData = beizerFn(routeData);
-        console.log(beizerData);
-        // this.startSimNavigation(routeData, handleData);
+        const handleData = preHandleRealData(routeData);
+        // const beizerData = beizerFn(routeData);
+        this.startRealNavigation(handleData);
     }
 }
 

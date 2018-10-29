@@ -3,6 +3,7 @@
  */
 /*eslint-disable*/
 import {point, distance, midpoint, lineString, length, along, bearing, destination} from "@turf/turf";
+import {floorStore} from "../../../mobx/stores/floorStore";
 
 /**
  * @author j_bleach
@@ -93,9 +94,9 @@ const preHandleSimData = (route, speed = 1) => {
  */
 const preHandleRealData = (route) => {
     let pointCollects = []; // 点集合
-    let handleRoute = []; // 处理后路径
     let routeLength = 0; // 总距离
     let handleRouteFloor = {};
+    let handleRouteFloorBeizer = {};
     let parseTurnType = (turnType) => {
         let turnText = {
             0: "起点",
@@ -126,16 +127,29 @@ const preHandleRealData = (route) => {
                 }
             }
         }
-        handleRoute.push(item);
+        const currentRoute = handleRouteFloor[item.startFloor];
+        if (currentRoute && currentRoute instanceof Array) {
+            handleRouteFloor[item.startFloor].push({
+                "type": "Feature",
+                ...item
+            });
+        } else {
+            handleRouteFloor[item.startFloor] = [];
+            handleRouteFloor[item.startFloor].push({
+                "type": "Feature",
+                ...item
+            });
+        }
     }
-
-    // for(let i=0; i<handleRoute)
-    console.log(handleRoute);
+    for (let key in handleRouteFloor) {
+        handleRouteFloorBeizer[key] = beizerFn(handleRouteFloor[key]);
+    }
     let routeLine = lineString(pointCollects);
     routeLength = length(routeLine) * 1000;
     return {
-        handleRoute,
         routeLength,
+        handleRouteFloor,
+        handleRouteFloorBeizer
     };
 };
 
