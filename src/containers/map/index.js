@@ -56,6 +56,7 @@ class mapPage extends Component {
         // 监听楼层改变
         map.on("floor.state.change", (event) => {
             this.props.floorStore.changeFloorStatus(event, map);
+            // console.log(event);
         });
 
         // 监听地图移动

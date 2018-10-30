@@ -173,6 +173,7 @@ class beginNav extends Component {
     realNav() {
         nav.startNav({
             routeData: toJS(this.props.navStore.navRoutes),
+            map: this.props.mapStore.mapObj,
             onNav: () => {
             },
             complete: () => {

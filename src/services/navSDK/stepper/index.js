@@ -111,6 +111,7 @@ const stepperFn = (target) => {
                 latitude: output.geometry.coordinates[1]
             };
             this.onFreeStep(this.currentPoint);
+            this.currentMode == "realNav" && this.onRealNavStep(this.currentPoint);
             this.initPolygonLocate && clearInterval(this.initPolygonLocate);
         }
 

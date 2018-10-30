@@ -129,10 +129,10 @@ class MapStore {
                 if (this.mapObj.getSource("building-route")) {
                     this.mapObj.removeSource("building-route");
                 }
-                console.log(111, toJS(floorStore.routeIndoor[floor].features));
+                console.log(111, beizerFn(toJS(floorStore.routeIndoor[floor].features), this.mapObj));
                 this.mapObj.addSource("building-route", {
                     type: "geojson",
-                    data: beizerFn(toJS(floorStore.routeIndoor[floor].features))
+                    data: beizerFn(toJS(floorStore.routeIndoor[floor].features), this.mapObj)
                 });
 
                 this.mapObj.addLayer({

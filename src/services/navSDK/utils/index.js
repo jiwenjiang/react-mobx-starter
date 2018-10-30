@@ -3,7 +3,6 @@
  */
 /*eslint-disable*/
 import {point, distance, midpoint, lineString, length, along, bearing, destination} from "@turf/turf";
-import {floorStore} from "../../../mobx/stores/floorStore";
 
 /**
  * @author j_bleach
@@ -92,7 +91,7 @@ const preHandleSimData = (route, speed = 1) => {
  * @Description: 预处理真实导航数据
  * @param route:[{}]
  */
-const preHandleRealData = (route) => {
+const preHandleRealData = (route, map) => {
     let pointCollects = []; // 点集合
     let routeLength = 0; // 总距离
     let handleRouteFloor = {};
@@ -142,7 +141,7 @@ const preHandleRealData = (route) => {
         }
     }
     for (let key in handleRouteFloor) {
-        handleRouteFloorBeizer[key] = beizerFn(handleRouteFloor[key]);
+        handleRouteFloorBeizer[key] = beizerFn(handleRouteFloor[key], map);
     }
     let routeLine = lineString(pointCollects);
     routeLength = length(routeLine) * 1000;
@@ -154,7 +153,7 @@ const preHandleRealData = (route) => {
 };
 
 // 贝塞尔处理
-const beizerFn = (arr) => {
+const beizerFn = (arr, map) => {
 
     let lines = arr;
 
@@ -162,6 +161,11 @@ const beizerFn = (arr) => {
         let startEndArr = new Array();
         for (let i = 0; i < lines.length; i++) {
             const pointObj = lines[i].geometry;
+            //获取导航线起点
+            // if (pointObj.type == "Point") {
+            //     startEndArr.push({"x": pointObj.coordinates[0], "y": pointObj.coordinates[1]});
+            //     startEndArr.push({"x": pointObj.coordinates[0], "y": pointObj.coordinates[1]});
+            // }
             if (pointObj.type == "LineString") {
                 startEndArr.push({"x": pointObj.coordinates[0][0], "y": pointObj.coordinates[0][1]});
                 startEndArr.push({
@@ -179,18 +183,19 @@ const beizerFn = (arr) => {
         return startEndArr;
     }
 
-    function bezierLine(startPoint, endPoint, controlPoint) {
+    function bezierLine(startPoint, endPoint, controlPoint, map) {
         let mControlPoints = new Array();
-        mControlPoints[0] = startPoint;
-        mControlPoints[1] = controlPoint;
-        mControlPoints[2] = endPoint;
+        mControlPoints[0] = map.project([startPoint.x, startPoint.y]);
+        mControlPoints[1] = map.project([controlPoint.x, controlPoint.y]);
+        mControlPoints[2] = map.project([endPoint.x, endPoint.y]);
         let points = new Array();
         let order = 2;
-        let delta = 0.01;
+        let delta = 0.1;
         for (let t = 0; t < 1; t += delta) {
             let x = deCasteljauX(order, 0, t);
             let y = deCasteljauY(order, 0, t);
-            points.push([x, y]);
+            let lngLat = map.unproject({"x": x, "y": y});
+            points.push([lngLat.lng, lngLat.lat]);
         }
 
         function deCasteljauX(i, j, t) {
@@ -210,7 +215,7 @@ const beizerFn = (arr) => {
         return points;
     }
 
-    function beizer() {
+    function beizer(map) {
         let startEndArr = getStartEndArr();
         let c = new Array();
         for (let i = 0; i < startEndArr.length - 3; i += 2) {
@@ -227,33 +232,28 @@ const beizerFn = (arr) => {
             let options = {units: "kilometers"};
             let p0distance = distance([startPoint.x, startPoint.y], [endPoint.x, endPoint.y], options);
             let p2distance = distance([nextendPoint.x, nextendPoint.y], [endPoint.x, endPoint.y], options);
-            let p0d = 0.0005;
-            let p2d = 0.0005;
-            if (p0distance < 0.002) {
-                p0d = p0distance / 3.0;
+            let pace;
+            if (p0distance <= p2distance) {
+                if (p0distance < 0.001) {
+                    pace = p0distance / 2.0;
+                } else {
+                    pace = 0.0005;
+                }
+            } else {
+                if (p2distance < 0.001) {
+                    pace = p2distance / 2.0;
+                } else {
+                    pace = 0.0005;
+                }
             }
-            if (p2distance < 0.002) {
-                p2d = p2distance / 3.0;
-            }
-            // if(p0distance<=p2distance){
-            //     if(p0distance<0.005){
-            //         p0d = p0distance/3.0;
-            //     }
-            // }else{
-            //     if (p2distance<0.005){
-            //         p2d = p2distance/3.0;
-            //     }
-            // }
-            // console.log(p0d)
-            // console.log(p2d)
-            let p0 = destination([endPoint.x, endPoint.y], p0d, p0bearing, options);
-            let p2 = destination([endPoint.x, endPoint.y], p2d, p2bearing, options);
+            let p0 = destination([endPoint.x, endPoint.y], pace, p0bearing, options);
+            let p2 = destination([endPoint.x, endPoint.y], pace, p2bearing, options);
             let p1 = endPoint;
 
             let beziPoint = bezierLine({
                 "x": p0.geometry.coordinates[0],
                 "y": p0.geometry.coordinates[1]
-            }, {"x": p2.geometry.coordinates[0], "y": p2.geometry.coordinates[1]}, p1);
+            }, {"x": p2.geometry.coordinates[0], "y": p2.geometry.coordinates[1]}, p1, map);
             if (i == 0) {
                 c.push([startPoint.x, startPoint.y]);
             }
@@ -267,6 +267,6 @@ const beizerFn = (arr) => {
         return c;
     }
 
-    return beizer();
+    return beizer(map);
 };
 export {calcDistanceFn, calcMidPoint, preHandleSimData, preHandleRealData, beizerFn};

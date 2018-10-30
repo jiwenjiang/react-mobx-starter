@@ -18,6 +18,10 @@ import {preHandleSimData, beizerFn, preHandleRealData} from "./utils";
 @simNavigation
 @realNavigation
 class Nav {
+    constructor() {
+        this.currentMode = "free";
+    }
+
     init(loc) {
         // console.log("loc", loc);
         if (loc.currentPosition) {
@@ -70,6 +74,7 @@ class Nav {
     startNav(
         {
             routeData = [],
+            map,
             onNav = () => {
             },
             complete = () => {
@@ -80,9 +85,9 @@ class Nav {
     ) {
         this.onNavStep = onNav;
         this.navComplete = complete;
-        const handleData = preHandleRealData(routeData);
-        // const beizerData = beizerFn(routeData);
-        this.startRealNavigation(handleData);
+        this.handleData = preHandleRealData(routeData, map);
+        this.currentMode = "realNav";
+        this.startCorrectNavLocate(this.loc);
     }
 }
 

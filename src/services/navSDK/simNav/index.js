@@ -51,7 +51,7 @@ const simNavigationFn = (target) => {
                     console.log("取消");
                     this.simComplete();
                     window.cancelAnimationFrame(animateId);
-                    if (this.loc.currentPosition) {
+                    if (this.loc && this.loc.currentPosition) {
                         this.startCorrectFreeLocate(this.loc);
                     }
                 }
