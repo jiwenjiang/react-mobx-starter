@@ -190,7 +190,7 @@ const beizerFn = (arr, map) => {
         mControlPoints[2] = map.project([endPoint.x, endPoint.y]);
         let points = new Array();
         let order = 2;
-        let delta = 0.1;
+        let delta = 0.07;
         for (let t = 0; t < 1; t += delta) {
             let x = deCasteljauX(order, 0, t);
             let y = deCasteljauY(order, 0, t);
@@ -233,17 +233,17 @@ const beizerFn = (arr, map) => {
             let p0distance = distance([startPoint.x, startPoint.y], [endPoint.x, endPoint.y], options);
             let p2distance = distance([nextendPoint.x, nextendPoint.y], [endPoint.x, endPoint.y], options);
             let pace;
-            if (p0distance <= p2distance) {
-                if (p0distance < 0.001) {
-                    pace = p0distance / 2.0;
-                } else {
-                    pace = 0.0005;
+            if (p0distance <= p2distance){
+                if (p0distance<0.0015){
+                    pace = p0distance/2.2;
+                }else {
+                    pace = 0.0015;
                 }
-            } else {
-                if (p2distance < 0.001) {
-                    pace = p2distance / 2.0;
-                } else {
-                    pace = 0.0005;
+            }else {
+                if (p2distance<0.0015){
+                    pace = p2distance/2.2;
+                }else {
+                    pace = 0.0015;
                 }
             }
             let p0 = destination([endPoint.x, endPoint.y], pace, p0bearing, options);

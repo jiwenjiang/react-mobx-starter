@@ -118,9 +118,12 @@ class MapStore {
                 this.routeObj.clearLocation();
             },
             setPathListView: (paths) => {
+                // console.log("originpaths", paths);
                 // 处理路径数据
                 this.routeHandle(paths);
                 const floor = this.startMarkerPoint.floor;
+                // console.log("rootIndoor", toJS(floorStore.routeIndoor[floor].features));
+                // console.log("beizerFloor", beizerFn(toJS(floorStore.routeIndoor[floor].features), this.mapObj));
                 // 楼层切换
                 this.changeFloor(floor);
                 if (this.mapObj.getLayer("building-layer")) {
@@ -129,10 +132,12 @@ class MapStore {
                 if (this.mapObj.getSource("building-route")) {
                     this.mapObj.removeSource("building-route");
                 }
-                console.log(111, beizerFn(toJS(floorStore.routeIndoor[floor].features), this.mapObj));
+                floorStore.routeIndoorBeizer[floor] = beizerFn(toJS(floorStore.routeIndoor[floor].features), this.mapObj);
+                // console.log("floorBeizer", floorStore.routeIndoorBeizer[floor]);
+                // console.log(111, beizerFn(toJS(floorStore.routeIndoor[floor].features), this.mapObj));
                 this.mapObj.addSource("building-route", {
                     type: "geojson",
-                    data: beizerFn(toJS(floorStore.routeIndoor[floor].features), this.mapObj)
+                    data: floorStore.routeIndoorBeizer[floor]
                 });
 
                 this.mapObj.addLayer({
@@ -291,11 +296,11 @@ class MapStore {
      * @param className:String 样式名
      * @return HTMLElement
      */
-    generateDom(src, classString) {
+    generateDom(src, classString, width) {
         let el = document.createElement("div");
         let img = document.createElement("img");
         img.src = src;
-        img.style.width = "7.3vw";
+        img.style.width = width || "7.3vw";
         if (classString) {
             img.className = classString;
         }

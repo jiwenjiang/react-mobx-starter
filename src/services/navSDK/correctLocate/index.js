@@ -13,7 +13,10 @@ const correctLocateFn = (target) => {
         // 自由模式
         startCorrectFreeLocate(loc) {
             console.log("entry 自由纠偏", this);
+            // 清除nav
+            this.correctNavLocateTimer = null;
             this.correctNavLocateWatchId && clearTimeout(this.correctNavLocateWatchId);
+            // 开始free
             this.correctFreeLocateTimer = () => {
                 this.correctFreeLocateWatchId = setTimeout(() => {
                     this.correctFreeLocateTimer && this.correctFreeLocateTimer();
@@ -66,20 +69,20 @@ const correctLocateFn = (target) => {
                 if (ibeaconToFiducial < 3) {
                     // 当前点至蓝牙点大于2米
                     if (currentToIbeacon > 2) {
-                        console.log("当前点至蓝牙点大于2米");
+                        console.log("free 当前点至蓝牙点大于2米");
                         const point = {...this.currentPoint, longitude: loc.longitude, latitude: loc.latitude};
                         this.updateFreeCurrentPoint(point);
                     }
                 } else {
                     // 当前点距离置信点大于10米
                     if (currentToFiducial > 10) {
-                        console.log("当前点距离置信点大于10米");
+                        console.log("free 当前点距离置信点大于10米");
                         const point = {...this.currentPoint, longitude: loc.fiducialLon, latitude: loc.fiducialLat};
                         this.updateFreeCurrentPoint(point);
                     } else {
                         // 当前点距离蓝牙点大于5米
                         if (currentToIbeacon > 5) {
-                            console.log("当前点距离蓝牙点大于5米");
+                            console.log("free 当前点距离蓝牙点大于5米");
                             const mid = calcMidPoint(ibeaconPoint, currentPoint);
                             const point = {...this.currentPoint, longitude: mid[0], latitude: mid[1]};
                             this.updateFreeCurrentPoint(point);
@@ -90,14 +93,14 @@ const correctLocateFn = (target) => {
                 if (loc.polygonLon) {
                     // 质心点和当前位置距离大于5小于10
                     if (currentToPolygon > 5 && currentToPolygon < 10) {
-                        console.log("质心点和当前位置距离大于5小于10");
+                        console.log("free 质心点和当前位置距离大于5小于10");
                         const mid = calcMidPoint(polygonPoint, currentPoint);
                         const point = {...this.currentPoint, longitude: mid[0], latitude: mid[1]};
                         this.updateFreeCurrentPoint(point);
                     } else {
                         //  质心点和当前位置距离大于 10
                         if (currentToPolygon > 10) {
-                            console.log("质心点和当前位置距离大于 10");
+                            console.log("free 质心点和当前位置距离大于 10");
                             const point = {
                                 ...this.currentPoint,
                                 longitude: loc.polygonLon, latitude: loc.polygonLat
@@ -118,7 +121,7 @@ const correctLocateFn = (target) => {
                 this.correctNavLocateWatchId = setTimeout(() => {
                     this.correctNavLocateTimer && this.correctNavLocateTimer();
                     this.chooseNavCorrectMode(loc);
-                }, 1000);
+                }, 5000);
             };
             this.correctNavLocateTimer();
         }
@@ -155,7 +158,7 @@ const correctLocateFn = (target) => {
                 // 置信点至蓝牙点小于3米
                 if (ibeaconToFiducial < 3) {
                     if (ibeaconToLine > 10) {
-                        console.log("蓝牙点导航线距离10米");
+                        console.log("nav 蓝牙点导航线距离10米");
                         const point = {
                             ...this.currentPoint,
                             longitude: loc.longitude,
@@ -166,20 +169,20 @@ const correctLocateFn = (target) => {
                     }
                     // 当前点至蓝牙点大于2米
                     if (currentToIbeacon > 2) {
-                        console.log("当前点至蓝牙点大于2米");
+                        console.log("nav 当前点至蓝牙点大于2米");
                         const point = {...this.currentPoint, longitude: loc.longitude, latitude: loc.latitude};
                         this.updateNavCurrentPoint(point);
                     }
                 } else {
                     // 当前点距离置信点大于10米
                     if (currentToFiducial > 10) {
-                        console.log("当前点距离置信点大于10米");
+                        console.log("nav 当前点距离置信点大于10米");
                         const point = {...this.currentPoint, longitude: loc.fiducialLon, latitude: loc.fiducialLat};
                         this.updateNavCurrentPoint(point);
                     } else {
                         // 当前点距离蓝牙点大于5米
                         if (currentToIbeacon > 5) {
-                            console.log("当前点距离蓝牙点大于5米");
+                            console.log("nav 当前点距离蓝牙点大于5米");
                             const mid = calcMidPoint(ibeaconPoint, currentPoint);
                             const point = {...this.currentPoint, longitude: mid[0], latitude: mid[1]};
                             this.updateNavCurrentPoint(point);
@@ -188,7 +191,7 @@ const correctLocateFn = (target) => {
                 }
             } else {
                 if (polygonToLine > 10) {
-                    console.log("质心点导航线距离10米");
+                    console.log("nav 质心点导航线距离10米");
                     const point = {
                         ...this.currentPoint,
                         longitude: loc.polygonLon,
@@ -200,14 +203,14 @@ const correctLocateFn = (target) => {
                 if (loc.polygonLon) {
                     // 质心点和当前位置距离大于5小于10
                     if (currentToPolygon > 5 && currentToPolygon < 10) {
-                        console.log("质心点和当前位置距离大于5小于10");
+                        console.log("nav 质心点和当前位置距离大于5小于10");
                         const mid = calcMidPoint(polygonPoint, currentPoint);
                         const point = {...this.currentPoint, longitude: mid[0], latitude: mid[1]};
                         this.updateNavCurrentPoint(point);
                     } else {
                         //  质心点和当前位置距离大于 10
                         if (currentToPolygon > 10) {
-                            console.log("质心点和当前位置距离大于 10");
+                            console.log("nav 质心点和当前位置距离大于 10");
                             const point = {
                                 ...this.currentPoint,
                                 longitude: loc.polygonLon, latitude: loc.polygonLat
@@ -222,7 +225,7 @@ const correctLocateFn = (target) => {
         updateNavCurrentPoint(point) {
             this.correctNavFlag = true;
             this.currentPoint = point;
-            // this.onFreeStep(point);
+            this.onRealNavStep(point);
             setTimeout(() => {
                 this.correctNavFlag = false;
             }, 5000);

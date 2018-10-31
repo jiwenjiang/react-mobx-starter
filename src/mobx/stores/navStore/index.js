@@ -174,12 +174,12 @@ class NavStore {
         }
     }
 
-    @action moveNavMarker(map, data) {
+    @action moveNavMarker(map, data, name) {
         if (this.navMode !== "free") {
             if (this.navMarker) {
                 this.navMarker.setLngLat(data);
             } else {
-                const el = map.generateDom(navImg, "freeMarker");
+                const el = map.generateDom(navImg, name, "10vw");
                 this.navMarker = new map.mapGL.Marker(el).setLngLat(data).addTo(map.mapObj);
             }
         }
@@ -205,6 +205,11 @@ class NavStore {
             let freeMarker = document.getElementsByClassName("freeMarker")[0];
             freeMarker.style.transformOrigin = "50% 50%";
             freeMarker.style.transform = "rotate(" + (angle + map.transform.angle * (180 / Math.PI)) + "deg)";
+        }
+        if (this.navMarker) {
+            let navMarker = document.getElementsByClassName("navMarker")[0];
+            navMarker.style.transformOrigin = "50% 50%";
+            navMarker.style.transform = "rotate(" + (angle + map.transform.angle * (180 / Math.PI)) + "deg)";
         }
     }
 

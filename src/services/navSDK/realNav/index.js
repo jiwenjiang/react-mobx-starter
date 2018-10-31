@@ -31,34 +31,25 @@ const realNavigationFn = (target) => {
                 let line = lineString(v.LineCoordinates);
                 distanceArr.push(pointToLineDistance(geoPoint, line));
             }
-            console.log("最小数组", distanceArr);
             currentLineIndex = distanceArr.findIndex(v => v == Math.min(...distanceArr));
             this.currentRealNavLine = lineString(routeFloor[currentLineIndex].LineCoordinates);
             const shadowPoint = nearestPointOnLine(this.currentRealNavLine, geoPoint);
-            let minDistance = 1024;
-            let beizerShadowPoint = [];
-            for (let v of routeFloorBeizer.geometry.coordinates) {
-                const dist = distance(shadowPoint, point(v));
-                if (dist < minDistance) {
-                    minDistance = dist;
-                    beizerShadowPoint = v;
-                }
-            }
             const navResult = this.realNavLogic(shadowPoint, currentLineIndex, routeFloor, voiceRecorder);
+            const currentPt = [this.currentPoint.longitude, this.currentPoint.latitude];
+            const beizerShadowPoint = nearestPointOnLine(routeFloorBeizer, point(currentPt));
             const output = {
                 // leftDistance,
-                currentLon: beizerShadowPoint[0],
-                currentLat: beizerShadowPoint[1],
+                currentLon: beizerShadowPoint.geometry.coordinates[0],
+                currentLat: beizerShadowPoint.geometry.coordinates[1],
                 level: navResult.currentFloor,
                 totalDistance: routeLength,
                 turn: navResult.turnType,
                 text: navResult.text,
-                voice: navResult.voice
+                voice: navResult.voice,
+                isOutdoor: this.currentPoint.isOutdoor,
+                info: "SUCCESS"
             };
-            this.onNavStep();
-            console.log("shadow", shadowPoint);
-            console.log("minDistance", minDistance);
-            console.log("beizerShadowPoint", beizerShadowPoint);
+            this.onNavStep(output);
         }
 
         // 模拟导航逻辑
@@ -133,6 +124,12 @@ const realNavigationFn = (target) => {
                             voice = `前方${currentEndDistance}米到达终点`;
                             voiceRecorder[`${currentLineIndex}4`] = true;
                         }
+                    }
+                    if (currentEndDistance < 2) {
+                        console.log("完成导航");
+                        this.currentMode = "free";
+                        this.startCorrectFreeLocate(this.loc);
+                        this.navComplete(this.currentPoint);
                     }
                 }
             }

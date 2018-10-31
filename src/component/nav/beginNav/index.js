@@ -9,6 +9,7 @@ import nav from "services/navSDK";
 import "./index.less";
 import {toJS} from "mobx";
 import floor from "component/map/operators/floor";
+import {floorStore} from "../../../mobx/stores/floorStore";
 
 
 @inject("mapStore", "navStore", "floorStore", "commonStore")
@@ -123,9 +124,9 @@ class beginNav extends Component {
         let bearing = null;
         nav.startSim({
             routeData: toJS(this.props.navStore.navRoutes),
-            speed: 1,
+            speed: 5,
             onSimNav: (data) => {
-                this.props.navStore.moveNavMarker(this.props.mapStore, [data.currentLon, data.currentLat]);
+                this.props.navStore.moveNavMarker(this.props.mapStore, [data.currentLon, data.currentLat], "simMarker");
                 this.props.navStore.updateNavData(data);
                 if (bearing && bearing != data.bearing) {
                     changeFlag = false;
@@ -155,7 +156,6 @@ class beginNav extends Component {
                 }
                 if (data.level != this.props.floorStore.mapFloor) {
                     // const floor = data.level >= 0 ? data.level - 1 : data.level;
-                    console.log(data.level);
                     this.props.floorStore.updateFloor(data.level);
                     this.props.mapStore.mapObj.setLevel(data.level); //  更新楼层
                     this.props.floorStore.checkMarkerAndRoute(this.props.mapStore, data.level); // 终点，起点，路径检测
@@ -171,12 +171,29 @@ class beginNav extends Component {
     }
 
     realNav() {
+        this.props.navStore.changeNavMode("real");
+        this.props.navStore.freeMarker && this.props.navStore.removeFreeMarker();
+        const startPoint = toJS(this.props.floorStore.routeIndoorBeizer[this.props.floorStore.mapFloor])
+            .geometry.coordinates[0];
+        // console.log(startPoint);
+        // console.log(toJS(this.props.navStore.navRoutes));
+        this.props.navStore.moveNavMarker(this.props.mapStore, startPoint, "navMarker");
+        // 操作dom
+        document.getElementsByClassName("map-routePanel")[0].classList.remove("dom-transformY-35");
+        document.getElementById("begin-nav").classList.remove("dom-transformY-30");
+        document.getElementById("nav-bottom").classList.add("dom-transformY-30");
         nav.startNav({
             routeData: toJS(this.props.navStore.navRoutes),
             map: this.props.mapStore.mapObj,
-            onNav: () => {
+            onNav: (data) => {
+                // console.log("导航data", data);
+                this.props.navStore.moveNavMarker(this.props.mapStore, [data.currentLon, data.currentLat], "navMarker");
+                this.props.navStore.updateNavData(data); // 更新导航数据
             },
-            complete: () => {
+            complete: (data) => {
+                document.getElementById("nav-bottom").classList.remove("dom-transformY-30");
+                this.props.navStore.completeNav(this.props.mapStore);
+                this.props.navStore.moveFreeMarker(this.props.mapStore, data);
             },
         });
     }

@@ -1,6 +1,7 @@
 /**
  * Created by j_bleach on 2018/9/30 0030.
  */
+/*eslint-disable*/
 import {observable, action, autorun, configure, toJS} from "mobx";
 import {beizerFn} from "services/utils/beizer";
 // import http from "services/http";
@@ -16,7 +17,7 @@ class FloorStore {
     @observable floorStatus; // 是否显示楼层（是否为室内）
     @observable floorData; // 楼层数据
     @observable routeIndoor; // 室内路径
-    @observable endRouteIndoor; // 室内终点路径
+    @observable routeIndoorBeizer; // 室内路径
 
     constructor() {
         this.mapFloor = 0;
@@ -35,6 +36,7 @@ class FloorStore {
          };
          */
         this.routeIndoor = {};
+        this.routeIndoorBeizer = {};
     }
 
     // 更新当前楼层
@@ -72,8 +74,7 @@ class FloorStore {
         }
         // 路径规划 跨楼层判断
         if (map.mapObj.getLayer("building-layer")) {
-            console.log("indoor", floorStore.routeIndoor);
-            const geoData = floorStore.routeIndoor[floor] ? beizerFn(toJS(floorStore.routeIndoor[floor].features)) : {
+            const geoData = floorStore.routeIndoor[floor] ? beizerFn(toJS(floorStore.routeIndoor[floor].features), map.mapObj) : {
                 type: "FeatureCollection",
                 features: []
             };
