@@ -39,6 +39,7 @@ const realNavigationFn = (target) => {
             const beizerShadowPoint = nearestPointOnLine(routeFloorBeizer, point(currentPt));
             const output = {
                 // leftDistance,
+                bearing: navResult.currentBearing,
                 currentLon: beizerShadowPoint.geometry.coordinates[0],
                 currentLat: beizerShadowPoint.geometry.coordinates[1],
                 level: navResult.currentFloor,
@@ -66,6 +67,7 @@ const realNavigationFn = (target) => {
                 : null; // 跨楼层类型
             const currentStartDistance = distance(shadowPoint, startPoint) * 1000; // 当前起点距离
             const currentEndDistance = ~~(distance(shadowPoint, endPoint) * 1000); // 当前终点距离
+            const currentBearing = bearingToAzimuth(bearing(startPoint, endPoint)); // 当前方向
             if (currentStartDistance > 5 && currentEndDistance > 5) {
                 this.currentPoint = {
                     ...this.currentPoint,
@@ -137,7 +139,8 @@ const realNavigationFn = (target) => {
                 text,
                 voice,
                 currentFloor,
-                turnType
+                turnType,
+                currentBearing
             };
         }
     };

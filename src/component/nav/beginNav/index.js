@@ -189,6 +189,16 @@ class beginNav extends Component {
                 // console.log("导航data", data);
                 this.props.navStore.moveNavMarker(this.props.mapStore, [data.currentLon, data.currentLat], "navMarker");
                 this.props.navStore.updateNavData(data); // 更新导航数据
+                this.props.mapStore.mapObj.flyTo({
+                    center: [data.currentLon, data.currentLat],
+                    zoom: 20,
+                    speed: 1,
+                    curve: 1.4,
+                    bearing: data.bearing,
+                    easing(t) {
+                        return t;
+                    }
+                });
             },
             complete: (data) => {
                 document.getElementById("nav-bottom").classList.remove("dom-transformY-30");

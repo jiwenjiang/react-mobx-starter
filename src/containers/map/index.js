@@ -194,6 +194,12 @@ class mapPage extends Component {
                 }
             },
             cancel: () => {
+                if (freeMarker) {
+                    this.props.mapStore.removeMarker("start");
+                    this.props.mapStore.removeMarker("end");
+                } else {
+                    this.props.mapStore.removeMarker("start");
+                }
             }
         };
         const warningModalProps = {
