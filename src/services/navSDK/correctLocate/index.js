@@ -12,7 +12,7 @@ const correctLocateFn = (target) => {
 
         // 自由模式
         startCorrectFreeLocate(loc) {
-            console.log("entry 自由纠偏", this);
+            console.log("entry 自由纠偏");
             // 清除nav
             this.correctNavLocateTimer = null;
             this.correctNavLocateWatchId && clearTimeout(this.correctNavLocateWatchId);
@@ -114,14 +114,14 @@ const correctLocateFn = (target) => {
 
         // 导航模式
         startCorrectNavLocate(loc) {
-            console.log("entry 导航纠偏", this);
+            console.log("entry 导航纠偏");
             this.correctFreeLocateTimer = null;
             this.correctFreeLocateWatchId && clearTimeout(this.correctFreeLocateWatchId);
             this.correctNavLocateTimer = () => {
                 this.correctNavLocateWatchId = setTimeout(() => {
                     this.correctNavLocateTimer && this.correctNavLocateTimer();
                     this.chooseNavCorrectMode(loc);
-                }, 5000);
+                }, 1000);
             };
             this.correctNavLocateTimer();
         }

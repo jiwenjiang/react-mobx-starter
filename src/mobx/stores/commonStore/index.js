@@ -55,7 +55,7 @@ class CommonStore {
     @action baiduVoiceUrl(text) {
         this.baiduVoice = `${this.baiduVoice}&tex=${text}`;
         const audio = document.getElementById("wb-audio");
-        audio.src = audioSrc;
+        audio.src = this.baiduVoice;
         audio.play();
     }
 

@@ -18,7 +18,7 @@ class beginNav extends Component {
 
     componentDidMount() {
         // swipe dom
-        const squareUp = document.querySelector(".begin-nav .map-goToShare-head");
+        const squareUp = document.getElementById("begin-nav");
         const squareDown = document.querySelector(".nav-route-detail-content");
         const managerUp = new Hammer.Manager(squareUp);
         const managerDown = new Hammer.Manager(squareDown);
@@ -112,6 +112,7 @@ class beginNav extends Component {
     simNav() {
         this.props.navStore.changeNavMode("sim");
         this.props.navStore.freeMarker && this.props.navStore.removeFreeMarker();
+        this.props.commonStore.baiduVoiceUrl("开始导航");
 
         // 操作dom
         document.getElementsByClassName("map-routePanel")[0].classList.remove("dom-transformY-35");
@@ -124,7 +125,7 @@ class beginNav extends Component {
         let bearing = null;
         nav.startSim({
             routeData: toJS(this.props.navStore.navRoutes),
-            speed: 5,
+            speed: 1,
             onSimNav: (data) => {
                 this.props.navStore.moveNavMarker(this.props.mapStore, [data.currentLon, data.currentLat], "simMarker");
                 this.props.navStore.updateNavData(data);
@@ -160,12 +161,23 @@ class beginNav extends Component {
                     this.props.mapStore.mapObj.setLevel(data.level); //  更新楼层
                     this.props.floorStore.checkMarkerAndRoute(this.props.mapStore, data.level); // 终点，起点，路径检测
                 }
+                if (data.voice) {
+                    console.log(data.voice);
+                    this.props.commonStore.baiduVoiceUrl(data.voice);
+                }
                 bearing = data.bearing;
             },
             complete: () => {
+                this.props.navStore.changeNavMode("free");
+                this.props.commonStore.baiduVoiceUrl("到达目的地，感谢使用本次导航");
                 document.getElementById("nav-bottom").classList.remove("dom-transformY-30");
+                this.props.navStore.upDateNavCompleteRoute({
+                    start: this.props.mapStore.startMarkerPoint,
+                    end: this.props.mapStore.endMarkerPoint
+                });
                 this.props.navStore.completeNav(this.props.mapStore);
                 clearInterval(navTimer);
+                this.props.navStore.changeEvaluateStatus(true);
             }
         });
     }
@@ -175,9 +187,8 @@ class beginNav extends Component {
         this.props.navStore.freeMarker && this.props.navStore.removeFreeMarker();
         const startPoint = toJS(this.props.floorStore.routeIndoorBeizer[this.props.floorStore.mapFloor])
             .geometry.coordinates[0];
-        // console.log(startPoint);
-        // console.log(toJS(this.props.navStore.navRoutes));
         this.props.navStore.moveNavMarker(this.props.mapStore, startPoint, "navMarker");
+        this.props.commonStore.baiduVoiceUrl("开始导航");
         // 操作dom
         document.getElementsByClassName("map-routePanel")[0].classList.remove("dom-transformY-35");
         document.getElementById("begin-nav").classList.remove("dom-transformY-30");
@@ -199,8 +210,14 @@ class beginNav extends Component {
                         return t;
                     }
                 });
+                if (data.voice) {
+                    console.log(data.voice);
+                    this.props.commonStore.baiduVoiceUrl(data.voice);
+                }
             },
             complete: (data) => {
+                this.props.navStore.changeNavMode("free");
+                this.props.commonStore.baiduVoiceUrl("到达目的地，感谢使用本次导航");
                 document.getElementById("nav-bottom").classList.remove("dom-transformY-30");
                 this.props.navStore.completeNav(this.props.mapStore);
                 this.props.navStore.moveFreeMarker(this.props.mapStore, data);

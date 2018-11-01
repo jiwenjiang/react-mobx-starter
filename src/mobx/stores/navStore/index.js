@@ -39,6 +39,8 @@ class NavStore {
     @observable navMode; // 导航模式 free 自由 、sim 模拟 、real 实时
     @observable navRealData; // 导航实时数据
     @observable initLocation; // 初始化定位
+    @observable evaluateStatus; // 评价模型显示
+    @observable navCompleteRoute; // 结束导航数据
 
     constructor() {
         this.mapNavParams = {
@@ -67,6 +69,8 @@ class NavStore {
         this.navMode = "free";
         this.navRealData = null;
         this.initLocation = false;
+        this.evaluateStatus = false;
+        this.navCompleteRoute = {};
     }
 
     // 更新当前定位点
@@ -208,8 +212,10 @@ class NavStore {
         }
         if (this.navMarker) {
             let navMarker = document.getElementsByClassName("navMarker")[0];
-            navMarker.style.transformOrigin = "50% 50%";
-            navMarker.style.transform = "rotate(" + (angle + map.transform.angle * (180 / Math.PI)) + "deg)";
+            if (navMarker) {
+                navMarker.style.transformOrigin = "50% 50%";
+                navMarker.style.transform = "rotate(" + (angle + map.transform.angle * (180 / Math.PI)) + "deg)";
+            }
         }
     }
 
@@ -227,6 +233,14 @@ class NavStore {
         floorStore.updateRouteIndoor({});
         floorStore.checkMarkerAndRoute(map, 0);
         this.getNavRoutes(null);
+    }
+
+    @action upDateNavCompleteRoute(v) {
+        this.navCompleteRoute = v;
+    }
+
+    @action changeEvaluateStatus(v) {
+        this.evaluateStatus = v;
     }
 }
 

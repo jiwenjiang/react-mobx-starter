@@ -48,7 +48,6 @@ class carPage extends Component {
                         location: this.props.navStore.locateCoordinate,
                         text: value
                     }, (data) => {
-                        console.log(data);
                         this.props.commonStore.changeLoadingStatus(false);
                         const listData = valueName === "carIdValue" ? data.result : data.list;
                         this.setState({

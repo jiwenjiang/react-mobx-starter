@@ -15,6 +15,7 @@ import NavBottom from "component/nav/nav-bottom";
 import NavPanel from "component/nav/navPanel";
 import ConfirmModal from "component/common/confirmModal";
 import WarningModal from "component/common/warningModal";
+import NavEndModal from "component/nav/navComplete";
 import NoticeComponent from "component/common/notice";
 import BeginNav from "component/nav/beginNav";
 import startConfirm from "assets/img/startConfirm.png";
@@ -179,7 +180,8 @@ class mapPage extends Component {
             searchStatus, confirmModalStatus,
             warningModalStatus, projectType, noticeProps,
         } = this.props.commonStore;
-        const {freeMarker, navMode} = this.props.navStore;
+        const {startMarker, endMarker} = this.props.mapStore;
+        const {freeMarker, navMode, evaluateStatus} = this.props.navStore;
         const confirmModalProps = {
             text: ` 要将此处设为${freeMarker ? "终" : "起"}点吗？`,
             icon: startConfirm,
@@ -217,16 +219,17 @@ class mapPage extends Component {
             <div>
                 <div id="wb-map" className="wb-map-box" width="100vw" height="100vh"
                      style={{width: "100vw", height: "100vh"}}></div>
-                {projectType == "Addressing" && searchStatus && 0 && <Search></Search>}
+                {projectType == "Addressing" && searchStatus && <Search></Search>}
                 {projectType == "Car" && searchStatus && <Car></Car>}
                 {confirmModalStatus && <ConfirmModal {...confirmModalProps}></ConfirmModal>}
                 {warningModalStatus && <WarningModal {...warningModalProps}></WarningModal>}
+                {evaluateStatus && <NavEndModal {...warningModalProps}></NavEndModal>}
                 {noticeProps && NoticeComponent(noticeProps)}
                 <Operators></Operators>
-                <GotoShare></GotoShare>
-                <BeginNav></BeginNav>
+                {<GotoShare></GotoShare>}
+                {(startMarker || endMarker) && <BeginNav></BeginNav>}
                 <RoutePanel></RoutePanel>
-                <NavBottom></NavBottom>
+                {startMarker && <NavBottom></NavBottom>}
                 {navMode !== "free" && <NavPanel></NavPanel>}
                 <audio id="wb-audio" autoPlay preload="true"></audio>
             </div>

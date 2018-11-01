@@ -111,13 +111,13 @@ const blueToothFn = (target) => {
                     }
                 });
                 wx.invoke("getBluetoothAdapterState", {
-                    complete: (data) => {
-                        console.log("lanya111", data);
+                    complete: () => {
+                        // console.log("lanya111", data);
                     }
                 });
                 wx.invoke("openBluetoothAdapter", {
                     complete: () => {
-                        wx.on("onWXDeviceBluetoothStateChange", (data) => console.log("蓝牙33", data));
+                        // wx.on("onWXDeviceBluetoothStateChange", (data) => console.log("蓝牙33", data));
                     }
                 });
 

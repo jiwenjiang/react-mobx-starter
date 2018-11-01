@@ -1,10 +1,7 @@
 /**
  * Created by j_bleach on 2018/10/12 0012.
  */
-/**
- * Created by j_bleach on 2018/9/17 0017.
- */
-/*eslint-disable*/
+
 import React, {Component} from "react";
 import {observer, inject} from "mobx-react";
 import iconSrc from "assets/img/waring.png";

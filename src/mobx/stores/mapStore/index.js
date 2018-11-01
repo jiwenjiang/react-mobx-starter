@@ -105,7 +105,7 @@ class MapStore {
                 runInAction(() => {
                     commonStore.loadingStatus = false;
                 });
-                commonStore.baiduVoiceUrl("重新规划路径");
+                commonStore.baiduVoiceUrl("路径规划成功");
                 this.routeObj.clearLocation();
                 document.getElementById("map-goToShare").classList.remove("dom-transformY-30");
                 document.getElementById("begin-nav").classList.add("dom-transformY-30");
@@ -118,12 +118,9 @@ class MapStore {
                 this.routeObj.clearLocation();
             },
             setPathListView: (paths) => {
-                // console.log("originpaths", paths);
                 // 处理路径数据
                 this.routeHandle(paths);
                 const floor = this.startMarkerPoint.floor;
-                // console.log("rootIndoor", toJS(floorStore.routeIndoor[floor].features));
-                // console.log("beizerFloor", beizerFn(toJS(floorStore.routeIndoor[floor].features), this.mapObj));
                 // 楼层切换
                 this.changeFloor(floor);
                 if (this.mapObj.getLayer("building-layer")) {
@@ -133,8 +130,6 @@ class MapStore {
                     this.mapObj.removeSource("building-route");
                 }
                 floorStore.routeIndoorBeizer[floor] = beizerFn(toJS(floorStore.routeIndoor[floor].features), this.mapObj);
-                // console.log("floorBeizer", floorStore.routeIndoorBeizer[floor]);
-                // console.log(111, beizerFn(toJS(floorStore.routeIndoor[floor].features), this.mapObj));
                 this.mapObj.addSource("building-route", {
                     type: "geojson",
                     data: floorStore.routeIndoorBeizer[floor]

@@ -125,7 +125,6 @@ class searchPage extends Component {
                     floor: Number(v.floorId),
                     name: v.areaName
                 };
-                // console.log(data)
                 this.props.mapStore.confirmMarker(this.props.commonStore.searchStatus, data);
                 this.props.commonStore.changeSearchStatus(false);
                 this.props.commonStore.changeSearchHistory(false);

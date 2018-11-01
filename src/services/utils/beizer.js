@@ -4,8 +4,6 @@
 import {bearing, destination, distance, lineString} from "@turf/turf";
 
 const beizerFn = (arr, map) => {
-    console.log("beizerFnArr", arr);
-    console.log("beizerFnMap", map);
 
     let lines = arr;
 
