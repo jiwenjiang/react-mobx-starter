@@ -83,9 +83,11 @@ class Nav {
             }
         }
     ) {
+        this.voiceRecorder = {};
         this.onNavStep = onNav;
         this.navComplete = complete;
         this.handleData = preHandleRealData(routeData, map);
+        this.navEndLevel = routeData[routeData.length - 1].endFloor;
         this.currentMode = "realNav";
         this.startCorrectNavLocate(this.loc);
     }

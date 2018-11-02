@@ -6,8 +6,11 @@ import React, {Component} from "react";
 import {observer, inject} from "mobx-react";
 import iconSrc from "assets/img/navEnd.png";
 import "./index.less";
+import http from "services/http";
+import normalUrl from "config/url/normal";
+import MobileDetect from "mobile-detect";
 
-@inject("navStore")
+@inject("navStore", "mapStore")
 @observer
 class navComplete extends Component {
     state = {
@@ -29,7 +32,8 @@ class navComplete extends Component {
                 text: "信息有误",
                 active: false
             },
-        ]
+        ],
+        evaluateValue: ""
     };
 
 
@@ -60,9 +64,45 @@ class navComplete extends Component {
         this.props.navStore.changeEvaluateStatus(false);
     }
 
+    updateEvaluate(e) {
+        this.setState({
+            evaluateValue: e.target.value
+        });
+    }
+
+    submit() {
+        this.props.mapStore.mapObj.resetNorth();
+        this.props.navStore.changeEvaluateStatus(false);
+        let md = new MobileDetect(navigator.userAgent);
+        const {navCompleteRoute} = this.props.navStore;
+        let label = "";
+        this.state.tarArr.forEach(v => {
+            if (v.active) {
+                label += v.text + ",";
+            }
+        });
+        let os = md.os() + "_" + (md.os() == "iOS" ? md.version("iOS") : md.version("Android"));
+        const params = {
+            mapid: this.props.mapStore.mapId,
+            startPlace: navCompleteRoute.start.name,
+            endPlace: navCompleteRoute.end.name,
+            distance: navCompleteRoute.distance || 1,
+            timeConsume: navCompleteRoute.navTime / 1000,
+            score: this.state.number + 1,
+            label,
+            evaluate: this.state.evaluateValue,
+            machineType: md.mobile(),
+            versionNumber: os
+        };
+        console.log(params);
+        http.post(normalUrl.evaluate, params, (data) => {
+            console.log(data);
+        });
+    }
+
 
     render() {
-        const {number, tarArr} = this.state;
+        const {number, tarArr, evaluateValue} = this.state;
         const {navCompleteRoute} = this.props.navStore;
         return (
             <div className="confirm-mask">
@@ -100,9 +140,10 @@ class navComplete extends Component {
                             })}
                         </div>
                         <div className="nav-complete-textArea">
-                            <textarea placeholder="其他想说..."></textarea>
+                            <textarea placeholder="其他想说..." value={evaluateValue}
+                                      onChange={(e) => this.updateEvaluate(e)}></textarea>
                             <p>
-                                <button>提交</button>
+                                <button onClick={() => this.submit()}>提交</button>
                             </p>
                         </div>
                     </div>

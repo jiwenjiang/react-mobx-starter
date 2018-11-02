@@ -10,6 +10,7 @@ const url = {
     searchCarByNumber: `${normalIp}/carStatus/${version}/searchCar`,
     searchCarByPosition: `${normalIp}/carStatus/${version}/getParkingNo`,
     getBaiduToken: `${mapIp}/location/BaiDuYuYin/${version}/getAccessToken`,
+    evaluate: `${normalIp}/location/NavigationEvaluation/${version}/addNavigationEvaluation`,
 };
 
 export default url;

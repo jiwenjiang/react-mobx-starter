@@ -14,17 +14,7 @@ class navBottom extends Component {
     }
 
     exit() {
-        this.props.mapStore.removeMarker("end");
-        document.getElementById("begin-nav").classList.remove("dom-transformY-30");
-        document.getElementsByClassName("map-routePanel")[0].classList.remove("dom-transformY-35");
-        if (this.props.mapStore.startMarkerPoint) {
-            this.props.mapStore.removeMarker("start");
-        }
-        if (this.props.navStore.navRoutes) {
-            this.props.floorStore.updateRouteIndoor({});
-            this.props.floorStore.checkMarkerAndRoute(this.props.mapStore, 0);
-            this.props.navStore.getNavRoutes(null);
-        }
+        this.props.navStore.completeNav(this.props.mapStore);
     }
 
     render() {

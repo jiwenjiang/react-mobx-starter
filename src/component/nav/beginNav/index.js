@@ -114,6 +114,8 @@ class beginNav extends Component {
         this.props.navStore.freeMarker && this.props.navStore.removeFreeMarker();
         this.props.commonStore.baiduVoiceUrl("开始导航");
 
+        console.log("start", new Date().getTime());
+
         // 操作dom
         document.getElementsByClassName("map-routePanel")[0].classList.remove("dom-transformY-35");
         document.getElementById("begin-nav").classList.remove("dom-transformY-30");
@@ -125,7 +127,7 @@ class beginNav extends Component {
         let bearing = null;
         nav.startSim({
             routeData: toJS(this.props.navStore.navRoutes),
-            speed: 1,
+            speed: 5,
             onSimNav: (data) => {
                 this.props.navStore.moveNavMarker(this.props.mapStore, [data.currentLon, data.currentLat], "simMarker");
                 this.props.navStore.updateNavData(data);
@@ -168,13 +170,16 @@ class beginNav extends Component {
                 bearing = data.bearing;
             },
             complete: () => {
+                console.log("end", new Date().getTime());
                 this.props.navStore.changeNavMode("free");
                 this.props.commonStore.baiduVoiceUrl("到达目的地，感谢使用本次导航");
                 document.getElementById("nav-bottom").classList.remove("dom-transformY-30");
                 this.props.navStore.upDateNavCompleteRoute({
                     start: this.props.mapStore.startMarkerPoint,
-                    end: this.props.mapStore.endMarkerPoint
+                    end: this.props.mapStore.endMarkerPoint,
                 });
+                console.log(11111, this.props.mapStore.startMarkerPoint);
+                this.props.navStore.moveFreeMarker(this.props.mapStore, this.props.mapStore.startMarkerPoint);
                 this.props.navStore.completeNav(this.props.mapStore);
                 clearInterval(navTimer);
                 this.props.navStore.changeEvaluateStatus(true);
@@ -183,6 +188,9 @@ class beginNav extends Component {
     }
 
     realNav() {
+        // 当前时间
+        let navTime = new Date().getTime();
+        //
         this.props.navStore.changeNavMode("real");
         this.props.navStore.freeMarker && this.props.navStore.removeFreeMarker();
         const startPoint = toJS(this.props.floorStore.routeIndoorBeizer[this.props.floorStore.mapFloor])
@@ -211,16 +219,24 @@ class beginNav extends Component {
                     }
                 });
                 if (data.voice) {
-                    console.log(data.voice);
                     this.props.commonStore.baiduVoiceUrl(data.voice);
                 }
             },
             complete: (data) => {
+                navTime = new Date().getTime() - navTime;
                 this.props.navStore.changeNavMode("free");
+                this.props.navStore.upDateNavCompleteRoute({
+                    start: this.props.mapStore.startMarkerPoint,
+                    end: this.props.mapStore.endMarkerPoint,
+                    distance: data.distance,
+                    navTime
+                });
                 this.props.commonStore.baiduVoiceUrl("到达目的地，感谢使用本次导航");
-                document.getElementById("nav-bottom").classList.remove("dom-transformY-30");
+                document.getElementById("nav-bottom")
+                && document.getElementById("nav-bottom").classList.remove("dom-transformY-30");
                 this.props.navStore.completeNav(this.props.mapStore);
                 this.props.navStore.moveFreeMarker(this.props.mapStore, data);
+                this.props.navStore.changeEvaluateStatus(true);
             },
         });
     }

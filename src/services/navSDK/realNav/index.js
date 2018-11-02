@@ -21,11 +21,11 @@ const realNavigationFn = (target) => {
         onRealNavStep(currentPoint) {
             // console.log("实时导航", point);
             const {handleRouteFloor, handleRouteFloorBeizer, routeLength} = this.handleData;
+
             const routeFloor = handleRouteFloor[currentPoint.level];
             const routeFloorBeizer = handleRouteFloorBeizer[currentPoint.level];
             let currentLineIndex = 0;
             let geoPoint = point([currentPoint.longitude, currentPoint.latitude]);
-            let voiceRecorder = {};
             const distanceArr = [];
             for (let v of routeFloor) {
                 let line = lineString(v.LineCoordinates);
@@ -34,11 +34,11 @@ const realNavigationFn = (target) => {
             currentLineIndex = distanceArr.findIndex(v => v == Math.min(...distanceArr));
             this.currentRealNavLine = lineString(routeFloor[currentLineIndex].LineCoordinates);
             const shadowPoint = nearestPointOnLine(this.currentRealNavLine, geoPoint);
-            const navResult = this.realNavLogic(shadowPoint, currentLineIndex, routeFloor, voiceRecorder);
+            const navResult = this.realNavLogic(shadowPoint, currentLineIndex, routeFloor, handleRouteFloor);
             const currentPt = [this.currentPoint.longitude, this.currentPoint.latitude];
             const beizerShadowPoint = nearestPointOnLine(routeFloorBeizer, point(currentPt));
             const output = {
-                // leftDistance,
+                leftDistance: navResult.leftDistance,
                 bearing: navResult.currentBearing,
                 currentLon: beizerShadowPoint.geometry.coordinates[0],
                 currentLat: beizerShadowPoint.geometry.coordinates[1],
@@ -54,7 +54,8 @@ const realNavigationFn = (target) => {
         }
 
         // 模拟导航逻辑
-        realNavLogic(shadowPoint, currentLineIndex, routeFloor, voiceRecorder) {
+        realNavLogic(shadowPoint, currentLineIndex, routeFloor, handleRouteFloor) {
+            let voiceRecorder = this.voiceRecorder;
             const currentFloor = routeFloor[currentLineIndex].startFloor; // 当前楼层
             const currentLine = routeFloor[currentLineIndex].LineCoordinates; // 当前路径
             const startPoint = point(currentLine[0]); // 当前路径终点
@@ -68,6 +69,7 @@ const realNavigationFn = (target) => {
             const currentStartDistance = distance(shadowPoint, startPoint) * 1000; // 当前起点距离
             const currentEndDistance = ~~(distance(shadowPoint, endPoint) * 1000); // 当前终点距离
             const currentBearing = bearingToAzimuth(bearing(startPoint, endPoint)); // 当前方向
+            // 当前点替换
             if (currentStartDistance > 5 && currentEndDistance > 5) {
                 this.currentPoint = {
                     ...this.currentPoint,
@@ -75,6 +77,27 @@ const realNavigationFn = (target) => {
                     latitude: shadowPoint.geometry.coordinates[1]
                 };
             }
+            let leftDistance = 0;
+            if (currentLineIndex == (routeFloor.length - 1)) {
+                leftDistance = currentEndDistance;
+                if (this.currentPoint.level != this.navEndLevel) {
+                    for (let i = 0; i < handleRouteFloor[this.navEndLevel].length; i++) {
+                        leftDistance += handleRouteFloor[this.navEndLevel][i];
+                    }
+                }
+            } else {
+                for (let i = currentLineIndex + 1; i < routeFloor.length; i++) {
+                    leftDistance += routeFloor[i].distance;
+                }
+                leftDistance = leftDistance + currentEndDistance;
+                if (this.currentPoint.level != this.navEndLevel) {
+                    for (let i = 0; i < handleRouteFloor[this.navEndLevel].length; i++) {
+                        leftDistance += handleRouteFloor[this.navEndLevel][i];
+                    }
+                }
+            }
+
+
             let text = ""; // 文字提示
             let voice = ""; // 语音提示
             // 大于起点1米开始提示
@@ -120,18 +143,20 @@ const realNavigationFn = (target) => {
                         }
                     }
                 } else {
-                    if (currentStartDistance >= 2) {
-                        text = `前方${currentEndDistance}米到达终点`;
-                        if (!voiceRecorder[`${currentLineIndex}4`]) {
-                            voice = `前方${currentEndDistance}米到达终点`;
-                            voiceRecorder[`${currentLineIndex}4`] = true;
+                    if (this.currentPoint.level == this.navEndLevel) {
+                        if (currentStartDistance >= 1) {
+                            text = `前方${currentEndDistance}米到达终点`;
+                            if (!voiceRecorder[`${currentLineIndex}4`] && lineDistance > 5) {
+                                voice = `前方${currentEndDistance}米到达终点`;
+                                voiceRecorder[`${currentLineIndex}4`] = true;
+                            }
                         }
-                    }
-                    if (currentEndDistance < 2) {
-                        console.log("完成导航");
-                        this.currentMode = "free";
-                        this.startCorrectFreeLocate(this.loc);
-                        this.navComplete(this.currentPoint);
+                        if (currentEndDistance < 1) {
+                            console.log("完成导航");
+                            this.currentMode = "free";
+                            this.startCorrectFreeLocate(this.loc);
+                            this.navComplete(this.currentPoint);
+                        }
                     }
                 }
             }
@@ -140,7 +165,8 @@ const realNavigationFn = (target) => {
                 voice,
                 currentFloor,
                 turnType,
-                currentBearing
+                currentBearing,
+                leftDistance
             };
         }
     };
