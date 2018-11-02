@@ -71,6 +71,13 @@ class Nav {
         this.startSimNavigation(handleData, speed);
     }
 
+    stopSim() {
+        window.cancelAnimationFrame(this.animateId);
+        if (this.loc && this.loc.currentPosition) {
+            this.startCorrectFreeLocate(this.loc);
+        }
+    }
+
     startNav(
         {
             routeData = [],
@@ -91,6 +98,12 @@ class Nav {
         this.currentMode = "realNav";
         this.startCorrectNavLocate(this.loc);
     }
+
+    stopNav() {
+        this.currentMode = "free";
+        this.startCorrectFreeLocate(this.loc);
+    }
+
 }
 
 export default new Nav();

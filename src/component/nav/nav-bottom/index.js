@@ -5,6 +5,7 @@
 import React, {Component} from "react";
 import {observer, inject} from "mobx-react";
 import "./index.less";
+import nav from "services/navSDK";
 
 @inject("mapStore", "navStore", "floorStore", "commonStore")
 @observer
@@ -14,7 +15,14 @@ class navBottom extends Component {
     }
 
     exit() {
+        if (this.props.navStore.navMode == "real") {
+            nav.stopNav();
+        }
+        if (this.props.navStore.navMode == "sim") {
+            nav.stopSim();
+        }
         this.props.navStore.completeNav(this.props.mapStore);
+        this.props.navStore.moveFreeMarker(this.props.mapStore, this.props.navStore.currentLocation);
     }
 
     render() {

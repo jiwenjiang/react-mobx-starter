@@ -108,7 +108,6 @@ class mapPage extends Component {
                     nav.init(loc);
                     nav.startFree({
                         complete: (data) => {
-                            // console.log("自由模式监听", data);
                             this.props.navStore.moveFreeMarker(this.props.mapStore, data);
                         }
                     });
@@ -128,6 +127,7 @@ class mapPage extends Component {
     setMarker(data) {
         if (this.props.mapStore.mapObj && this.props.mapStore.mapGL) {
             if (data.locType === "ibeacon") {
+                this.props.navStore.updateCurrentLocation(data);
                 if (this.confMarker) {
                     this.confMarker.setLngLat([data.fiducialLon, data.fiducialLat]);
                 } else {

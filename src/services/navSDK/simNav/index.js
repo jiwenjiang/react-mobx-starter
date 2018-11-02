@@ -18,11 +18,11 @@ const simNavigationFn = (target) => {
             // 判断是否跨楼层
             let completeLength = 0;
             let currentLineIndex = 0;
-            let animateId = null;
+            this.animateId = null;
             let voiceRecorder = {};
             const animate = () => {
                 if (animateArray.length > completeLength) {
-                    animateId = window.requestAnimationFrame(animate);
+                    this.animateId = window.requestAnimationFrame(animate);
                     let currentPoint = animateArray[completeLength];
                     let geoPoint = point(currentPoint);
                     const distanceArr = [];
@@ -50,7 +50,7 @@ const simNavigationFn = (target) => {
                 } else {
                     console.log("取消");
                     this.simComplete();
-                    window.cancelAnimationFrame(animateId);
+                    window.cancelAnimationFrame(this.animateId);
                     if (this.loc && this.loc.currentPosition) {
                         this.startCorrectFreeLocate(this.loc);
                     }

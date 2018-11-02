@@ -41,6 +41,7 @@ class NavStore {
     @observable initLocation; // 初始化定位
     @observable evaluateStatus; // 评价模型显示
     @observable navCompleteRoute; // 结束导航数据
+    @observable currentLocation; // 当前定位
 
     constructor() {
         this.mapNavParams = {
@@ -71,6 +72,7 @@ class NavStore {
         this.initLocation = false;
         this.evaluateStatus = false;
         this.navCompleteRoute = {};
+        this.currentLocation = null;
     }
 
     // 更新当前定位点
@@ -241,6 +243,10 @@ class NavStore {
 
     @action changeEvaluateStatus(v) {
         this.evaluateStatus = v;
+    }
+
+    @action updateCurrentLocation(v) {
+        this.currentLocation = v;
     }
 }
 
