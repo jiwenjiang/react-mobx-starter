@@ -175,8 +175,6 @@ const blueToothFn = (target) => {
          * @author j_bleach
          * @date 2018-10-18
          * @Description: 监听蓝牙点（超时切换gps）
-         * @param name:String
-         * @return name:String
          */
         onSearchBeaconsWithGps() {
             console.log("进入蓝牙定时搜索");

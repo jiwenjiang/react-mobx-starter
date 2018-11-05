@@ -15,9 +15,10 @@ class routePanel extends Component {
         this.props.navStore.changeRoadType(v);
         if (v === "car") {
             this.props.navStore.changePriorityType("stairs");
-        }else {
+        } else {
             this.props.navStore.changePriorityType("elevator");
         }
+        this.props.mapStore.planRoute();
     }
 
     routeFocus(v) {
@@ -26,7 +27,8 @@ class routePanel extends Component {
     }
 
     changePersonType(personType) {
-        this.props.navStore.changePriorityType(personType)
+        this.props.navStore.changePriorityType(personType);
+        this.props.mapStore.planRoute();
     }
 
     render() {

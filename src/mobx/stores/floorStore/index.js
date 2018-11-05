@@ -3,7 +3,7 @@
  */
 /*eslint-disable*/
 import {observable, action, autorun, configure, toJS} from "mobx";
-import {beizerFn} from "services/utils/beizer";
+import {bezierFn} from "services/utils/bezier";
 // import http from "services/http";
 // import normalUrl from "config/url/normal";
 // import {commonStore} from "../commonStore";
@@ -17,7 +17,7 @@ class FloorStore {
     @observable floorStatus; // 是否显示楼层（是否为室内）
     @observable floorData; // 楼层数据
     @observable routeIndoor; // 室内路径
-    @observable routeIndoorBeizer; // 室内路径
+    @observable routeIndoorBezier; // 室内路径
 
     constructor() {
         this.mapFloor = 0;
@@ -36,7 +36,7 @@ class FloorStore {
          };
          */
         this.routeIndoor = {};
-        this.routeIndoorBeizer = {};
+        this.routeIndoorBezier = {};
     }
 
     // 更新当前楼层
@@ -74,7 +74,7 @@ class FloorStore {
         // 路径规划 跨楼层判断
         if (map.mapObj.getLayer("building-layer")) {
             const geoData = floorStore.routeIndoor[floor]
-                ? beizerFn(toJS(floorStore.routeIndoor[floor].features), map.mapObj)
+                ? bezierFn(toJS(floorStore.routeIndoor[floor].features), map.mapObj)
                 : {
                     type: "FeatureCollection",
                     features: []

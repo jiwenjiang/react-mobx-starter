@@ -95,7 +95,7 @@ const preHandleRealData = (route, map) => {
     let pointCollects = []; // 点集合
     let routeLength = 0; // 总距离
     let handleRouteFloor = {};
-    let handleRouteFloorBeizer = {};
+    let handleRouteFloorBezier = {};
     let parseTurnType = (turnType) => {
         let turnText = {
             0: "起点",
@@ -141,19 +141,19 @@ const preHandleRealData = (route, map) => {
         }
     }
     for (let key in handleRouteFloor) {
-        handleRouteFloorBeizer[key] = beizerFn(handleRouteFloor[key], map);
+        handleRouteFloorBezier[key] = bezierFn(handleRouteFloor[key], map);
     }
     let routeLine = lineString(pointCollects);
     routeLength = length(routeLine) * 1000;
     return {
         routeLength,
         handleRouteFloor,
-        handleRouteFloorBeizer
+        handleRouteFloorBezier
     };
 };
 
 // 贝塞尔处理
-const beizerFn = (arr, map) => {
+const bezierFn = (arr, map) => {
 
     let lines = arr;
 
@@ -215,7 +215,7 @@ const beizerFn = (arr, map) => {
         return points;
     }
 
-    function beizer(map) {
+    function bezier(map) {
         let startEndArr = getStartEndArr();
         let c = new Array();
         for (let i = 0; i < startEndArr.length - 3; i += 2) {
@@ -267,6 +267,6 @@ const beizerFn = (arr, map) => {
         return c;
     }
 
-    return beizer(map);
+    return bezier(map);
 };
-export {calcDistanceFn, calcMidPoint, preHandleSimData, preHandleRealData, beizerFn};
+export {calcDistanceFn, calcMidPoint, preHandleSimData, preHandleRealData, bezierFn};

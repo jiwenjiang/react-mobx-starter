@@ -8,7 +8,7 @@ import stepper from "./stepper";
 import correctLocate from "./correctLocate";
 import simNavigation from "./simNav";
 import realNavigation from "./realNav";
-import {preHandleSimData, beizerFn, preHandleRealData} from "./utils";
+import {preHandleSimData, preHandleRealData} from "./utils";
 
 // import {pointToLineDistance} from "@turf/turf";
 

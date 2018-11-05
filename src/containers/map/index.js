@@ -51,7 +51,9 @@ class mapPage extends Component {
 
         // 监听地图点击
         map.on("click", (e) => {
-            this.props.mapStore.handleMarker(e);
+            if (this.props.navStore.navMode == "free") {
+                this.props.mapStore.handleMarker(e);
+            }
         });
 
         // 监听楼层改变
@@ -98,7 +100,7 @@ class mapPage extends Component {
                 this.setMarker(data);
                 // console.log("map-on", data);
                 if (this.props.commonStore.detectLocation && data.level && data.level != this.props.floorStore.mapFloor) {
-                    // console.log("entry change level", data.level, this.props.floorStore.mapFloor);
+                    console.log("entry change level", data.level, this.props.floorStore.mapFloor);
                     this.props.floorStore.listenIbeacon(this.props.mapStore, data.level);
                 }
                 if (!this.props.navStore.freeMarker && this.props.navStore.firstLocation) {
@@ -226,7 +228,7 @@ class mapPage extends Component {
                 {evaluateStatus && <NavEndModal {...warningModalProps}></NavEndModal>}
                 {noticeProps && NoticeComponent(noticeProps)}
                 <Operators></Operators>
-                {<GotoShare></GotoShare>}
+                <GotoShare></GotoShare>
                 {(startMarker || endMarker) && <BeginNav></BeginNav>}
                 <RoutePanel></RoutePanel>
                 {startMarker && <NavBottom></NavBottom>}

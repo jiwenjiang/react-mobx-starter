@@ -127,7 +127,7 @@ class beginNav extends Component {
         let bearing = null;
         nav.startSim({
             routeData: toJS(this.props.navStore.navRoutes),
-            speed: 5,
+            speed: 1,
             onSimNav: (data) => {
                 this.props.navStore.moveNavMarker(this.props.mapStore, [data.currentLon, data.currentLat], "simMarker");
                 this.props.navStore.updateNavData(data);
@@ -178,7 +178,6 @@ class beginNav extends Component {
                     start: this.props.mapStore.startMarkerPoint,
                     end: this.props.mapStore.endMarkerPoint,
                 });
-                console.log(11111, this.props.mapStore.startMarkerPoint);
                 this.props.navStore.moveFreeMarker(this.props.mapStore, this.props.mapStore.startMarkerPoint);
                 this.props.navStore.completeNav(this.props.mapStore);
                 clearInterval(navTimer);
@@ -190,10 +189,11 @@ class beginNav extends Component {
     realNav() {
         // 当前时间
         let navTime = new Date().getTime();
+        this.props.commonStore.changeDetectLocation(true); // 开启定位检测
         //
         this.props.navStore.changeNavMode("real");
         this.props.navStore.freeMarker && this.props.navStore.removeFreeMarker();
-        const startPoint = toJS(this.props.floorStore.routeIndoorBeizer[this.props.floorStore.mapFloor])
+        const startPoint = toJS(this.props.floorStore.routeIndoorBezier[this.props.floorStore.mapFloor])
             .geometry.coordinates[0];
         this.props.navStore.moveNavMarker(this.props.mapStore, startPoint, "navMarker");
         this.props.commonStore.baiduVoiceUrl("开始导航");

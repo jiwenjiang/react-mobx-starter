@@ -112,6 +112,8 @@ const correctLocateFn = (target) => {
             }
         };
 
+
+
         // 导航模式
         startCorrectNavLocate(loc) {
             console.log("entry 导航纠偏");
@@ -132,7 +134,7 @@ const correctLocateFn = (target) => {
                 "ibeacon": this.correctNavLocateIndoor,
                 "gps": this.correctNavLocateOutdoor,
             }[this.currentPoint.locType];
-            correctMode(locate);
+            correctMode && correctMode(locate);
         }
 
         correctNavLocateIndoor = (loc) => {
@@ -220,6 +222,10 @@ const correctLocateFn = (target) => {
                     }
                 }
             }
+        };
+
+        correctNavLocateOutdoor = (loc) => {
+            console.log("进入户外", loc);
         };
 
         updateNavCurrentPoint(point) {

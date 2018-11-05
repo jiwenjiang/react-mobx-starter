@@ -191,6 +191,7 @@ class NavStore {
         }
     }
 
+    // 首次定位
     @action changeFirstLocation(status) {
         this.firstLocation = status;
     }
@@ -241,10 +242,12 @@ class NavStore {
         this.navCompleteRoute = v;
     }
 
+    // 评价页面显示
     @action changeEvaluateStatus(v) {
         this.evaluateStatus = v;
     }
 
+    // 更新当前定位
     @action updateCurrentLocation(v) {
         this.currentLocation = v;
     }

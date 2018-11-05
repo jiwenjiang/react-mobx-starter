@@ -9,7 +9,7 @@ import {
     distance,
     bearingToAzimuth,
     bearing,
-    nearestPointOnLine
+    nearestPointOnLine,
 } from "@turf/turf";
 
 const realNavigationFn = (target) => {
@@ -19,11 +19,11 @@ const realNavigationFn = (target) => {
         }
 
         onRealNavStep(currentPoint) {
-            // console.log("实时导航", point);
-            const {handleRouteFloor, handleRouteFloorBeizer, routeLength} = this.handleData;
-
+            // console.log("实时导航", currentPoint);
+            const {handleRouteFloor, handleRouteFloorBezier, routeLength} = this.handleData;
             const routeFloor = handleRouteFloor[currentPoint.level];
-            const routeFloorBeizer = handleRouteFloorBeizer[currentPoint.level];
+            const routeFloorBezier = handleRouteFloorBezier[currentPoint.level];
+            // console.log("aaa", routeFloorBezier);
             let currentLineIndex = 0;
             let geoPoint = point([currentPoint.longitude, currentPoint.latitude]);
             const distanceArr = [];
@@ -33,15 +33,26 @@ const realNavigationFn = (target) => {
             }
             currentLineIndex = distanceArr.findIndex(v => v == Math.min(...distanceArr));
             this.currentRealNavLine = lineString(routeFloor[currentLineIndex].LineCoordinates);
-            const shadowPoint = nearestPointOnLine(this.currentRealNavLine, geoPoint);
+
+            let shadowPoint = nearestPointOnLine(this.currentRealNavLine, geoPoint);
+            let currentPt = [this.currentPoint.longitude, this.currentPoint.latitude];
+            // 进入电梯、扶梯判断
+            if (this.loc.currentPosition.locType == "ibeacon" && this.loc.currentLocation == "gps") {
+                if (this.loc.currentPosition.level != this.navEndLevel) {
+                    const coordinates = routeFloorBezier.geometry.coordinates;
+                    shadowPoint = point(coordinates[coordinates.length - 1]);
+                    console.log("进入楼梯");
+                    currentPt = coordinates[coordinates.length - 1];
+                }
+            }
             const navResult = this.realNavLogic(shadowPoint, currentLineIndex, routeFloor, handleRouteFloor);
-            const currentPt = [this.currentPoint.longitude, this.currentPoint.latitude];
-            const beizerShadowPoint = nearestPointOnLine(routeFloorBeizer, point(currentPt));
+
+            const bezierShadowPoint = nearestPointOnLine(routeFloorBezier, point(currentPt));
             const output = {
                 leftDistance: navResult.leftDistance,
                 bearing: navResult.currentBearing,
-                currentLon: beizerShadowPoint.geometry.coordinates[0],
-                currentLat: beizerShadowPoint.geometry.coordinates[1],
+                currentLon: bezierShadowPoint.geometry.coordinates[0],
+                currentLat: bezierShadowPoint.geometry.coordinates[1],
                 level: navResult.currentFloor,
                 totalDistance: routeLength,
                 turn: navResult.turnType,

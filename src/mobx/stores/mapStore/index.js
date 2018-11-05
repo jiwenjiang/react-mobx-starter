@@ -15,7 +15,7 @@ import startImg from "assets/img/start.png";
 import endImg from "assets/img/end.png";
 import "./index.less";
 
-import {beizerFn} from "services/utils/beizer";
+import {bezierFn} from "services/utils/bezier";
 
 configure({
     enforceActions: "observed"
@@ -129,10 +129,11 @@ class MapStore {
                 if (this.mapObj.getSource("building-route")) {
                     this.mapObj.removeSource("building-route");
                 }
-                floorStore.routeIndoorBeizer[floor] = beizerFn(toJS(floorStore.routeIndoor[floor].features), this.mapObj);
+                console.log(toJS(floorStore.routeIndoor));
+                floorStore.routeIndoorBezier[floor] = bezierFn(toJS(floorStore.routeIndoor[floor].features), this.mapObj);
                 this.mapObj.addSource("building-route", {
                     type: "geojson",
-                    data: floorStore.routeIndoorBeizer[floor]
+                    data: floorStore.routeIndoorBezier[floor]
                 });
 
                 this.mapObj.addLayer({

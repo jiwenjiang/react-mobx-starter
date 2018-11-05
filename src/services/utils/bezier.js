@@ -3,7 +3,7 @@
  */
 import {bearing, destination, distance, lineString} from "@turf/turf";
 
-const beizerFn = (arr, map) => {
+const bezierFn = (arr, map) => {
 
     let lines = arr;
 
@@ -65,7 +65,7 @@ const beizerFn = (arr, map) => {
         return points;
     }
 
-    function beizer(map) {
+    function bezier(map) {
         let startEndArr = getStartEndArr();
         let c = new Array();
         if (startEndArr.length > 2) {
@@ -138,6 +138,6 @@ const beizerFn = (arr, map) => {
         return c;
     }
 
-    return beizer(map);
+    return bezier(map);
 };
-export {beizerFn};
+export {bezierFn};
