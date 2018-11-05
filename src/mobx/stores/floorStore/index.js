@@ -58,14 +58,14 @@ class FloorStore {
         const endMarker = map.endMarker;
         const startMarker = map.startMarker;
         if (endMarkerPoint) {
-            if (endMarkerPoint.floor == floor) {
+            if (endMarkerPoint.floor == floor || endMarkerPoint.floor === 0) {
                 endMarker.setLngLat(endMarkerPoint.point);
             } else {
                 endMarker.setLngLat([0, 0]);
             }
         }
         if (startMarkerPoint) {
-            if (startMarkerPoint.floor == floor) {
+            if (startMarkerPoint.floor == floor || startMarkerPoint.floor === 0) {
                 startMarker.setLngLat(startMarkerPoint.point);
             } else {
                 startMarker.setLngLat([0, 0]);

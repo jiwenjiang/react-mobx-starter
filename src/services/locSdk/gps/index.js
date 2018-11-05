@@ -26,6 +26,7 @@ const gpsFn = (target) => {
                 longitude: data.longitude,
                 latitude: data.latitude,
                 accuracy: data.accuracy,
+                level: "0",
                 locType: "gps",
                 timestamp: res.timestamp
             };

@@ -195,6 +195,7 @@ class MapStore {
     @action
     handleMarker(e) {
         let feature = this.mapObj.queryRenderedFeatures(e.point);
+        // console.log(feature);
         if (feature && feature[0] && "layer" in feature[0] && "properties" in feature[0]) {
             if (feature[0]["properties"]["name"]) {
                 let polygonGeojson = feature[0].geometry.coordinates;
@@ -214,9 +215,10 @@ class MapStore {
                 }
                 const markerData = {
                     point: point.geometry.coordinates,
-                    floor: Number(point.floor),
+                    floor: point.floor ? Number(point.floor) : 0, // 户外楼层1024指代
                     name: feature[0]["properties"]["name"]
                 };
+                console.log(point);
                 if (navStore.freeMarker) {
                     this.confirmMarker("start", navStore.freeMarkerPoint, true);
                     this.confirmMarker("end", markerData, true);

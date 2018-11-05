@@ -22,7 +22,6 @@ class floor extends Component {
          * @param name:String
          * @return name:String
          */
-        // TODO 国庆完成
 //         const floor = document.getElementById("floor");
 //         const manager = new Hammer.Manager(floor);
 //         const Swipe = new Hammer.Swipe();
@@ -44,6 +43,7 @@ class floor extends Component {
 //             //     // e.target.style.transform = translate3d;
 //             // }
 //         });
+
     }
 
     calcFloorHeight() {
@@ -103,8 +103,8 @@ class floor extends Component {
         const {showFloor, floorData} = this.state;
         const {mapFloor, floorStatus} = this.props.floorStore;
         const referFloor = mapFloor >= 0 ? mapFloor + 1 : mapFloor;
-        return <div>
-            {floorStatus && <div className="map-operators-floor">
+        return <div className="map-operators-floor">
+            {floorStatus && <div>
                 {
                     showFloor && <div className="map-operators-floor-total" id="map-operators-floor-total">
                         {/*<div id="floor" className="swipe-floor"></div>*/}
@@ -121,7 +121,7 @@ class floor extends Component {
                     {mapFloor >= 0 ? `${Number(mapFloor) + 1}F` : `B${-Number(mapFloor)}`}
                 </div>
             </div>
-            };
+            }
         </div>;
     }
 }

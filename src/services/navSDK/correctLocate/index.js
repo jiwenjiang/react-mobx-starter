@@ -36,12 +36,13 @@ const correctLocateFn = (target) => {
         }
 
         chooseFreeCorrectMode(loc) {
+            console.log("选择自由");
             const locate = loc.currentPosition;
             const correctMode = {
                 "ibeacon": this.correctFreeLocateIndoor,
                 "gps": this.correctFreeLocateOutdoor,
             }[locate.locType];
-            correctMode(locate);
+            correctMode && correctMode(locate);
         }
 
         /**
@@ -111,7 +112,6 @@ const correctLocateFn = (target) => {
                 }
             }
         };
-
 
 
         // 导航模式
@@ -225,7 +225,10 @@ const correctLocateFn = (target) => {
         };
 
         correctNavLocateOutdoor = (loc) => {
-            console.log("进入户外", loc);
+            if (!this.correctNavFlag2) {
+                console.log("进入户外", loc);
+                this.updateNavCurrentPoint2();
+            }
         };
 
         updateNavCurrentPoint(point) {
@@ -234,6 +237,13 @@ const correctLocateFn = (target) => {
             this.onRealNavStep(point);
             setTimeout(() => {
                 this.correctNavFlag = false;
+            }, 5000);
+        }
+
+        updateNavCurrentPoint2() {
+            this.correctNavFlag2 = true;
+            setTimeout(() => {
+                this.correctNavFlag2 = false;
             }, 5000);
         }
 

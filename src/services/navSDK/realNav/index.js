@@ -38,7 +38,7 @@ const realNavigationFn = (target) => {
             let currentPt = [this.currentPoint.longitude, this.currentPoint.latitude];
             // 进入电梯、扶梯判断
             if (this.loc.currentPosition.locType == "ibeacon" && this.loc.currentLocation == "gps") {
-                if (this.loc.currentPosition.level != this.navEndLevel) {
+                if (this.loc.currentPosition.level != this.navEndLevel && (currentLineIndex == routeFloor.length - 1)) {
                     const coordinates = routeFloorBezier.geometry.coordinates;
                     shadowPoint = point(coordinates[coordinates.length - 1]);
                     console.log("进入楼梯");
@@ -61,6 +61,7 @@ const realNavigationFn = (target) => {
                 isOutdoor: this.currentPoint.isOutdoor,
                 info: "SUCCESS"
             };
+            console.log("导航输出", output);
             this.onNavStep(output);
         }
 
@@ -82,6 +83,7 @@ const realNavigationFn = (target) => {
             const currentBearing = bearingToAzimuth(bearing(startPoint, endPoint)); // 当前方向
             // 当前点替换
             if (currentStartDistance > 5 && currentEndDistance > 5) {
+                console.log("shadowPoint", shadowPoint);
                 this.currentPoint = {
                     ...this.currentPoint,
                     longitude: shadowPoint.geometry.coordinates[0],

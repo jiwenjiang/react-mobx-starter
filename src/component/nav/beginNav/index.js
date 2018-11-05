@@ -114,8 +114,6 @@ class beginNav extends Component {
         this.props.navStore.freeMarker && this.props.navStore.removeFreeMarker();
         this.props.commonStore.baiduVoiceUrl("开始导航");
 
-        console.log("start", new Date().getTime());
-
         // 操作dom
         document.getElementsByClassName("map-routePanel")[0].classList.remove("dom-transformY-35");
         document.getElementById("begin-nav").classList.remove("dom-transformY-30");
