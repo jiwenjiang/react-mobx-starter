@@ -96,6 +96,7 @@ class Nav {
         this.handleData = preHandleRealData(routeData, map);
         this.navEndLevel = routeData[routeData.length - 1].endFloor;
         this.currentMode = "realNav";
+        this.correctNavFlag = false;
         this.startCorrectNavLocate(this.loc);
     }
 

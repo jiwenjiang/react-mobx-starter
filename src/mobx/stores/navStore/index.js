@@ -41,7 +41,8 @@ class NavStore {
     @observable initLocation; // 初始化定位
     @observable evaluateStatus; // 评价模型显示
     @observable navCompleteRoute; // 结束导航数据
-    @observable currentLocation; // 当前定位
+    @observable currentLocation; // 当前定位r
+    @observable rePlanStatus; // 重新规划路劲
 
     constructor() {
         this.mapNavParams = {
@@ -73,11 +74,17 @@ class NavStore {
         this.evaluateStatus = false;
         this.navCompleteRoute = {};
         this.currentLocation = null;
+        this.rePlanStatus = false;
     }
 
     // 更新当前定位点
     @action updateLocateCoordinate = (value) => {
         this.locateCoordinate = value;
+    };
+
+    // 更新重新规划路径状态
+    @action updateRePlanStatus = (v) => {
+        this.rePlanStatus = v;
     };
 
     // 更新导航模式

@@ -203,7 +203,6 @@ class beginNav extends Component {
             routeData: toJS(this.props.navStore.navRoutes),
             map: this.props.mapStore.mapObj,
             onNav: (data) => {
-                // console.log("导航data", data);
                 this.props.navStore.moveNavMarker(this.props.mapStore, [data.currentLon, data.currentLat], "navMarker");
                 this.props.navStore.updateNavData(data); // 更新导航数据
                 this.props.mapStore.mapObj.flyTo({
@@ -221,20 +220,32 @@ class beginNav extends Component {
                 }
             },
             complete: (data) => {
-                navTime = new Date().getTime() - navTime;
-                this.props.navStore.changeNavMode("free");
-                this.props.navStore.upDateNavCompleteRoute({
-                    start: this.props.mapStore.startMarkerPoint,
-                    end: this.props.mapStore.endMarkerPoint,
-                    distance: data.distance,
-                    navTime
-                });
-                this.props.commonStore.baiduVoiceUrl("到达目的地，感谢使用本次导航");
-                document.getElementById("nav-bottom")
-                && document.getElementById("nav-bottom").classList.remove("dom-transformY-30");
-                this.props.navStore.completeNav(this.props.mapStore);
-                this.props.navStore.moveFreeMarker(this.props.mapStore, data);
-                this.props.navStore.changeEvaluateStatus(true);
+                console.log("完成", data);
+                if (!data.isYaw) {
+                    navTime = new Date().getTime() - navTime;
+                    this.props.navStore.changeNavMode("free");
+                    this.props.navStore.upDateNavCompleteRoute({
+                        start: this.props.mapStore.startMarkerPoint,
+                        end: this.props.mapStore.endMarkerPoint,
+                        distance: data.distance,
+                        navTime
+                    });
+                    this.props.commonStore.baiduVoiceUrl("到达目的地，感谢使用本次导航");
+                    document.getElementById("nav-bottom")
+                    && document.getElementById("nav-bottom").classList.remove("dom-transformY-30");
+                    this.props.navStore.completeNav(this.props.mapStore);
+                    this.props.navStore.moveFreeMarker(this.props.mapStore, data);
+                    this.props.navStore.changeEvaluateStatus(true);
+                } else {
+                    this.props.navStore.updateRePlanStatus(true);
+                    this.props.commonStore.baiduVoiceUrl("偏离路线，正在重新规划路径");
+                    const startPoint = {
+                        floor: data.level,
+                        point: [data.longitude, data.latitude],
+                        name: "当前位置"
+                    };
+                    this.props.mapStore.confirmMarker("start", startPoint);
+                }
             },
         });
     }
@@ -282,7 +293,7 @@ class beginNav extends Component {
                             <i className="iconfont icon-monixianlupipei"></i>
                             <span> 模拟导航</span>
                         </button>
-                        <button className={`${navRoutes ? "begin-nav-nav" : "begin-nav-gray-btn"}`}
+                        <button className={`${navRoutes ? "begin-nav-nav" : "begin-nav-gray-btn"}`} id="beginNavBtn"
                                 onClick={() => this.realNav()}>
                             <i className="iconfont icon-daohang1"></i>
                             <span> 开始导航</span>

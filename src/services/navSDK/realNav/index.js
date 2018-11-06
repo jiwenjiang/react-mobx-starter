@@ -61,7 +61,6 @@ const realNavigationFn = (target) => {
                 isOutdoor: this.currentPoint.isOutdoor,
                 info: "SUCCESS"
             };
-            console.log("导航输出", output);
             this.onNavStep(output);
         }
 
@@ -83,7 +82,6 @@ const realNavigationFn = (target) => {
             const currentBearing = bearingToAzimuth(bearing(startPoint, endPoint)); // 当前方向
             // 当前点替换
             if (currentStartDistance > 5 && currentEndDistance > 5) {
-                console.log("shadowPoint", shadowPoint);
                 this.currentPoint = {
                     ...this.currentPoint,
                     longitude: shadowPoint.geometry.coordinates[0],

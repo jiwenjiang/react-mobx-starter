@@ -105,10 +105,8 @@ class MapStore {
                 runInAction(() => {
                     commonStore.loadingStatus = false;
                 });
-                commonStore.baiduVoiceUrl("路径规划成功");
                 this.routeObj.clearLocation();
                 document.getElementById("map-goToShare").classList.remove("dom-transformY-30");
-                document.getElementById("begin-nav").classList.add("dom-transformY-30");
             },
             routeError: () => {
                 console.error("路径规划失败");
@@ -129,8 +127,8 @@ class MapStore {
                 if (this.mapObj.getSource("building-route")) {
                     this.mapObj.removeSource("building-route");
                 }
-                console.log(toJS(floorStore.routeIndoor));
                 floorStore.routeIndoorBezier[floor] = bezierFn(toJS(floorStore.routeIndoor[floor].features), this.mapObj);
+                // console.log("当前bezier", floorStore.routeIndoorBezier[floor]);
                 this.mapObj.addSource("building-route", {
                     type: "geojson",
                     data: floorStore.routeIndoorBezier[floor]
@@ -155,6 +153,14 @@ class MapStore {
                         }
                     }
                 });
+                if (!navStore.rePlanStatus) {
+                    document.getElementById("begin-nav").classList.add("dom-transformY-30");
+                    commonStore.baiduVoiceUrl("路径规划成功");
+                } else {
+                    console.log("重新规划路径!");
+                    document.getElementById("beginNavBtn") && document.getElementById("beginNavBtn").click();
+                    navStore.updateRePlanStatus(false);
+                }
             },
         };
     }
@@ -189,6 +195,7 @@ class MapStore {
         });
         navStore.recordDistance(totalDistance);
         navStore.getNavRoutes(paths);
+        console.log("原始路劲", toJS(navStore.navRoutes));
     }
 
     // 地图点击处理
@@ -218,7 +225,6 @@ class MapStore {
                     floor: point.floor ? Number(point.floor) : 0, // 户外楼层1024指代
                     name: feature[0]["properties"]["name"]
                 };
-                console.log(point);
                 if (navStore.freeMarker) {
                     this.confirmMarker("start", navStore.freeMarkerPoint, true);
                     this.confirmMarker("end", markerData, true);

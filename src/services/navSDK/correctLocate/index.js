@@ -36,7 +36,6 @@ const correctLocateFn = (target) => {
         }
 
         chooseFreeCorrectMode(loc) {
-            console.log("选择自由");
             const locate = loc.currentPosition;
             const correctMode = {
                 "ibeacon": this.correctFreeLocateIndoor,
@@ -134,6 +133,7 @@ const correctLocateFn = (target) => {
                 "ibeacon": this.correctNavLocateIndoor,
                 "gps": this.correctNavLocateOutdoor,
             }[this.currentPoint.locType];
+            console.log("当期年", this.currentPoint);
             correctMode && correctMode(locate);
         }
 
@@ -152,15 +152,20 @@ const correctLocateFn = (target) => {
             let ibeaconToLine = 0;
             let polygonToLine = 0;
             if (this.currentRealNavLine) {
-                ibeaconToLine = pointToLineDistance(point(ibeaconPoint), this.currentRealNavLine) * 1000;  // 蓝牙点至导航线
-                polygonToLine = pointToLineDistance(point(polygonPoint), this.currentRealNavLine) * 1000;  // 质心点至导航线
+                // 蓝牙点至导航线
+                ibeaconToLine = pointToLineDistance(point(ibeaconPoint), this.currentRealNavLine) * 1000;
+                if (loc.polygonLon) {
+                    // 质心点至导航线
+                    polygonToLine = pointToLineDistance(point(polygonPoint), this.currentRealNavLine) * 1000;
+                    // console.log("loc", loc, polygonToLine);
+                }
             }
             // 存在置信点
             if (loc.fiducialLon) {
                 // 置信点至蓝牙点小于3米
                 if (ibeaconToFiducial < 3) {
                     if (ibeaconToLine > 10) {
-                        console.log("nav 蓝牙点导航线距离10米");
+                        console.log("nav 蓝牙点导航线距离10米 偏航，", ibeaconToLine);
                         const point = {
                             ...this.currentPoint,
                             longitude: loc.longitude,
@@ -168,6 +173,7 @@ const correctLocateFn = (target) => {
                             isYaw: true // 偏航
                         };
                         this.updateNavCurrentPoint(point);
+                        return false;
                     }
                     // 当前点至蓝牙点大于2米
                     if (currentToIbeacon > 2) {
@@ -193,7 +199,7 @@ const correctLocateFn = (target) => {
                 }
             } else {
                 if (polygonToLine > 10) {
-                    console.log("nav 质心点导航线距离10米");
+                    console.log("nav 质心点导航线距离10米 偏航", polygonToLine);
                     const point = {
                         ...this.currentPoint,
                         longitude: loc.polygonLon,
@@ -201,6 +207,7 @@ const correctLocateFn = (target) => {
                         isYaw: true // 偏航
                     };
                     this.updateNavCurrentPoint(point);
+                    return false;
                 }
                 if (loc.polygonLon) {
                     // 质心点和当前位置距离大于5小于10
@@ -225,26 +232,68 @@ const correctLocateFn = (target) => {
         };
 
         correctNavLocateOutdoor = (loc) => {
-            if (!this.correctNavFlag2) {
+            if (!this.correctNavOutdoorFlag) {
                 console.log("进入户外", loc);
-                this.updateNavCurrentPoint2();
+                const gpsCoords = this.loc.gpsCoords; // 当前点
+                const gpsPoint = [gpsCoords.longitude, gpsCoords.latitude];
+                const currentPoint = [this.currentPoint.longitude, this.currentPoint.latitude]; // 当前点
+                let gpsToLine = null;
+                if (gpsCoords.accuracy <= 10) {
+                    if (this.currentRealNavLine) {
+                        gpsToLine = pointToLineDistance(point(gpsPoint), this.currentRealNavLine) * 1000;  // gps点至导航线
+                    }
+                    if (gpsToLine && gpsToLine < 30) {
+                        const currentTogps = calcDistanceFn(gpsPoint, currentPoint);
+                        if (currentTogps > 20) {
+                            console.log("nav gps 定位点纠偏");
+                            const point = {
+                                ...this.currentPoint,
+                                longitude: gpsCoords.longitude, latitude: gpsCoords.latitude
+                            };
+                            this.updateNavCurrentPointOutDoor(point);
+                        }
+                    } else {
+                        console.log("nav gps定位点导航线距离10米");
+                        const point = {
+                            ...this.currentPoint,
+                            longitude: gpsCoords.longitude,
+                            latitude: gpsCoords.latitude,
+                            isYaw: true // 偏航
+                        };
+                        this.updateNavCurrentPointOutDoor(point);
+                    }
+                }
             }
         };
 
         updateNavCurrentPoint(point) {
             this.correctNavFlag = true;
             this.currentPoint = point;
+            if (point.isYaw) {
+                console.log("完成点", point);
+                // this.stopNav();
+                this.navComplete(point);
+                return false;
+            }
             this.onRealNavStep(point);
             setTimeout(() => {
                 this.correctNavFlag = false;
             }, 5000);
         }
 
-        updateNavCurrentPoint2() {
-            this.correctNavFlag2 = true;
+        updateNavCurrentPointOutDoor(point) {
+            this.correctNavOutdoorFlag = true;
+            this.currentPoint = point;
+            if (point.isYaw) {
+                console.log("户外偏航");
+                this.stopNav();
+                this.navComplete(point);
+                return false;
+            }
+            this.onRealNavStep(point);
             setTimeout(() => {
-                this.correctNavFlag2 = false;
-            }, 5000);
+                this.correctNavOutdoorFlag = false;
+            }, 10000);
         }
 
 

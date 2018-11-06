@@ -110,7 +110,6 @@ const stepperFn = (target) => {
                 longitude: output.geometry.coordinates[0],
                 latitude: output.geometry.coordinates[1]
             };
-            console.log("当前定位点", this.currentPoint);
             // console.log("当前定位模式", this.loc.currentLocation);
             this.currentMode == "free" && this.onFreeStep(this.currentPoint);
             this.currentMode == "realNav" && this.onRealNavStep(this.currentPoint);
