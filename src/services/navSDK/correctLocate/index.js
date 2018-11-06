@@ -133,7 +133,6 @@ const correctLocateFn = (target) => {
                 "ibeacon": this.correctNavLocateIndoor,
                 "gps": this.correctNavLocateOutdoor,
             }[this.currentPoint.locType];
-            console.log("当期年", this.currentPoint);
             correctMode && correctMode(locate);
         }
 

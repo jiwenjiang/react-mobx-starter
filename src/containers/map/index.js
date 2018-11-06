@@ -105,14 +105,16 @@ class mapPage extends Component {
                 }
                 if (!this.props.navStore.freeMarker && this.props.navStore.firstLocation) {
                     // console.log("entry first locate");
-                    this.props.navStore.initFreeMarker(this.props.mapStore, data);
-                    this.props.navStore.updateInitLocation(true);
-                    nav.init(loc);
-                    nav.startFree({
-                        complete: (data) => {
-                            this.props.navStore.moveFreeMarker(this.props.mapStore, data);
-                        }
-                    });
+                    if (this.props.mapStore.mapGL) {
+                        this.props.navStore.initFreeMarker(this.props.mapStore, data);
+                        this.props.navStore.updateInitLocation(true);
+                        nav.init(loc);
+                        nav.startFree({
+                            complete: (data) => {
+                                this.props.navStore.moveFreeMarker(this.props.mapStore, data);
+                            }
+                        });
+                    }
                 }
                 // console.log(`${data.locType == "ibeacon" ? "蓝牙点" : "gps"}`, data);
             }

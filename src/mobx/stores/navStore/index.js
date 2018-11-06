@@ -120,6 +120,7 @@ class NavStore {
     }
 
     @action initFreeMarker(map, data) {
+        console.log("当前定位点", data);
         this.changeFirstLocation(false);
         if (data.locType === "gps") {
             if (data.accuracy <= 10) {
