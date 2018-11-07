@@ -9,9 +9,10 @@ const POINTLENTH = 3; // 质心点计算数组长度
 const CHANGE_GPS = 3000; // 搜索不到蓝牙5000ms后，切换gps
 
 const blueToothFn = (target) => {
+    // const signUrl = `https://gl.swun.edu.cn/wxConfig/weixin/v1/jsSdkSign`;
     const signUrl = `https://map.parkbobo.com/location/weixin/v1/jsSdkSign`;
+    // const getIbeconUrl = `https://gl.swun.edu.cn/location/weka/v1/classify`;
     const getIbeconUrl = `https://map.parkbobo.com/location/weka/v1/classify`;
-    const signBody = `url=${encodeURIComponent(window.location.href.split("#")[0])}`;
     let phoneType = "ios";
     let ibeaconArr = []; // 蓝牙地位点集合
     let gpsTimeId = null; // gps定时器标记
@@ -27,6 +28,7 @@ const blueToothFn = (target) => {
         }
 
         getSignature() {
+            const signBody = `url=${encodeURIComponent(window.location.href.split("#")[0])}&mapId=${this.mapId}`;
             // 注销页面，停止微信
             window.onunload = () => {
                 wx.stopSearchBeacons();

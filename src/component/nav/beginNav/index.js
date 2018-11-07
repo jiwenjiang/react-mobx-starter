@@ -8,7 +8,6 @@ import Hammer from "hammerjs";
 import nav from "services/navSDK";
 import "./index.less";
 import {toJS} from "mobx";
-import floor from "component/map/operators/floor";
 import {floorStore} from "../../../mobx/stores/floorStore";
 
 
@@ -176,10 +175,17 @@ class beginNav extends Component {
                     start: this.props.mapStore.startMarkerPoint,
                     end: this.props.mapStore.endMarkerPoint,
                 });
-                this.props.navStore.moveFreeMarker(this.props.mapStore, this.props.mapStore.startMarkerPoint);
+                if (this.props.navStore.freeMarkerPoint) {
+                    const freePoint = {
+                        longitude: this.props.navStore.freeMarkerPoint.point[0],
+                        latitude: this.props.navStore.freeMarkerPoint.point[1],
+                        level: this.props.navStore.freeMarkerPoint.floor,
+                    };
+                    this.props.navStore.moveFreeMarker(this.props.mapStore, freePoint);
+                }
                 this.props.navStore.completeNav(this.props.mapStore);
                 clearInterval(navTimer);
-                this.props.navStore.changeEvaluateStatus(true);
+                // this.props.navStore.changeEvaluateStatus(true);
             }
         });
     }
