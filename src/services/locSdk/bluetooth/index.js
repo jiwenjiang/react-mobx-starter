@@ -9,8 +9,8 @@ const POINTLENTH = 3; // 质心点计算数组长度
 const CHANGE_GPS = 3000; // 搜索不到蓝牙5000ms后，切换gps
 
 const blueToothFn = (target) => {
-    // const signUrl = `https://gl.swun.edu.cn/wxConfig/weixin/v1/jsSdkSign`;
-    const signUrl = `https://map.parkbobo.com/location/weixin/v1/jsSdkSign`;
+    // const signUrl = `https://gisapp.swun.edu.cn/wxConfig/weixin/v1/jsSdkSign`;
+    const signUrl = `https://xz.parkbobo.com/wxConfig/weixin/v1/jsSdkSign`;
     // const getIbeconUrl = `https://gl.swun.edu.cn/location/weka/v1/classify`;
     const getIbeconUrl = `https://map.parkbobo.com/location/weka/v1/classify`;
     let phoneType = "ios";
@@ -29,13 +29,14 @@ const blueToothFn = (target) => {
 
         getSignature() {
             const signBody = `url=${encodeURIComponent(window.location.href.split("#")[0])}&mapId=${this.mapId}`;
+            console.log(this.mapId);
             // 注销页面，停止微信
             window.onunload = () => {
                 wx.stopSearchBeacons();
             };
             // 请求签名
             fetch(signUrl, {
-                method: "PUT",
+                method: "POST",
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded",
                 },

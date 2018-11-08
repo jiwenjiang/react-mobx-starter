@@ -274,16 +274,21 @@ class MapStore {
             ? startMarkerHandle()
             : endMarkerHandle();
         // 切换楼层
-        data.floor && this.changeFloor(data.floor);
         this.mapObj.flyTo({
             center: data.point,
             zoom: 19,
-            speed: 1,
+            speed: 2,
             curve: 1,
-            easing(t) {
+            easing: (t) => {
+                if (t === 1) {
+                    setTimeout(() => {
+                        data.floor && this.changeFloor(data.floor);
+                    });
+                }
                 return t;
             }
         });
+        // this.props.mapStore.mapObj.setLevel(data.floor);
         this.checkNodePosition();
         // 如果存在起点，终点，则规划路径
         if (this.startMarkerPoint && this.endMarkerPoint && !notPlan) {

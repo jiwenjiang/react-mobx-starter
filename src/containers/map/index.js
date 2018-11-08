@@ -230,7 +230,7 @@ class mapPage extends Component {
                 {evaluateStatus && <NavEndModal {...warningModalProps}></NavEndModal>}
                 {noticeProps && NoticeComponent(noticeProps)}
                 <Operators></Operators>
-                <GotoShare></GotoShare>
+                {!searchStatus && <GotoShare></GotoShare>}
                 {(startMarker || endMarker) && <BeginNav></BeginNav>}
                 <RoutePanel></RoutePanel>
                 {startMarker && <NavBottom></NavBottom>}

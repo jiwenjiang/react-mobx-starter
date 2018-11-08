@@ -123,7 +123,7 @@ class NavStore {
         console.log("当前定位点", data);
         this.changeFirstLocation(false);
         if (data.locType === "gps") {
-            if (data.accuracy <= 10) {
+            if (data.accuracy <= 25) {
                 this.freeMarkerPoint = {
                     point: [data.longitude, data.latitude],
                     floor: 0,
@@ -151,6 +151,15 @@ class NavStore {
             const el = map.generateDom(imgSrc, "freeMarker");
             this.freeMarker = new map.mapGL.Marker(el).setLngLat(this.freeMarkerPoint.point).addTo(map.mapObj);
         }
+        map.mapObj.flyTo({
+            center: [data.longitude, data.latitude],
+            zoom: 20,
+            speed: 1,
+            curve: 1.4,
+            easing(t) {
+                return t;
+            }
+        });
     }
 
     /**

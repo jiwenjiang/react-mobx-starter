@@ -16,7 +16,7 @@ class listPage extends Component {
             {name: "理想中心", mapId: 2, link: "/map"},
             {name: "路易艺术城堡", mapId: 1, link: "/map"},
             {name: "成都妇女儿童医院", mapId: 3, link: "/map"},
-            // {name: "武侯校区", mapId: 1, link: "/map"},
+            {name: "武侯校区", mapId: 15, link: "/map"},
             // {name: "航空港校区", mapId: 2, link: "/map"},
         ]
     };

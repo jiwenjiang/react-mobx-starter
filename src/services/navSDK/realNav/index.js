@@ -38,7 +38,7 @@ const realNavigationFn = (target) => {
             // 进入电梯、扶梯判断
             if (this.loc.currentPosition.locType == "ibeacon" && this.loc.currentLocation == "gps") {
                 if (this.loc.currentPosition.level != this.navEndLevel
-                    && (currentLineIndex == routeFloor.length - 1||currentLineIndex == routeFloor.length - 2)) {
+                    && (currentLineIndex == routeFloor.length - 1 || currentLineIndex == routeFloor.length - 2)) {
                     const coordinates = routeFloorBezier.geometry.coordinates;
                     shadowPoint = point(coordinates[coordinates.length - 1]);
                     console.log("进入楼梯");
@@ -91,7 +91,7 @@ const realNavigationFn = (target) => {
             let leftDistance = 0;
             if (currentLineIndex == (routeFloor.length - 1)) {
                 leftDistance = currentEndDistance;
-                if (this.currentPoint.level != this.navEndLevel) {
+                if (this.currentPoint.level != this.navEndLevel && handleRouteFloor[this.navEndLevel]) {
                     for (let i = 0; i < handleRouteFloor[this.navEndLevel].length; i++) {
                         leftDistance += handleRouteFloor[this.navEndLevel][i];
                     }
@@ -101,7 +101,7 @@ const realNavigationFn = (target) => {
                     leftDistance += routeFloor[i].distance;
                 }
                 leftDistance = leftDistance + currentEndDistance;
-                if (this.currentPoint.level != this.navEndLevel) {
+                if (this.currentPoint.level != this.navEndLevel && handleRouteFloor[this.navEndLevel]) {
                     for (let i = 0; i < handleRouteFloor[this.navEndLevel].length; i++) {
                         leftDistance += handleRouteFloor[this.navEndLevel][i];
                     }
