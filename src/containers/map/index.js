@@ -169,6 +169,7 @@ class mapPage extends Component {
                 } else {
                     let el = document.createElement("div");
                     el.style.background = "green";
+                    // el.innerHTML = `${data.accuracy}`;
                     el.style.width = "10px";
                     el.style.height = "10px";
                     this.gpsMarker = new this.props.mapStore.mapGL.Marker(el).setLngLat([data.longitude, data.latitude])

@@ -116,13 +116,14 @@ const correctLocateFn = (target) => {
             if (this.correctFreeFlag) {
                 return false;
             }
-            const gpsPoint = [loc.longitude, loc.latitude]; // 蓝牙点
+            const gpsCoords = this.loc.gpsCoords; // 当前点
+            const gpsPoint = [gpsCoords.longitude, gpsCoords.latitude];
             const currentPoint = [this.currentPoint.longitude, this.currentPoint.latitude]; // 当前点
             const currentToGps = calcDistanceFn(currentPoint, gpsPoint); // 当前点gps点距离
             if (loc.accuracy <= 15) {
                 if (currentToGps >= 10) {
                     console.log("free 当前点至gps点大于10米");
-                    const point = {...this.currentPoint, longitude: loc.longitude, latitude: loc.latitude};
+                    const point = {...this.currentPoint, longitude: gpsCoords.longitude, latitude: gpsCoords.latitude};
                     this.updateFreeCurrentPoint(point);
                 }
             }
@@ -149,7 +150,7 @@ const correctLocateFn = (target) => {
                 "ibeacon": this.correctNavLocateIndoor,
                 "gps": this.correctNavLocateOutdoor,
             }[this.currentPoint && this.currentPoint.locType];
-            console.log("导航纠偏当前点", this.currentPoint);
+            // console.log("导航纠偏当前点", this.currentPoint);
             correctMode && correctMode(locate);
         }
 
@@ -260,7 +261,7 @@ const correctLocateFn = (target) => {
                     }
                     if (gpsToLine && gpsToLine < 30) {
                         const currentTogps = calcDistanceFn(gpsPoint, currentPoint);
-                        if (currentTogps > 20) {
+                        if (currentTogps > 10) {
                             console.log("nav gps 定位点纠偏");
                             const point = {
                                 ...this.currentPoint,

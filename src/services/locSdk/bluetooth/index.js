@@ -6,7 +6,7 @@ import wx from "weixin-js-sdk";
 
 const INTERVAL = 500; // 服务器时间间隔
 const POINTLENTH = 3; // 质心点计算数组长度
-const CHANGE_GPS = 3000; // 搜索不到蓝牙5000ms后，切换gps
+const CHANGE_GPS = 2500; // 搜索不到蓝牙5000ms后，切换gps
 
 const blueToothFn = (target) => {
     // const signUrl = `https://gisapp.swun.edu.cn/wxConfig/weixin/v1/jsSdkSign`;

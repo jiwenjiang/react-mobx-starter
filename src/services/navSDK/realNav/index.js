@@ -37,6 +37,10 @@ const realNavigationFn = (target) => {
             let currentPt = [this.currentPoint.longitude, this.currentPoint.latitude];
             // 进入电梯、扶梯判断
             if (this.loc.currentPosition.locType == "ibeacon" && this.loc.currentLocation == "gps") {
+                console.log("当前地位楼层", this.loc.currentPosition.level);
+                console.log("结束楼层", this.navEndLevel);
+                console.log("当前楼层路径长度", routeFloor.length);
+                console.log("当前路径数", currentLineIndex);
                 if (this.loc.currentPosition.level != this.navEndLevel
                     && (currentLineIndex == routeFloor.length - 1 || currentLineIndex == routeFloor.length - 2)) {
                     const coordinates = routeFloorBezier.geometry.coordinates;

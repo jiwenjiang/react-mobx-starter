@@ -98,7 +98,7 @@ class Loc {
         this.gpsCoords = data;
         if (!this.initIbeacon || this.currentLocation !== "ibeacon") {
             this.onLocationComplete(this.gpsCoords);
-            if (data.accuracy <= 15) {
+            if (data.accuracy <= 20) {
                 this.currentPosition = data;
             }
         }
