@@ -178,21 +178,23 @@ class NavStore {
 
     @action moveFreeMarker(map, data) {
         if (this.navMode === "free") {
-            this.freeMarkerPoint = {
-                point: [data.longitude, data.latitude],
-                floor: data.level,
-                name: "当前位置"
-            };
+            if (data) {
+                this.freeMarkerPoint = {
+                    point: [data.longitude, data.latitude],
+                    floor: data.level,
+                    name: "当前位置"
+                };
 
-            if (this.freeMarker) {
-                this.freeMarker.setLngLat(toJS(this.freeMarkerPoint.point));
-            } else {
-                const imgSrc = data.locType === "gps"
-                    ? locateImg
-                    : floorStore.mapFloor == this.freeMarkerPoint.floor
-                        ? locateImg : locateHalfImg;
-                const el = map.generateDom(imgSrc, "freeMarker");
-                this.freeMarker = new map.mapGL.Marker(el).setLngLat(this.freeMarkerPoint.point).addTo(map.mapObj);
+                if (this.freeMarker) {
+                    this.freeMarker.setLngLat(toJS(this.freeMarkerPoint.point));
+                } else {
+                    const imgSrc = data.locType === "gps"
+                        ? locateImg
+                        : floorStore.mapFloor == this.freeMarkerPoint.floor
+                            ? locateImg : locateHalfImg;
+                    const el = map.generateDom(imgSrc, "freeMarker");
+                    this.freeMarker = new map.mapGL.Marker(el).setLngLat(this.freeMarkerPoint.point).addTo(map.mapObj);
+                }
             }
         }
     }

@@ -155,7 +155,7 @@ const correctLocateFn = (target) => {
         }
 
         correctNavLocateIndoor = (loc) => {
-            if (this.correctNavFlag) {
+            if (this.correctNavFlag || this.loc.currentLocation == "gps") {
                 return false;
             }
             const ibeaconPoint = [loc.longitude, loc.latitude]; // 蓝牙点

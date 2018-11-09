@@ -191,6 +191,9 @@ class beginNav extends Component {
     }
 
     realNav() {
+        if (this.props.navStore.firstLocation) {
+            return false;
+        }
         // 当前时间
         let navTime = new Date().getTime();
         this.props.commonStore.changeDetectLocation(true); // 开启定位检测
@@ -299,8 +302,12 @@ class beginNav extends Component {
                             <i className="iconfont icon-monixianlupipei"></i>
                             <span> 模拟导航</span>
                         </button>
-                        <button className={`${navRoutes ? "begin-nav-nav" : "begin-nav-gray-btn"}`} id="beginNavBtn"
-                                onClick={() => this.realNav()}>
+                        <button
+                            className={`${navRoutes && !this.props.navStore.firstLocation
+                                ? "begin-nav-nav"
+                                : "begin-nav-gray-btn"}`}
+                            id="beginNavBtn"
+                            onClick={() => this.realNav()}>
                             <i className="iconfont icon-daohang1"></i>
                             <span> 开始导航</span>
                         </button>

@@ -60,9 +60,9 @@ const stepperFn = (target) => {
             }, 500);
             // 步进器
             window.addEventListener("devicemotion", (e) => {
-                let n = e.accelerationIncludingGravity;
-                this.checkInAccSensor(n.x, n.y, n.z);
-                this.handleMessage();
+                    let n = e.accelerationIncludingGravity;
+                    this.checkInAccSensor(n.x, n.y, n.z);
+                    this.handleMessage();
             }, false);
         }
 

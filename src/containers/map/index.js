@@ -99,7 +99,8 @@ class mapPage extends Component {
             complete: (data) => {
                 this.setMarker(data);
                 // console.log("map-on", data);
-                if (this.props.commonStore.detectLocation && data.level && data.level != this.props.floorStore.mapFloor) {
+                if (this.props.commonStore.detectLocation && data.locType == "ibeacon"
+                    && data.level && data.level != this.props.floorStore.mapFloor) {
                     console.log("entry change level", data.level, this.props.floorStore.mapFloor);
                     this.props.floorStore.listenIbeacon(this.props.mapStore, data.level);
                 }
@@ -169,7 +170,6 @@ class mapPage extends Component {
                 } else {
                     let el = document.createElement("div");
                     el.style.background = "green";
-                    // el.innerHTML = `${data.accuracy}`;
                     el.style.width = "10px";
                     el.style.height = "10px";
                     this.gpsMarker = new this.props.mapStore.mapGL.Marker(el).setLngLat([data.longitude, data.latitude])
