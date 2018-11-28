@@ -1,0 +1,81 @@
+.search-voice {
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.7);
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 999;
+}
+
+.start-record {
+  width: 22vw;
+  height: 22vw;
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 13vh;
+}
+.top-tips{
+  width: 100%;
+  color: white;
+  text-align: center;
+  position: fixed;
+  top: 20vh;
+  >p:nth-of-type(2){
+    padding: 1vh 0 0 0;
+    font-size: 1.1rem;
+  }
+}
+.bottom-tips {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 9vh;
+  color: white;
+}
+
+.status-tips {
+  width: 45vw;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+
+}
+.end-tips{
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 65vh;
+  color: white;
+}
+.close-voice{
+  color: white;
+  font-size: 1.5rem;
+  position: fixed;
+  right: 4vw;
+  top: 4vw;
+}
+@keyframes rotate{
+  0%{
+    transform: rotate(0);
+  }
+  50%{
+    transform:rotate(360deg);
+  }
+  100%{
+    transform: rotate(0);
+  }
+}
+
+.yuan{
+  position: fixed;
+  top: 48%;
+  left: 50.5%;
+  transform: translate(-50%,-50%);
+}
+.yuan-img{
+  animation: rotate .8s linear infinite;  /*开始动画后无限循环，用来控制rotate*/
+
+}

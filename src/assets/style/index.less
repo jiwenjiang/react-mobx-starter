@@ -1,18 +1,42 @@
 @import "../iconfont/iconfont.css";
+@import "./map.css";
+
 html {
-  //font-size : calc(100vw/3.75);
+  //font-size: calc(100vw / 75);
   margin: 0;
   padding: 0;
 }
+
 body {
-  background-color : #fff;
+  background-color: #fff;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  touch-action: none;
+  position: fixed;
+  ul, li {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
 }
-.mapboxgl-ctrl-attrib.mapboxgl-compact:after{
-  display : none;
+
+.App {
+  overflow: hidden;
+}
+
+.markerIcon {
+  width: 100px;
+  height: 100px;
+  display: block;
+  z-index: 1111;
+  /* position: fixed; */
+  position: absolute;
+  background: beige;
 }
 
 //自定义间距
-.mt-10{
-  margin-top: 10px;
+.mt-10 {
+  margin-top: 10px !important;
 }
 

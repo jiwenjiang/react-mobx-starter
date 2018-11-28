@@ -3,9 +3,15 @@
  */
 import config from "config";
 
-const {normalIp, version} = config;
+const {normalIp, version, mapIp} = config;
 const url = {
-    dynamicParams: `${normalIp}/location/locDynamicThreshold/${version}/getLocDynamicThreshold`
+    dynamicParams: `${normalIp}/location/locDynamicThreshold/${version}/getLocDynamicThreshold`,
+    mapService: `${normalIp}/hospService/${version}/getAllService`,
+    searchCarByNumber: `${normalIp}/carStatus/${version}/searchCar`,
+    searchCarByPosition: `${normalIp}/carStatus/${version}/getParkingNo`,
+    getBaiduToken: `${mapIp}/location/BaiDuYuYin/${version}/getAccessToken`,
+    evaluate: `${normalIp}/location/NavigationEvaluation/${version}/addNavigationEvaluation`,
+    wxSign: `${normalIp}/wxConfig/weixin/${version}/jsSdkSign`,
 };
 
-export default url
+export default url;

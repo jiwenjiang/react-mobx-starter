@@ -13,7 +13,9 @@ module.exports = {
             "jsx": true
         }
     },
-    "globals": {},
+    "globals": {
+        "debugger":true
+    },
     "plugins": [
         "react"
     ],
