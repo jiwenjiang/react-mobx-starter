@@ -87,6 +87,7 @@ class mapPage extends Component {
         // const projectType = "car";
         const mapId = getQueryString("mapId", window.location.href) || this.props.mapStore.mapId;
         let shareMessage = getQueryString("miniMessage", window.location.href);
+        let startMessage = getQueryString("startMessage", window.location.href);
 
         this.props.commonStore.changeProjectType(projectType);
         // 更新服务
@@ -123,6 +124,10 @@ class mapPage extends Component {
                 shareMessage = JSON.parse(decodeURI(shareMessage));
                 this.props.commonStore.changeSearchStatus(false);
                 this.props.mapStore.confirmMarker("end", shareMessage);
+                if (startMessage) {
+                    startMessage = JSON.parse(decodeURI(startMessage));
+                    this.props.mapStore.confirmMarker("start", startMessage);
+                }
             }
         });
 

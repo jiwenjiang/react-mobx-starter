@@ -36,7 +36,7 @@ class MapStore {
     @observable bboxPolygon; // 确定终点标记
 
     constructor() {
-        this.mapId = 1;
+        this.mapId = 2;
         this.carouselData = [];
         this.accordionData = [];
         this.mapObj = null;
@@ -136,10 +136,20 @@ class MapStore {
                     if (this.mapObj.getSource("building-route")) {
                         this.mapObj.removeSource("building-route");
                     }
+                    if (this.mapObj.getLayer("building-layer-down")) {
+                        this.mapObj.removeLayer("building-layer-down");
+                    }
+                    if (this.mapObj.getSource("building-route-down")) {
+                        this.mapObj.removeSource("building-route-down");
+                    }
                     const routeIndoor = floorStore.routeIndoor[floor].features.filter(v => v.geometry.type !== "Point");
                     floorStore.routeIndoorBezier[floor] = bezierV2(routeIndoor, this.mapObj);
-                    // console.log("当前bezier", toJS(floorStore.routeIndoorBezier[floor]));
+                    // console.log("当前bezier", toJS(floorStore.routeIndoorBezier));
                     this.mapObj.addSource("building-route", {
+                        type: "geojson",
+                        data: floorStore.routeIndoorBezier[floor]
+                    });
+                    this.mapObj.addSource("building-route-down", {
                         type: "geojson",
                         data: floorStore.routeIndoorBezier[floor]
                     });
@@ -152,7 +162,25 @@ class MapStore {
                             return t;
                         }
                     });
-
+                    this.mapObj.addLayer({
+                        type: "line",
+                        source: "building-route-down",
+                        id: "building-layer-down",
+                        layout: {
+                            "line-join": "round", //连接时显示的线
+                            "line-cap": "round" //导航线尾部
+                        },
+                        paint: {
+                            "line-width": {
+                                base: 10,
+                                stops: [
+                                    [18, 6],
+                                    [22, 16]
+                                ]
+                            },
+                            "line-color": "#d7d6d6",
+                        }
+                    });
                     this.mapObj.addLayer({
                         type: "line",
                         source: "building-route",
@@ -172,6 +200,7 @@ class MapStore {
                             }
                         }
                     });
+
                     if (!navStore.rePlanStatus) {
                         console.log("规划路径成功");
                         document.getElementById("begin-nav").classList.add("dom-transformY-30");

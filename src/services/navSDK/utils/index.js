@@ -36,11 +36,14 @@ const calcMidPoint = (point1, point2) => {
  * @param route:[{}]
  * @param speed:number
  */
-const preHandleSimData = (route, speed = 1) => {
+const preHandleSimData = (route, map, speed = 1) => {
     let pointCollects = []; // 点集合
     let handleRoute = []; // 处理后路径
     let routeLength = 0; // 总距离
     let animateArray = []; // 细化点集合
+    let handleRouteFloor = {};
+    let handleRouteFloorBezier = {};
+    let handleRouteFloorBezierAni = {};
     let parseTurnType = (turnType) => {
         let turnText = {
             0: "起点",
@@ -72,7 +75,41 @@ const preHandleSimData = (route, speed = 1) => {
             }
         }
         handleRoute.push(item);
+        /*----------------------*/
+        const currentRoute = handleRouteFloor[item.startFloor];
+        if (currentRoute && currentRoute instanceof Array) {
+            handleRouteFloor[item.startFloor].push({
+                "type": "Feature",
+                ...item
+            });
+        } else {
+            handleRouteFloor[item.startFloor] = [];
+            handleRouteFloor[item.startFloor].push({
+                "type": "Feature",
+                ...item
+            });
+        }
+        /*----------------------*/
     }
+    /*-----------------------*/
+    for (let key in handleRouteFloor) {
+        const routeIndoor = handleRouteFloor[key]
+            && handleRouteFloor[key].filter(v => v.geometry.type !== "Point");
+        handleRouteFloorBezier[key] = bezierV2(routeIndoor, map);
+        const keyLength = length(handleRouteFloorBezier[key]) * 1000;
+        for (let i = 0, j = 0; i < keyLength * (50 / speed); i += 1) {
+            j += 1 / (50 / speed) / 1000;
+            let segment = along(handleRouteFloorBezier[key], j);
+            if (handleRouteFloorBezierAni[key]) {
+                handleRouteFloorBezierAni[key].push(segment.geometry.coordinates);
+            } else {
+                handleRouteFloorBezierAni[key] = [];
+            }
+        }
+    }
+    // console.log(11111, handleRouteFloor);
+    // console.log(11112, handleRouteFloorBezier);
+    /*-----------------------*/
     let routeLine = lineString(pointCollects);
     routeLength = length(routeLine) * 1000;
     for (let i = 0, j = 0; i < routeLength * (50 / speed); i += 1) {
@@ -82,6 +119,8 @@ const preHandleSimData = (route, speed = 1) => {
     }
     return {
         handleRoute,
+        handleRouteFloor,
+        handleRouteFloorBezierAni,
         routeLength,
         animateArray
     };
@@ -221,7 +260,7 @@ const bezierV2 = (arr, map) => {
             if (arr[0].geometry.type == "LineString") {
                 line.push(...arr[0].geometry.coordinates);
             } else {
-                for(let i =0;i<arr[0].geometry.coordinates.length;i++){
+                for (let i = 0; i < arr[0].geometry.coordinates.length; i++) {
                     line.push(...arr[0].geometry.coordinates[i]);
                 }
 

@@ -69,10 +69,10 @@ class Nav {
     ) {
         this.onSimStep = onSimNav;
         this.simComplete = complete;
-        const handleData = preHandleSimData(routeData, speed);
+        const handleData = preHandleSimData(routeData, map, speed);
         // const handleData = preHandleRealData(routeData, map);
         // console.log(handleData)
-        this.startSimNavigation(handleData, speed);
+        this.startSimNavigation(handleData, map, speed);
     }
 
     stopSim() {

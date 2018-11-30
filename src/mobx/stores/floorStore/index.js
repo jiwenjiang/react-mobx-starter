@@ -85,6 +85,18 @@ class FloorStore {
                 };
             map.mapObj.getSource("building-route").setData(geoData);
         }
+        if (map.mapObj.getLayer("building-layer-down")) {
+            const routeIndoor = floorStore.routeIndoor[floor]
+                && floorStore.routeIndoor[floor].features
+                && floorStore.routeIndoor[floor].features.filter(v => v.geometry.type !== "Point");
+            const geoData = routeIndoor && routeIndoor.length > 0
+                ? bezierV2(toJS(routeIndoor), map.mapObj)
+                : {
+                    type: "FeatureCollection",
+                    features: []
+                };
+            map.mapObj.getSource("building-route-down").setData(geoData);
+        }
     }
 
     @action

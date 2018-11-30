@@ -117,6 +117,9 @@ class beginNav extends Component {
     }
 
     simNav() {
+        if (!this.props.navStore.navRoutes) {
+            return false;
+        }
         if (document.getElementsByClassName("nav-route-detail")[0].classList.contains("dom-transformY-100vh")) {
             document.getElementsByClassName("nav-route-detail")[0].classList.remove("dom-transformY-100vh");
         }
@@ -355,7 +358,8 @@ class beginNav extends Component {
                                     <i className="iconfont icon-fanhui"></i>
                                     <span> 查看地图</span>
                                 </button>
-                                <button className="begin-nav-sim" onClick={() => this.simNav()}>
+                                <button className={`${navRoutes ? "begin-nav-sim" : "begin-nav-gray-btn"}`}
+                                        onClick={() => this.simNav()}>
                                     <i className="iconfont icon-monixianlupipei"></i>
                                     <span> 模拟导航</span>
                                 </button>

@@ -9,31 +9,40 @@ const simNavigationFn = (target) => {
             super();
         }
 
-        startSimNavigation = (handleData, speed = 1) => {
+        startSimNavigation = (handleData, map, speed = 1) => {
             // 清除自由模式纠偏
             this.correctFreeLocateTimer = null;
             clearTimeout(this.correctFreeLocateWatchId);
             //
-            const {animateArray, handleRoute, routeLength} = handleData;
+            const {animateArray, handleRoute, routeLength, handleRouteFloorBezierAni} = handleData;
             // 判断是否跨楼层
             let completeLength = 0;
             let currentLineIndex = 0;
             this.animateId = null;
             let voiceRecorder = {};
             const animate = () => {
-                if (animateArray.length > completeLength) {
+                if (animateArray.length > 0) {
                     this.animateId = window.requestAnimationFrame(animate);
-                    let currentPoint = animateArray[completeLength];
+                    let currentPoint = animateArray[0];
+                    animateArray.shift();
                     let geoPoint = point(currentPoint);
                     const distanceArr = [];
                     for (let v of handleRoute) {
                         let line = lineString(v.LineCoordinates);
                         distanceArr.push((pointToLineDistance(geoPoint, line) * 1000));
                     }
+
                     // console.log(distanceArr);
                     currentLineIndex = distanceArr.findIndex(v => v == Math.min(...distanceArr));
                     const leftDistance = routeLength - (completeLength / 50 / speed);
                     const simResult = this.simNavLogic(currentPoint, currentLineIndex, handleRoute, voiceRecorder);
+                    handleRouteFloorBezierAni[simResult.currentFloor].shift();
+                    const currentRoute = handleRouteFloorBezierAni[simResult.currentFloor];
+                    if (map.getLayer("building-layer") && currentRoute && currentRoute.length > 2) {
+                        const geoData = lineString(currentRoute);
+                        map.getSource("building-route").setData(geoData);
+                    }
+                    // console.log(handleRouteFloorBezier[simResult.currentFloor]);
                     const output = {
                         leftDistance,
                         currentLon: currentPoint[0],
@@ -53,6 +62,12 @@ const simNavigationFn = (target) => {
                     this.inElevator = false;
                     this.simComplete();
                     window.cancelAnimationFrame(this.animateId);
+                    if (map.getLayer("building-layer-down")) {
+                        map.getSource("building-route-down").setData({
+                            type: "FeatureCollection",
+                            features: []
+                        });
+                    }
                     if (this.loc && this.loc.currentPosition) {
                         this.startCorrectFreeLocate(this.loc);
                     }
