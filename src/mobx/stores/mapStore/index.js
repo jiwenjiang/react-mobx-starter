@@ -2,15 +2,14 @@
  * Created by j_bleach on 2018/9/20 0020.
  */
 /*eslint-disable*/
-import {action, autorun, computed, configure, observable, runInAction} from "mobx";
-import {polygon, centerOfMass, bboxPolygon} from "@turf/turf";
+// import {start} from "component/map/marker";
+import {action, autorun, computed, configure, observable, runInAction, toJS} from "mobx";
+import {bboxPolygon, centerOfMass, polygon} from "@turf/turf";
 import http from "services/http";
 import normalUrl from "config/url/normal";
 import {commonStore} from "../commonStore";
 import {floorStore} from "../floorStore";
 import {navStore} from "../navStore";
-// import {start} from "component/map/marker";
-import {toJS} from "mobx";
 import startImg from "assets/img/start.png";
 import endImg from "assets/img/end.png";
 import "./index.less";
@@ -36,7 +35,7 @@ class MapStore {
     @observable bboxPolygon; // 确定终点标记
 
     constructor() {
-        this.mapId = 1;
+        this.mapId = 2;
         this.carouselData = [];
         this.accordionData = [];
         this.mapObj = null;
@@ -68,7 +67,7 @@ class MapStore {
     @action
     async getMapServices(mapId) {
         try {
-            commonStore.loadingStatus = true;
+            commonStore.changeLoadingStatus(true);
             const mapServices = await http.post(normalUrl.mapService, {mapId});
             runInAction(() => {
                 const carouselData = []; // 走马灯数据
@@ -81,7 +80,7 @@ class MapStore {
                         accordionData.push(v);
                     }
                 });
-                commonStore.loadingStatus = false;
+                commonStore.changeLoadingStatus(false);
                 this.carouselData = carouselData;
                 this.accordionData = accordionData;
             });
@@ -111,7 +110,7 @@ class MapStore {
             this.routeObj.ri = {
                 routeSuccess: () => {
                     runInAction(() => {
-                        commonStore.loadingStatus = false;
+                        commonStore.changeLoadingStatus(false);
                     });
                     this.routeObj.clearLocation();
                     document.getElementById("map-goToShare").classList.remove("dom-transformY-30");
@@ -119,7 +118,7 @@ class MapStore {
                 routeError: () => {
                     console.error("路径规划失败");
                     runInAction(() => {
-                        commonStore.loadingStatus = false;
+                        commonStore.changeLoadingStatus(false);
                     });
                     this.routeObj.clearLocation();
                 },
@@ -136,10 +135,20 @@ class MapStore {
                     if (this.mapObj.getSource("building-route")) {
                         this.mapObj.removeSource("building-route");
                     }
+                    if (this.mapObj.getLayer("building-layer-down")) {
+                        this.mapObj.removeLayer("building-layer-down");
+                    }
+                    if (this.mapObj.getSource("building-route-down")) {
+                        this.mapObj.removeSource("building-route-down");
+                    }
                     const routeIndoor = floorStore.routeIndoor[floor].features.filter(v => v.geometry.type !== "Point");
                     floorStore.routeIndoorBezier[floor] = bezierV2(routeIndoor, this.mapObj);
-                    // console.log("当前bezier", toJS(floorStore.routeIndoorBezier[floor]));
+                    // console.log("当前bezier", toJS(floorStore.routeIndoorBezier));
                     this.mapObj.addSource("building-route", {
+                        type: "geojson",
+                        data: floorStore.routeIndoorBezier[floor]
+                    });
+                    this.mapObj.addSource("building-route-down", {
                         type: "geojson",
                         data: floorStore.routeIndoorBezier[floor]
                     });
@@ -152,7 +161,25 @@ class MapStore {
                             return t;
                         }
                     });
-
+                    this.mapObj.addLayer({
+                        type: "line",
+                        source: "building-route-down",
+                        id: "building-layer-down",
+                        layout: {
+                            "line-join": "round", //连接时显示的线
+                            "line-cap": "round" //导航线尾部
+                        },
+                        paint: {
+                            "line-width": {
+                                base: 10,
+                                stops: [
+                                    [18, 6],
+                                    [22, 16]
+                                ]
+                            },
+                            "line-color": "#d7d6d6",
+                        }
+                    });
                     this.mapObj.addLayer({
                         type: "line",
                         source: "building-route",
@@ -172,6 +199,7 @@ class MapStore {
                             }
                         }
                     });
+
                     if (!navStore.rePlanStatus) {
                         console.log("规划路径成功");
                         document.getElementById("begin-nav").classList.add("dom-transformY-30");
@@ -179,6 +207,7 @@ class MapStore {
                     } else {
                         console.log("重新规划路径!");
                         document.getElementById("beginNavBtn") && document.getElementById("beginNavBtn").click();
+                        document.getElementById("map-goToShare").classList.remove("dom-transformY-30");
                         navStore.updateRePlanStatus(false);
                     }
                 },
@@ -201,7 +230,8 @@ class MapStore {
             if (currentRoute && currentRoute.features && currentRoute.features instanceof Array) {
                 floorStore.routeIndoor[v.startFloor].features.push({
                     "type": "Feature",
-                    "geometry": v.geometry
+                    "geometry": v.geometry,
+                    "distance": v.distance
                 });
             } else {
                 floorStore.routeIndoor[v.startFloor] = {
@@ -210,7 +240,8 @@ class MapStore {
                 };
                 floorStore.routeIndoor[v.startFloor].features.push({
                     "type": "Feature",
-                    "geometry": v.geometry
+                    "geometry": v.geometry,
+                    "distance": v.distance
                 });
             }
         });
@@ -409,7 +440,9 @@ class MapStore {
 
     @action
     planRoute() {
-        commonStore.loadingStatus = true;
+        commonStore.changeLoadingStatus(true);
+        document.getElementById("map-goToShare")
+        && document.getElementById("map-goToShare").classList.remove("dom-transformY-30");
         const [startLng, startLat] = toJS(this.startMarkerPoint).point;
         const [endLng, endLat] = toJS(this.endMarkerPoint).point;
         this.routeObj.roadType = navStore.navRoadType;

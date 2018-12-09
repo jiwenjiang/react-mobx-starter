@@ -47,7 +47,7 @@ class Loc {
     }
 
     initSuccess() {
-        if (this.locType.includes("ibeacon") && this.initIbeacon || this.locType.includes("gps") && this.initGps) {
+        if (this.locType.includes("ibeacon") && this.initIbeacon) {
             this.initComplete();
         }
     }
@@ -109,7 +109,7 @@ class Loc {
     onSuccessIbeacon(data) {
         this.ibeaconCoords = data;
         this.currentPosition = data;
-        this.onLocationComplete(this.ibeaconCoords);
+        this.onLocationComplete(this.ibeaconCoords, this);
     }
 }
 

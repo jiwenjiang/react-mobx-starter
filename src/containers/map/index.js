@@ -18,12 +18,14 @@ import NavEndModal from "component/nav/navComplete";
 import NoticeComponent from "component/common/notice";
 import BeginNav from "component/nav/beginNav";
 import startConfirm from "assets/img/startConfirm.png";
+import endConfirm from "assets/img/endConfirm.png";
 import "./index.less";
 import loc from "services/locSdk";
 import nav from "services/navSDK";
 import {getQueryString} from "services/utils/tool";
 import normalUrl from "config/url/normal";
 import wx from "weixin-js-sdk";
+import LoadingComponent from "component/common/loading";
 
 // import audioTest from "assets/audio/routePlan.mp3";
 
@@ -87,6 +89,7 @@ class mapPage extends Component {
         // const projectType = "car";
         const mapId = getQueryString("mapId", window.location.href) || this.props.mapStore.mapId;
         let shareMessage = getQueryString("miniMessage", window.location.href);
+        let startMessage = getQueryString("startMessage", window.location.href);
 
         this.props.commonStore.changeProjectType(projectType);
         // 更新服务
@@ -112,17 +115,36 @@ class mapPage extends Component {
                     this.props.mapStore.updateBBoxPolygon(map.configComponent.mapZone.bbox);
                 }
             }, 500);
-            map.zoomTo(18);
+            // map.zoomTo(18);
             this.props.commonStore.getBaiduToken();
             if (shareMessage) {
+                shareMessage = JSON.parse(decodeURI(shareMessage));
                 this.props.commonStore.changeLocationLoading(true);
                 setTimeout(() => {
                     this.props.commonStore.changeLocationLoading(false);
+                    map.flyTo({
+                        center: shareMessage.point,
+                        zoom: 19,
+                        speed: 2,
+                        curve: 1,
+                        easing: (t) => {
+                            if (t == 1) {
+                                setTimeout(() => {
+                                    this.changeFloor(shareMessage.floor);
+                                    map.resetNorth();
+                                });
+                            }
+                            return t;
+                        }
+                    });
                     this.locationFail = true;
                 }, 5000);
-                shareMessage = JSON.parse(decodeURI(shareMessage));
                 this.props.commonStore.changeSearchStatus(false);
                 this.props.mapStore.confirmMarker("end", shareMessage);
+                if (startMessage) {
+                    startMessage = JSON.parse(decodeURI(startMessage));
+                    this.props.mapStore.confirmMarker("start", startMessage);
+                }
             }
         });
 
@@ -147,13 +169,13 @@ class mapPage extends Component {
                 this.props.navStore.updateInitLocation(false);
             }
         });
-
         // 禁用滑动
         document.addEventListener("touchmove", (e) => {
+            // console.log(e)
             if (!e.target.classList.contains("canBeScroll") && !this.props.commonStore.searchStatus) {
                 e.preventDefault();
             }
-        });
+        }, true);
 
         // 定位sdk
         loc.init({
@@ -176,10 +198,11 @@ class mapPage extends Component {
         });
 
         loc.onLocation({
-            complete: (data) => {
-                this.setMarker(data);
+            complete: (data, locData) => {
+                // this.setMarker(data);
                 if (this.props.commonStore.detectLocation && data.locType == "ibeacon"
-                    && data.level && data.level != this.props.floorStore.mapFloor) {
+                    && data.level && data.level != this.props.floorStore.mapFloor
+                    && locData.gpsCoords && locData.gpsCoords.accuracy > 25) {
                     console.log("entry change level", data.level, this.props.floorStore.mapFloor);
                     this.props.floorStore.listenIbeacon(this.props.mapStore, data.level);
                 }
@@ -211,9 +234,11 @@ class mapPage extends Component {
 
                 if (data.locType == "ibeacon") {
                     this.props.navStore.updateCurrentLocation(data);
+                    this.props.navStore.updateLocateCoordinate(data);
                 } else {
-                    if (data.accuracy < 25) {
+                    if (data.accuracy <= 25) {
                         this.props.navStore.updateCurrentLocation(data);
+                        this.props.navStore.updateLocateCoordinate(data);
                     }
                 }
                 // if (this.props.navStore.currentLocation && this.props.navStore.currentLocation.locType != data.locType) {
@@ -311,7 +336,9 @@ class mapPage extends Component {
                 ? endMarkerPoint && `${endMarkerPoint.name}`
                 : startMarkerPoint && `${startMarkerPoint.name}`,
             addressStyle: {},
-            icon: startConfirm,
+            icon: freeMarker
+                ? endMarkerPoint && endConfirm
+                : startMarkerPoint && startConfirm,
             confirm: () => {
                 this.props.mapStore.planRoute();
                 this.props.commonStore.changeConfirmModal(false);
@@ -358,6 +385,7 @@ class mapPage extends Component {
                 <RoutePanel></RoutePanel>
                 {startMarker && !searchStatus && <NavBottom></NavBottom>}
                 {navMode !== "free" && <NavPanel></NavPanel>}
+                {this.props.commonStore.loadingStatus ? <LoadingComponent/> : <div></div>}
                 <audio id="wb-audio" autoPlay preload="true"></audio>
             </div>
         );

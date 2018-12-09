@@ -36,11 +36,14 @@ const calcMidPoint = (point1, point2) => {
  * @param route:[{}]
  * @param speed:number
  */
-const preHandleSimData = (route, speed = 1) => {
+const preHandleSimData = (route, map, speed = 1) => {
     let pointCollects = []; // 点集合
     let handleRoute = []; // 处理后路径
     let routeLength = 0; // 总距离
     let animateArray = []; // 细化点集合
+    let handleRouteFloor = {};
+    let handleRouteFloorBezier = {};
+    let handleRouteFloorBezierAni = {};
     let parseTurnType = (turnType) => {
         let turnText = {
             0: "起点",
@@ -72,7 +75,41 @@ const preHandleSimData = (route, speed = 1) => {
             }
         }
         handleRoute.push(item);
+        /*----------------------*/
+        const currentRoute = handleRouteFloor[item.startFloor];
+        if (currentRoute && currentRoute instanceof Array) {
+            handleRouteFloor[item.startFloor].push({
+                "type": "Feature",
+                ...item
+            });
+        } else {
+            handleRouteFloor[item.startFloor] = [];
+            handleRouteFloor[item.startFloor].push({
+                "type": "Feature",
+                ...item
+            });
+        }
+        /*----------------------*/
     }
+    /*-----------------------*/
+    for (let key in handleRouteFloor) {
+        const routeIndoor = handleRouteFloor[key]
+            && handleRouteFloor[key].filter(v => v.geometry.type !== "Point");
+        handleRouteFloorBezier[key] = bezierV2(routeIndoor, map);
+        const keyLength = length(handleRouteFloorBezier[key]) * 1000;
+        for (let i = 0, j = 0; i < keyLength * (50 / speed); i += 1) {
+            j += 1 / (50 / speed) / 1000;
+            let segment = along(handleRouteFloorBezier[key], j);
+            if (handleRouteFloorBezierAni[key]) {
+                handleRouteFloorBezierAni[key].push(segment.geometry.coordinates);
+            } else {
+                handleRouteFloorBezierAni[key] = [];
+            }
+        }
+    }
+    // console.log(11111, handleRouteFloor);
+    // console.log(11112, handleRouteFloorBezier);
+    /*-----------------------*/
     let routeLine = lineString(pointCollects);
     routeLength = length(routeLine) * 1000;
     for (let i = 0, j = 0; i < routeLength * (50 / speed); i += 1) {
@@ -82,6 +119,8 @@ const preHandleSimData = (route, speed = 1) => {
     }
     return {
         handleRoute,
+        handleRouteFloor,
+        handleRouteFloorBezierAni,
         routeLength,
         animateArray
     };
@@ -97,6 +136,7 @@ const preHandleRealData = (route, map) => {
     let routeLength = 0; // 总距离
     let handleRouteFloor = {};
     let handleRouteFloorBezier = {};
+    let handleRouteFloorBezierAni = {};
     let parseTurnType = (turnType) => {
         let turnText = {
             0: "起点",
@@ -145,13 +185,24 @@ const preHandleRealData = (route, map) => {
         const routeIndoor = handleRouteFloor[key]
             && handleRouteFloor[key].filter(v => v.geometry.type !== "Point");
         handleRouteFloorBezier[key] = bezierV2(routeIndoor, map);
+        const keyLength = length(handleRouteFloorBezier[key]) * 1000;
+        for (let i = 0, j = 0; i < keyLength * (50); i += 1) {
+            j += 1 / (50) / 1000;
+            let segment = along(handleRouteFloorBezier[key], j);
+            if (handleRouteFloorBezierAni[key]) {
+                handleRouteFloorBezierAni[key].push(segment.geometry.coordinates);
+            } else {
+                handleRouteFloorBezierAni[key] = [];
+            }
+        }
     }
     let routeLine = lineString(pointCollects);
     routeLength = length(routeLine) * 1000;
     return {
         routeLength,
         handleRouteFloor,
-        handleRouteFloorBezier
+        handleRouteFloorBezier,
+        handleRouteFloorBezierAni
     };
 };
 
@@ -176,13 +227,6 @@ const bezierV2 = (arr, map) => {
                                 } else {
                                     line.push(...[lineObj.coordinates[j][0], lineObj.coordinates[j][1]]);
                                 }
-                                // } else if (lineObj.type == "MultiLineString") {
-                                //     // if (i == arr.length - 1) {
-                                //     //     line.push(...[lineObj.coordinates[j + 1][0], lineObj.coordinates[j][1]]);
-                                //     // } else if (j != lineObj.coordinates.length - 2) {
-                                //     //     line.push(...[lineObj.coordinates[j + 1][0], lineObj.coordinates[j + 1][1]]);
-                                //     // }
-                                // }
                             } else {
                                 if (i == arr.length - 1) {
                                     if (lineObj.type == "LineString") {
@@ -205,8 +249,16 @@ const bezierV2 = (arr, map) => {
                         let p0bearing = bearing([beizerPoint.controlPoint.x, beizerPoint.controlPoint.y], [beizerPoint.startPoint.x, beizerPoint.startPoint.y]);
                         let p2bearing = bearing([beizerPoint.controlPoint.x, beizerPoint.controlPoint.y], [beizerPoint.endPoint.x, beizerPoint.endPoint.y]);
                         let options = {units: "kilometers"};
-                        let p0 = destination([beizerPoint.controlPoint.x, beizerPoint.controlPoint.y], 0.00075, p0bearing, options);
-                        let p2 = destination([beizerPoint.controlPoint.x, beizerPoint.controlPoint.y], 0.00075, p2bearing, options);
+                        let len1 = 0.0006;
+                        let len2 = 0.0006;
+                        if(arr[i].distance<2){
+                            len1 = arr[i].distance/1000/3;
+                        }
+                        if(arr[i+1] && arr[i+1].distance<2){
+                            len2 = arr[i+1].distance/1000/3
+                        }
+                        let p0 = destination([beizerPoint.controlPoint.x, beizerPoint.controlPoint.y], len1, p0bearing, options);
+                        let p2 = destination([beizerPoint.controlPoint.x, beizerPoint.controlPoint.y], len2, p2bearing, options);
                         let p1 = beizerPoint.controlPoint;
                         let beziPoint = bezierLine({
                             "x": p0.geometry.coordinates[0],

@@ -12,7 +12,6 @@ import Scale from "./scale";
 import Floor from "./floor";
 import SearchInput from "component/search/searchInput";
 import "./index.less";
-import LoadingComponent from "component/common/loading";
 import LocationLoading from "component/common/loading";
 import wx from "weixin-js-sdk";
 
@@ -65,7 +64,6 @@ class operatorsComponent extends Component {
                 <div className="map-operators-search">
                     <SearchInput {...searchProps}></SearchInput>
                 </div>
-                {this.props.commonStore.loadingStatus ? <LoadingComponent/> : <div></div>}
                 {this.props.commonStore.LocationLoading ? <LocationLoading text={`定位中...`}/> : <div></div>}
             </div>
         );

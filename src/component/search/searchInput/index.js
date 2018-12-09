@@ -61,7 +61,7 @@ class SearchComponent extends PureComponent {
         this.searchWatchId && clearTimeout(this.searchWatchId);
         this.searchWatchId = setTimeout(() => {
             this.props.toSearch && this.props.toSearch(this.state.inputValue);
-        }, 1000);
+        }, 2000);
     }
 
     goBack() {
@@ -84,21 +84,22 @@ class SearchComponent extends PureComponent {
                         {/*onClick={() => this.props.goBack()}></i>*/}
                         {/*: <i className="wbIcon-search iconfont icon-search" style={{fontSize: "4.5vw"}}></i>*/}
                         {/*}*/}
-                        <div onClick={() => this.goBack()}>
-                            <i className="wbIcon-search iconfont icon-fanhui1"
-                               style={{fontSize: "4.5vw", padding: ".2rem", paddingTop: ".25rem"}}
-                            ></i>
-                        </div>
-                        <div>
+                        {/*<div onClick={() => this.goBack()}>*/}
+                            <i onClick={() => this.goBack()} className="wbIcon-search iconfont icon-fanhui1"
+    // style={{fontSize: "4.5vw", padding: ".2rem", paddingTop: ".25rem"}}
+    />
+                        {/*</div>*/}
+                        {/*<div>*/}
                             <input type="search" value={this.state.inputValue} id="searchInput"
                                    onChange={(e) => this.inputChange(e)}
                                    onFocus={(e) => this.focusSearch(e)}
                                    placeholder={placeholder}/>
-                        </div>
-                        <div onClick={() => this.searchByVoice()}>
-                            <i className="wbIcon-mic iconfont icon-mic"
-                               style={{fontSize: "5vw", paddingTop: "2vw"}}/>
-                        </div>
+                        {/*</div>*/}
+                        {/*<div onClick={() => this.searchByVoice()}>*/}
+                            <i onClick={() => this.searchByVoice()} className="wbIcon-mic iconfont icon-mic"
+                               // style={{fontSize: "5vw", paddingTop: "2vw"}}
+                            />
+                        {/*</div>*/}
                     </div>
                 </form>
             </div>

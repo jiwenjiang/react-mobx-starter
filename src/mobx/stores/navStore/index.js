@@ -83,7 +83,7 @@ class NavStore {
 
     // 更新当前定位点
     @action updateLocateCoordinate = (value) => {
-        this.locateCoordinate = value;
+        this.locateCoordinate = `${value.longitude},${value.latitude}`;
     };
 
     @action updateLocType(v) {

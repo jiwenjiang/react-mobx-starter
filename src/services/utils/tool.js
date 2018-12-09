@@ -33,4 +33,27 @@ const getQueryString = (name, url = window.location.search) => {
     const results = regex.exec(url);
     return results == null ? null : results[1];
 };
-export {unique, getQueryString};
+
+const handleTime = (s) => {
+    let h;
+    h = Math.floor(s / 60);
+    //计算秒
+    //算法：取得秒%60的余数，既得到秒数
+    s = s % 60;
+    if (h === 0) {
+        return s + "秒";
+    } else {
+        return h + "分 " + s + "秒";
+    }
+};
+
+const handleDistance = (s) => {
+    if (s && s > 0) {
+        if (s > 1000) {
+            return (s / 1000).toFixed(2) + "公里";
+        } else {
+            return ~~s + "米";
+        }
+    }
+};
+export {unique, getQueryString, handleTime, handleDistance};

@@ -25,8 +25,8 @@ class Nav {
 
     init(loc) {
         this.loc = loc;
+        this.isIOS = /(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent) ? true : false;
         if (loc.currentPosition) {
-            console.log("进入nav存在loc定位", loc.currentPosition);
             this.currentPoint = loc.currentPosition;
             this.initStepper(loc);
         }
@@ -57,8 +57,8 @@ class Nav {
     startSim(
         {
             routeData = [],
-            speed = 1,
             map,
+            speed = 1,
             onSimNav = () => {
             },
             complete = () => {
@@ -69,10 +69,10 @@ class Nav {
     ) {
         this.onSimStep = onSimNav;
         this.simComplete = complete;
-        const handleData = preHandleSimData(routeData, speed);
+        const handleData = preHandleSimData(routeData, map, speed);
         // const handleData = preHandleRealData(routeData, map);
         // console.log(handleData)
-        this.startSimNavigation(handleData, speed);
+        this.startSimNavigation(handleData, map, speed);
     }
 
     stopSim() {
@@ -98,6 +98,7 @@ class Nav {
         this.voiceRecorder = {};
         this.onNavStep = onNav;
         this.navComplete = complete;
+        this.mapObj = map;
         this.handleData = preHandleRealData(routeData, map);
         this.navEndLevel = routeData[routeData.length - 1].endFloor;
         this.currentMode = "realNav";

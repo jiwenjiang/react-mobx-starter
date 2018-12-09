@@ -19,9 +19,10 @@ const realNavigationFn = (target) => {
         }
 
         onRealNavStep() {
-            const {handleRouteFloor, handleRouteFloorBezier, routeLength} = this.handleData;
+            const {handleRouteFloor, handleRouteFloorBezier, routeLength, handleRouteFloorBezierAni} = this.handleData;
             const routeFloor = handleRouteFloor[this.currentPoint.level];
             const routeFloorBezier = handleRouteFloorBezier[this.currentPoint.level];
+            const routeFloorBezierAni = handleRouteFloorBezierAni[this.currentPoint.level];
             let currentLineIndex = 0;
             let geoPoint = point([this.currentPoint.longitude, this.currentPoint.latitude]);
 
@@ -37,6 +38,12 @@ const realNavigationFn = (target) => {
             this.currentRealNavLine = lineString(routeFloor[currentLineIndex].LineCoordinates);
 
             let shadowPoint = nearestPointOnLine(this.currentRealNavLine, geoPoint);
+            let shadowPointBezier = nearestPointOnLine(lineString(routeFloorBezierAni), shadowPoint);
+            let shadowLine = routeFloorBezierAni.slice(shadowPointBezier.properties.index);
+            if (this.mapObj.getLayer("building-layer") && shadowLine && shadowLine.length > 2) {
+                const geoData = lineString(shadowLine);
+                this.mapObj.getSource("building-route").setData(geoData);
+            }
             let currentDistance = distance(geoPoint, shadowPoint) * 1000;
             if (this.currentPoint.locType == "gps" && this.currentPoint.accuracy < 25 && currentDistance > 30) {
                 console.log("gps 偏航", currentDistance);
@@ -56,7 +63,7 @@ const realNavigationFn = (target) => {
             if (this.loc.currentPosition.locType == "ibeacon" && this.loc.currentLocation == "gps") {
                 if (this.loc.currentPosition.level != this.navEndLevel
                     && (currentLineIndex == routeFloor.length - 1
-                    || currentLineIndex == routeFloor.length - 2)) {
+                        || currentLineIndex == routeFloor.length - 2)) {
                     const crossType = routeFloor[currentLineIndex + 1]
                     && routeFloor[currentLineIndex + 1].crossType == 12 ? "elevator" : "stairs";
                     this.inElevator = crossType;
@@ -89,6 +96,8 @@ const realNavigationFn = (target) => {
             const navResult = this.realNavLogic(shadowPoint, currentLineIndex, routeFloor, handleRouteFloor);
 
             const bezierShadowPoint = nearestPointOnLine(routeFloorBezier, point(currentPt));
+            // const aaa = nearestPointOnLine(routeFloorBezierAni, point(currentPt));
+            // console.log()
             const output = {
                 leftDistance: navResult.leftDistance,
                 bearing: navResult.currentBearing,
@@ -130,6 +139,8 @@ const realNavigationFn = (target) => {
                     latitude: shadowPoint.geometry.coordinates[1]
                 };
             }
+
+            // 剩余距离计算
             let leftDistance = 0;
             if (currentLineIndex == (routeFloor.length - 1)) {
                 leftDistance = currentEndDistance;
@@ -150,18 +161,18 @@ const realNavigationFn = (target) => {
                 }
             }
 
-
+            // 文案，语音计算
             let text = ""; // 文字提示
             let voice = ""; // 语音提示
             // 大于起点1米开始提示
-            if (currentStartDistance > 1) {
+            if (currentStartDistance > 0.1) {
                 if (currentLineIndex != (routeFloor.length - 1)) {
                     if (lineDistance < 5) {
                         text = `请按路线行走`;
                     } else {
                         const upLimit = this.loc.currentLocation == "gps" ? 15 : 8;
                         const downLimit = this.loc.currentLocation == "gps" ? 8 : 5;
-                        if (currentEndDistance >= upLimit) {
+                        if (currentEndDistance > upLimit) {
                             text = `请直行${currentEndDistance}米`;
                             turnType = 1;
                             if (!voiceRecorder[`${currentLineIndex}1`]) {
@@ -202,6 +213,7 @@ const realNavigationFn = (target) => {
                 } else {
                     if (this.currentPoint.level == this.navEndLevel) {
                         if (currentStartDistance >= 1) {
+                            turnType = 1;
                             text = `前方${currentEndDistance}米到达终点`;
                             if (!voiceRecorder[`${currentLineIndex}4`] && lineDistance > 5) {
                                 voice = `前方${currentEndDistance}米到达终点`;

@@ -64,7 +64,7 @@ class SearchHistory extends PureComponent {
                                         onClick={() => this.toSearch(v)}
                                         key={v.name}
                                         thumb={<i className="iconfont icon-search" style={{fontSize: "3.9vw"}}/>}
-                                        extra={<i className="iconfont icon-close"
+                                        extra={<i className="iconfont icon-close" style={{padding:'2vw'}}
                                                   onClick={(e) => this.deleteRecord(v, e)}/>}>
                                         <span>{v.name}</span>
                                     </List.Item>

@@ -1,12 +1,12 @@
 /**
  * Created by j_bleach on 2018/10/27 0027.
  */
-/*eslint-disable*/
 import React, {Component} from "react";
 import {observer, inject} from "mobx-react";
 import "./index.less";
 import nav from "services/navSDK";
 import ConfirmModal from "component/common/confirmModal";
+import {handleDistance} from "services/utils/tool";
 
 @inject("mapStore", "navStore", "floorStore", "commonStore")
 @observer
@@ -63,7 +63,7 @@ class navBottom extends Component {
                             </div>
                             <div className="nav-bottom-notice">
                                 {navRealData && navRealData.leftDistance
-                                && `距离目的地${navRealData && Math.round(navRealData.leftDistance)}米`}
+                                && `距离目的地${navRealData && handleDistance(navRealData.leftDistance)}`}
                                 &emsp;
                             </div>
                         </div>

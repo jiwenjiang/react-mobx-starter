@@ -42,7 +42,7 @@ class FloorStore {
     // 更新当前楼层
     @action
     updateFloor(floor) {
-        this.mapFloor = floor && Number(floor);
+        this.mapFloor = (floor && Number(floor)) || 0;
     }
 
     // 更改楼层显示状态
@@ -84,6 +84,18 @@ class FloorStore {
                     features: []
                 };
             map.mapObj.getSource("building-route").setData(geoData);
+        }
+        if (map.mapObj.getLayer("building-layer-down")) {
+            const routeIndoor = floorStore.routeIndoor[floor]
+                && floorStore.routeIndoor[floor].features
+                && floorStore.routeIndoor[floor].features.filter(v => v.geometry.type !== "Point");
+            const geoData = routeIndoor && routeIndoor.length > 0
+                ? bezierV2(toJS(routeIndoor), map.mapObj)
+                : {
+                    type: "FeatureCollection",
+                    features: []
+                };
+            map.mapObj.getSource("building-route-down").setData(geoData);
         }
     }
 
