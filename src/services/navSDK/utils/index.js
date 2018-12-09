@@ -107,7 +107,8 @@ const preHandleSimData = (route, map, speed = 1) => {
             }
         }
     }
-
+    // console.log(11111, handleRouteFloor);
+    // console.log(11112, handleRouteFloorBezier);
     /*-----------------------*/
     let routeLine = lineString(pointCollects);
     routeLength = length(routeLine) * 1000;
@@ -272,7 +273,7 @@ const bezierV2 = (arr, map) => {
             if (arr[0].geometry.type == "LineString") {
                 line.push(...arr[0].geometry.coordinates);
             } else {
-                for (let i = 0; i < arr[0].geometry.coordinates.length; i++) {
+                for(let i =0;i<arr[0].geometry.coordinates.length;i++){
                     line.push(...arr[0].geometry.coordinates[i]);
                 }
 
