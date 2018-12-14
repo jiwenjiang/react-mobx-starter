@@ -83,7 +83,7 @@ class NavStore {
 
     // 更新当前定位点
     @action updateLocateCoordinate = (value) => {
-        this.locateCoordinate = value;
+        this.locateCoordinate = `${value.longitude},${value.latitude}`;
     };
 
     @action updateLocType(v) {
@@ -131,7 +131,7 @@ class NavStore {
         // console.log("当前定位点", data);
         this.changeFirstLocation(false);
         if (data.locType === "gps") {
-            if (data.accuracy <= 25) {
+            if (data.accuracy < 500) {
                 const pt = point([data.longitude, data.latitude]);
                 if (map.bboxPolygon && booleanPointInPolygon(pt, map.bboxPolygon)) {
                     console.log("户外定位成功");
@@ -150,11 +150,18 @@ class NavStore {
             }
         }
         if (data.locType === "ibeacon") {
-            this.freeMarkerPoint = {
-                point: [data.longitude, data.latitude],
-                floor: data.level,
-                name: "当前位置"
-            };
+            const pt = point([data.longitude, data.latitude]);
+            if (map.bboxPolygon && booleanPointInPolygon(pt, map.bboxPolygon)) {
+                console.log("蓝牙定位成功");
+                this.freeMarkerPoint = {
+                    point: [data.longitude, data.latitude],
+                    floor: data.level,
+                    name: "当前位置"
+                };
+            } else {
+                this.changeFirstLocation(true);
+                return false;
+            }
         }
         if (this.freeMarker) {
             this.freeMarker.setLngLat(this.freeMarkerPoint.point);
@@ -198,6 +205,7 @@ class NavStore {
     }
 
     @action moveFreeMarker(map, data) {
+        console.log("free", data);
         if (this.navMode === "free") {
             if (data) {
                 this.freeMarkerPoint = {

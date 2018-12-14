@@ -20,6 +20,10 @@ const simNavigationFn = (target) => {
             let currentLineIndex = 0;
             this.animateId = null;
             let voiceRecorder = {};
+            let floorRecorder = {
+                lastFloor: null
+            };
+            let lastFloor = null;
             const animate = () => {
                 if (animateArray.length > 0) {
                     this.animateId = window.requestAnimationFrame(animate);
@@ -35,9 +39,13 @@ const simNavigationFn = (target) => {
                     // console.log(distanceArr);
                     currentLineIndex = distanceArr.findIndex(v => v == Math.min(...distanceArr));
                     const leftDistance = routeLength - (completeLength / 50 / speed);
-                    const simResult = this.simNavLogic(currentPoint, currentLineIndex, handleRoute, voiceRecorder);
-                    handleRouteFloorBezierAni[simResult.currentFloor].shift();
-                    const currentRoute = handleRouteFloorBezierAni[simResult.currentFloor];
+                    const simResult = this.simNavLogic(currentPoint, currentLineIndex, handleRoute, voiceRecorder, floorRecorder, lastFloor);
+                    const currentFloor = JSON.stringify({
+                        level: Number(simResult.currentFloor),
+                        index: simResult.floorIndex
+                    });
+                    handleRouteFloorBezierAni[currentFloor].shift();
+                    const currentRoute = handleRouteFloorBezierAni[currentFloor];
                     if (map.getLayer("building-layer") && currentRoute && currentRoute.length > 2) {
                         const geoData = lineString(currentRoute);
                         map.getSource("building-route").setData(geoData);
@@ -53,7 +61,8 @@ const simNavigationFn = (target) => {
                         turn: simResult.turnType,
                         text: simResult.text,
                         voice: simResult.voice,
-                        inElevator: this.inElevator
+                        inElevator: this.inElevator,
+                        floorIndex: simResult.floorIndex
                     };
                     this.onSimStep(output);
                     completeLength++;
@@ -77,8 +86,18 @@ const simNavigationFn = (target) => {
         };
 
         // 模拟导航逻辑
-        simNavLogic(currentPoint, currentLineIndex, handleRoute, voiceRecorder) {
+        simNavLogic(currentPoint, currentLineIndex, handleRoute, voiceRecorder, floorRecorder) {
             const currentFloor = handleRoute[currentLineIndex].startFloor; // 当前楼层
+            // 判断当前楼层
+            if (floorRecorder[currentFloor] !== undefined) {
+                if (floorRecorder.lastFloor != currentFloor) {
+                    floorRecorder.lastFloor = currentFloor;
+                    floorRecorder[currentFloor] += 1;
+                }
+            } else {
+                floorRecorder.lastFloor = currentFloor;
+                floorRecorder[currentFloor] = 0;
+            }
             const currentLine = handleRoute[currentLineIndex].LineCoordinates; // 当前路径
             const startPoint = point(currentLine[0]); // 当前路径终点
             const endPoint = point(currentLine[currentLine.length - 1]); // 当前路径终点
@@ -95,12 +114,12 @@ const simNavigationFn = (target) => {
             let voice = ""; // 语音提示
             // 大于起点1米开始提示
             this.inElevator = false;
-            if (currentStartDistance > 1) {
+            if (currentStartDistance > 0) {
                 if (currentLineIndex != (handleRoute.length - 1)) {
                     if (lineDistance < 5 && nextCrossType == 19) {
                         text = `请按路线行走`;
                     } else {
-                        if (currentEndDistance >= 8) {
+                        if (currentEndDistance > 8) {
                             text = `请直行${currentEndDistance}米`;
                             turnType = 1;
                             if (!voiceRecorder[`${currentLineIndex}1`]) {
@@ -146,6 +165,7 @@ const simNavigationFn = (target) => {
                 } else {
                     if (currentStartDistance >= 2) {
                         text = `前方${currentEndDistance}米到达终点`;
+                        turnType = 1;
                         if (!voiceRecorder[`${currentLineIndex}4`]) {
                             voice = `前方${currentEndDistance}米到达终点`;
                             voiceRecorder[`${currentLineIndex}4`] = true;
@@ -158,7 +178,8 @@ const simNavigationFn = (target) => {
                 voice,
                 currentBearing,
                 currentFloor,
-                turnType
+                turnType,
+                floorIndex: floorRecorder[currentFloor]
             };
         }
     };

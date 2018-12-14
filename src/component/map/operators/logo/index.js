@@ -6,6 +6,7 @@ import AddressingImg from "assets/img/logo.png";
 import CarImg from "assets/img/logo_car.png";
 import "./index.less";
 
-const logo = (type) => <img className="map-logo" src={type === "Addressing" ? AddressingImg : CarImg} alt=""/>;
+const logo = (type, noLogo) => !noLogo &&
+    <img className="map-logo" src={type === "Addressing" ? AddressingImg : CarImg} alt=""/>;
 
 export default logo;

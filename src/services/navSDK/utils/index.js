@@ -2,8 +2,11 @@
  * Created by j_bleach on 2018/10/24 0024.
  */
 /*eslint-disable*/
-import {point, distance, midpoint, lineString, length, along, bearing, destination} from "@turf/turf";
-import {floorStore} from "../../../mobx/stores/floorStore";
+import {
+    point, distance, midpoint,
+    lineString, length, along,
+    bearing, destination, rhumbDestination
+} from "@turf/turf";
 
 /**
  * @author j_bleach
@@ -44,6 +47,8 @@ const preHandleSimData = (route, map, speed = 1) => {
     let handleRouteFloor = {};
     let handleRouteFloorBezier = {};
     let handleRouteFloorBezierAni = {};
+    let countKey = {};
+    let lastFloor = null;
     let parseTurnType = (turnType) => {
         let turnText = {
             0: "起点",
@@ -76,15 +81,27 @@ const preHandleSimData = (route, map, speed = 1) => {
         }
         handleRoute.push(item);
         /*----------------------*/
-        const currentRoute = handleRouteFloor[item.startFloor];
+        /* 新的路径划分 */
+        if (countKey[item.startFloor] !== undefined) {
+            if (lastFloor != item.startFloor) {
+                lastFloor = item.startFloor;
+                countKey[item.startFloor] += 1;
+            }
+        } else {
+            lastFloor = item.startFloor;
+            countKey[item.startFloor] = 0;
+        }
+        const routeKey = JSON.stringify({level: Number(item.startFloor), index: countKey[item.startFloor]});
+        /* 新的路径划分 */
+        const currentRoute = handleRouteFloor[routeKey];
         if (currentRoute && currentRoute instanceof Array) {
-            handleRouteFloor[item.startFloor].push({
+            handleRouteFloor[routeKey].push({
                 "type": "Feature",
                 ...item
             });
         } else {
-            handleRouteFloor[item.startFloor] = [];
-            handleRouteFloor[item.startFloor].push({
+            handleRouteFloor[routeKey] = [];
+            handleRouteFloor[routeKey].push({
                 "type": "Feature",
                 ...item
             });
@@ -107,8 +124,6 @@ const preHandleSimData = (route, map, speed = 1) => {
             }
         }
     }
-    // console.log(11111, handleRouteFloor);
-    // console.log(11112, handleRouteFloorBezier);
     /*-----------------------*/
     let routeLine = lineString(pointCollects);
     routeLength = length(routeLine) * 1000;
@@ -122,7 +137,7 @@ const preHandleSimData = (route, map, speed = 1) => {
         handleRouteFloor,
         handleRouteFloorBezierAni,
         routeLength,
-        animateArray
+        animateArray,
     };
 };
 /**
@@ -136,6 +151,11 @@ const preHandleRealData = (route, map) => {
     let routeLength = 0; // 总距离
     let handleRouteFloor = {};
     let handleRouteFloorBezier = {};
+    let handleRouteFloorBezierAni = {};
+    let handleRouteFloorShadow = {};
+    let countKey = {};
+    let lastFloor = null;
+    let crossEndLevel = null;
     let parseTurnType = (turnType) => {
         let turnText = {
             0: "起点",
@@ -152,6 +172,9 @@ const preHandleRealData = (route, map) => {
         let item = route[i];
         item.LineCoordinates = [];
         item.turnTypeText = parseTurnType(route[i].turnType);
+        if (item.crossType == 11 || item.crossType == 13) {
+            crossEndLevel = item.startFloor;
+        }
         if (route[i]["geometry"]["type"] === "LineString") {
             for (let k = 0; k < route[i]["geometry"]["coordinates"].length; k++) {
                 item.LineCoordinates.push(route[i]["geometry"]["coordinates"][k]);
@@ -166,15 +189,27 @@ const preHandleRealData = (route, map) => {
                 }
             }
         }
-        const currentRoute = handleRouteFloor[item.startFloor];
+        /* 新的路径划分 */
+        if (countKey[item.startFloor] !== undefined) {
+            if (lastFloor != item.startFloor) {
+                lastFloor = item.startFloor;
+                countKey[item.startFloor] += 1;
+            }
+        } else {
+            lastFloor = item.startFloor;
+            countKey[item.startFloor] = 0;
+        }
+        const routeKey = JSON.stringify({level: Number(item.startFloor), index: countKey[item.startFloor]});
+        /* 新的路径划分 */
+        const currentRoute = handleRouteFloor[routeKey];
         if (currentRoute && currentRoute instanceof Array) {
-            handleRouteFloor[item.startFloor].push({
+            handleRouteFloor[routeKey].push({
                 "type": "Feature",
                 ...item
             });
         } else {
-            handleRouteFloor[item.startFloor] = [];
-            handleRouteFloor[item.startFloor].push({
+            handleRouteFloor[routeKey] = [];
+            handleRouteFloor[routeKey].push({
                 "type": "Feature",
                 ...item
             });
@@ -183,14 +218,55 @@ const preHandleRealData = (route, map) => {
     for (let key in handleRouteFloor) {
         const routeIndoor = handleRouteFloor[key]
             && handleRouteFloor[key].filter(v => v.geometry.type !== "Point");
+        if (routeIndoor) {
+            handleRouteFloorShadow[key] = routeIndoor.map((v, i) => {
+                let startPt = null;
+                let endPt = null;
+                if (i < routeIndoor.length - 1) {
+                    const limit = v.indoor ? 5 : 8;
+                    const nextLine = routeIndoor[i + 1];
+                    if (v.distance < limit) {
+                        startPt = point(v.LineCoordinates[0]);
+                    } else {
+                        const firstPt = point(v.LineCoordinates[0]);
+                        const lastPt = point(v.LineCoordinates[v.LineCoordinates.length - 1]);
+                        const lineBearing = bearing(lastPt, firstPt);
+                        startPt = rhumbDestination(lastPt, limit / 1000, lineBearing);
+                    }
+                    if (nextLine.distance < limit) {
+                        endPt = point(nextLine.LineCoordinates[nextLine.LineCoordinates.length - 1]);
+                    } else {
+                        const lastPt = point(v.LineCoordinates[v.LineCoordinates.length - 1]);
+                        const nextLastPt = point(nextLine.LineCoordinates[nextLine.LineCoordinates.length - 1]);
+                        const nextLineBearing = bearing(lastPt, nextLastPt);
+                        endPt = rhumbDestination(lastPt, limit / 1000, nextLineBearing);
+                    }
+                    return lineString([startPt.geometry.coordinates, endPt.geometry.coordinates]);
+                }
+            });
+        }
         handleRouteFloorBezier[key] = bezierV2(routeIndoor, map);
+        const keyLength = length(handleRouteFloorBezier[key]) * 1000;
+        for (let i = 0, j = 0; i < keyLength * (50); i += 1) {
+            j += 1 / (50) / 1000;
+            let segment = along(handleRouteFloorBezier[key], j);
+            if (handleRouteFloorBezierAni[key]) {
+                handleRouteFloorBezierAni[key].push(segment.geometry.coordinates);
+            } else {
+                handleRouteFloorBezierAni[key] = [];
+            }
+        }
     }
     let routeLine = lineString(pointCollects);
     routeLength = length(routeLine) * 1000;
     return {
         routeLength,
         handleRouteFloor,
-        handleRouteFloorBezier
+        handleRouteFloorBezier,
+        handleRouteFloorBezierAni,
+        handleRouteFloorShadow,
+        crossEndLevel,
+        countKey
     };
 };
 
@@ -215,13 +291,6 @@ const bezierV2 = (arr, map) => {
                                 } else {
                                     line.push(...[lineObj.coordinates[j][0], lineObj.coordinates[j][1]]);
                                 }
-                                // } else if (lineObj.type == "MultiLineString") {
-                                //     // if (i == arr.length - 1) {
-                                //     //     line.push(...[lineObj.coordinates[j + 1][0], lineObj.coordinates[j][1]]);
-                                //     // } else if (j != lineObj.coordinates.length - 2) {
-                                //     //     line.push(...[lineObj.coordinates[j + 1][0], lineObj.coordinates[j + 1][1]]);
-                                //     // }
-                                // }
                             } else {
                                 if (i == arr.length - 1) {
                                     if (lineObj.type == "LineString") {
@@ -244,8 +313,16 @@ const bezierV2 = (arr, map) => {
                         let p0bearing = bearing([beizerPoint.controlPoint.x, beizerPoint.controlPoint.y], [beizerPoint.startPoint.x, beizerPoint.startPoint.y]);
                         let p2bearing = bearing([beizerPoint.controlPoint.x, beizerPoint.controlPoint.y], [beizerPoint.endPoint.x, beizerPoint.endPoint.y]);
                         let options = {units: "kilometers"};
-                        let p0 = destination([beizerPoint.controlPoint.x, beizerPoint.controlPoint.y], 0.00075, p0bearing, options);
-                        let p2 = destination([beizerPoint.controlPoint.x, beizerPoint.controlPoint.y], 0.00075, p2bearing, options);
+                        let len1 = 0.0006;
+                        let len2 = 0.0006;
+                        if (arr[i].distance < 2) {
+                            len1 = arr[i].distance / 1000 / 3;
+                        }
+                        if (arr[i + 1] && arr[i + 1].distance < 2) {
+                            len2 = arr[i + 1].distance / 1000 / 3;
+                        }
+                        let p0 = destination([beizerPoint.controlPoint.x, beizerPoint.controlPoint.y], len1, p0bearing, options);
+                        let p2 = destination([beizerPoint.controlPoint.x, beizerPoint.controlPoint.y], len2, p2bearing, options);
                         let p1 = beizerPoint.controlPoint;
                         let beziPoint = bezierLine({
                             "x": p0.geometry.coordinates[0],

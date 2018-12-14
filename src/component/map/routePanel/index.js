@@ -25,7 +25,9 @@ class routePanel extends Component {
 
     routeFocus(v) {
         this.props.commonStore.changeSearchStatus(v);
-        // this.props.commonStore.changeSearchHistory(true);
+        if (this.props.commonStore.projectType == "car") {
+            this.props.commonStore.changeProjectType("Car");
+        }
     }
 
     changePersonType(personType) {

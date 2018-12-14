@@ -9,7 +9,7 @@ import nav from "services/navSDK";
 import "./index.less";
 import {toJS} from "mobx";
 import {floorStore} from "../../../mobx/stores/floorStore";
-import audioTest from "assets/audio/routePlan.mp3";
+import {handleTime, handleDistance} from "services/utils/tool";
 
 
 @inject("mapStore", "navStore", "floorStore", "commonStore")
@@ -19,7 +19,7 @@ class beginNav extends Component {
     componentDidMount() {
         // swipe dom
         const squareUp = document.getElementById("begin-nav");
-        const squareDown = document.querySelector(".nav-route-detail-content");
+        const squareDown = document.querySelector(".nav-route-detail-head");
         const managerUp = new Hammer.Manager(squareUp);
         const managerDown = new Hammer.Manager(squareDown);
         const SwipeUp = new Hammer.Swipe();
@@ -32,9 +32,7 @@ class beginNav extends Component {
             }
         });
         managerDown.on("swipedown", () => {
-            if (squareDown.scrollTop === 0) {
-                document.getElementsByClassName("nav-route-detail")[0].classList.remove("dom-transformY-100vh");
-            }
+            document.getElementsByClassName("nav-route-detail")[0].classList.remove("dom-transformY-100vh");
         });
         if (this.props.mapStore.confirmEndMarker) {
             document.getElementById("begin-nav").classList.add("dom-transformY-30");
@@ -58,38 +56,38 @@ class beginNav extends Component {
     renderList(v, i) {
         if (v.crossType === 19) {
             return {
-                0: <li className="nav-route-detail-list" key={i}>
+                0: <li className="nav-route-detail-list canBeScroll" key={i}>
                     <i className="iconfont icon-qidian2" style={{color: "#00B4FF"}}></i>&emsp;
-                    <span className="nav-route-text">
+                    <span className="nav-route-text canBeScroll">
                         <span className="nav-route-firstText nav-route-thinText">从我的位置</span>
                         <span className="nav-route-secondText nav-route-boldText">{this.props.mapStore.startMarkerPoint
                         && this.props.mapStore.startMarkerPoint.name} 出发</span>
                     </span>
                 </li>,
-                1: <li className="nav-route-detail-list" key={i}>
+                1: <li className="nav-route-detail-list canBeScroll" key={i}>
                     <i className="iconfont icon-zhihang" style={{color: "#9B9B9B"}}></i>&emsp;
-                    <span className="nav-route-text">
+                    <span className="nav-route-text canBeScroll">
                     <span className="nav-route-firstText nav-route-boldText">直行</span>
                     <span className="nav-route-secondText nav-route-thinText">{Math.round(v.distance)}米</span>
                     </span>
                 </li>,
-                2: <li className="nav-route-detail-list" key={i}>
+                2: <li className="nav-route-detail-list canBeScroll" key={i}>
                     <i className="iconfont icon-zuozhuan" style={{color: "#9B9B9B"}}></i>&emsp;
-                    <span className="nav-route-text">
+                    <span className="nav-route-text canBeScroll">
                     <span className="nav-route-firstText nav-route-thinText">{Math.round(v.distance)}米后</span>
                     <span className="nav-route-secondText nav-route-boldText">左转</span>
                     </span>
                 </li>,
-                3: <li className="nav-route-detail-list" key={i}>
+                3: <li className="nav-route-detail-list canBeScroll" key={i}>
                     <i className="iconfont icon-youzhuan" style={{color: "#9B9B9B"}}></i>&emsp;
-                    <span className="nav-route-text">
+                    <span className="nav-route-text canBeScroll">
                     <span className="nav-route-firstText nav-route-thinText">{Math.round(v.distance)}米后</span>
                     <span className="nav-route-secondText nav-route-boldText">右转</span>
                     </span>
                 </li>,
-                5: <li className="nav-route-detail-list" key={i}>
+                5: <li className="nav-route-detail-list canBeScroll" key={i}>
                     <i className="iconfont icon-zhongdian2" style={{color: "#FF343E"}}></i>&emsp;
-                    <span className="nav-route-text">
+                    <span className="nav-route-text canBeScroll">
                         <span className="nav-route-firstText nav-route-thinText">到达</span>
                         <span className="nav-route-secondText nav-route-boldText">{this.props.mapStore.endMarkerPoint
                         && this.props.mapStore.endMarkerPoint.name}</span>
@@ -141,7 +139,7 @@ class beginNav extends Component {
         nav.startSim({
             routeData: toJS(this.props.navStore.navRoutes),
             map: this.props.mapStore.mapObj,
-            speed: 1,
+            speed: 5,
             onSimNav: (data) => {
                 this.props.navStore.moveNavMarker(this.props.mapStore, [data.currentLon, data.currentLat], "simMarker");
                 let navDatas = data.text ? data : {
@@ -179,7 +177,7 @@ class beginNav extends Component {
                     // const floor = data.level >= 0 ? data.level - 1 : data.level;
                     this.props.floorStore.updateFloor(data.level);
                     this.props.mapStore.mapObj.setLevel(data.level); //  更新楼层
-                    this.props.floorStore.checkMarkerAndRoute(this.props.mapStore, data.level); // 终点，起点，路径检测
+                    this.props.floorStore.checkMarkerAndRoute(this.props.mapStore, data.level, data.floorIndex); // 终点，起点，路径检测
                 }
                 if (data.voice) {
                     this.props.commonStore.baiduVoiceUrl(data.voice);
@@ -187,7 +185,6 @@ class beginNav extends Component {
                 bearing = data.bearing;
             },
             complete: () => {
-                console.log("end", new Date().getTime());
                 this.props.navStore.changeNavMode("free");
                 this.props.commonStore.baiduVoiceUrl("到达目的地，感谢使用本次导航");
                 document.getElementById("nav-bottom").classList.remove("dom-transformY-30");
@@ -223,7 +220,8 @@ class beginNav extends Component {
         //
         this.props.navStore.changeNavMode("real");
         this.props.navStore.freeMarker && this.props.navStore.removeFreeMarker();
-        const startPoint = toJS(this.props.floorStore.routeIndoorBezier[this.props.floorStore.mapFloor])
+        const routeKey = JSON.stringify({level: Number(this.props.floorStore.mapFloor), index: 0});
+        const startPoint = toJS(this.props.floorStore.routeIndoorBezier[routeKey])
             .geometry.coordinates[0];
         this.props.navStore.moveNavMarker(this.props.mapStore, startPoint, "navMarker");
         this.props.commonStore.baiduVoiceUrl("开始导航");
@@ -236,6 +234,9 @@ class beginNav extends Component {
             routeData: toJS(this.props.navStore.navRoutes),
             map: this.props.mapStore.mapObj,
             onNav: (data) => {
+                if (data.level && data.level != this.props.floorStore.mapFloor) {
+                    this.props.floorStore.listenIbeacon(this.props.mapStore, data.level);
+                }
                 this.props.navStore.moveNavMarker(this.props.mapStore, [data.currentLon, data.currentLat], "navMarker");
                 let navDatas = data.text ? data : {
                     ...data,
@@ -315,7 +316,7 @@ class beginNav extends Component {
                             <div className="map-goToShare-head-swipe"></div>
                             <div className="map-goToShare-name">
                             <span className="map-goToShare-name-font nav-font">
-                                {navRoutes ? `${totalDistance}米 ${navTime}秒` : "请选择起点"}
+                                {navRoutes ? `${handleDistance(totalDistance)} ${handleTime(navTime)}` : "请选择起点"}
                                 </span>
                             </div>
                             <div className="begin-nav-exit" onClick={() => this.exit()}>
@@ -345,12 +346,12 @@ class beginNav extends Component {
                             </button>
                         </div>
                     </div>
-                    <div className="nav-route-detail">
+                    <div className="nav-route-detail canBeScroll">
                         <div className="nav-route-detail-content canBeScroll">
                             <div className="nav-route-detail-head">
-                                <span>{totalDistance}米 {navTime}秒</span>
+                                <span>{handleDistance(totalDistance)} {handleTime(navTime)}</span>
                             </div>
-                            <ul className="nav-route-detail-body">
+                            <ul className="canBeScroll">
                                 {navRoutes && navRoutes.map((v, i) => this.renderList(v, i))}
                             </ul>
                             <div className="nav-route-detail-foot begin-nav">

@@ -42,7 +42,7 @@ class FloorStore {
     // 更新当前楼层
     @action
     updateFloor(floor) {
-        this.mapFloor = floor && Number(floor);
+        this.mapFloor = (floor && Number(floor)) || 0;
     }
 
     // 更改楼层显示状态
@@ -51,7 +51,8 @@ class FloorStore {
         this.floorStatus = event.newState === 1 ? true : false;
     }
 
-    checkMarkerAndRoute(map, floor) {
+    checkMarkerAndRoute(map, floor, index = 0) {
+        console.log(index);
         // marker 跨楼层判断
         const endMarkerPoint = map.endMarkerPoint;
         const startMarkerPoint = map.startMarkerPoint;
@@ -74,9 +75,10 @@ class FloorStore {
         // 路径规划 跨楼层判断
 
         if (map.mapObj.getLayer("building-layer")) {
-            const routeIndoor = floorStore.routeIndoor[floor]
-                && floorStore.routeIndoor[floor].features
-                && floorStore.routeIndoor[floor].features.filter(v => v.geometry.type !== "Point");
+            const handleFloor = JSON.stringify({level: Number(floor), index});
+            const routeIndoor = floorStore.routeIndoor[handleFloor]
+                && floorStore.routeIndoor[handleFloor].features
+                && floorStore.routeIndoor[handleFloor].features.filter(v => v.geometry.type !== "Point");
             const geoData = routeIndoor && routeIndoor.length > 0
                 ? bezierV2(toJS(routeIndoor), map.mapObj)
                 : {
@@ -86,9 +88,10 @@ class FloorStore {
             map.mapObj.getSource("building-route").setData(geoData);
         }
         if (map.mapObj.getLayer("building-layer-down")) {
-            const routeIndoor = floorStore.routeIndoor[floor]
-                && floorStore.routeIndoor[floor].features
-                && floorStore.routeIndoor[floor].features.filter(v => v.geometry.type !== "Point");
+            const handleFloor = JSON.stringify({level: Number(floor), index});
+            const routeIndoor = floorStore.routeIndoor[handleFloor]
+                && floorStore.routeIndoor[handleFloor].features
+                && floorStore.routeIndoor[handleFloor].features.filter(v => v.geometry.type !== "Point");
             const geoData = routeIndoor && routeIndoor.length > 0
                 ? bezierV2(toJS(routeIndoor), map.mapObj)
                 : {
@@ -112,11 +115,11 @@ class FloorStore {
      * @param floor:楼层
      */
     @action
-    listenIbeacon(map, floor) {
+    listenIbeacon(map, floor, index = 0) {
         // const floorNum = floor >= 0 ? Number(floor) + 1 : floor;
         this.updateFloor(floor);
         map.mapObj.setLevel(floor);
-        this.checkMarkerAndRoute(map, floor);
+        this.checkMarkerAndRoute(map, floor, index);
     }
 }
 

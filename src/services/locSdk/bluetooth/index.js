@@ -6,14 +6,14 @@ import wx from "weixin-js-sdk";
 
 const INTERVAL = 500; // 服务器时间间隔
 const POINTLENTH = 3; // 质心点计算数组长度
-const CHANGE_GPS = 2000; // 搜索不到蓝牙5000ms后，切换gps
+const CHANGE_GPS = 5000; // 搜索不到蓝牙5000ms后，切换gps
 
 const blueToothFn = (target) => {
-    // const signUrl = `https://gisgd.scu.edu.cn/wxConfig/weixin/v1/jsSdkSign`;
-    const signUrl = `https://xz.parkbobo.com/wxConfig/weixin/v1/jsSdkSign`;
+    const signUrl = `https://gisgd.scu.edu.cn/wxConfig/weixin/v1/jsSdkSign`;
+    // const signUrl = `https://xz.parkbobo.com/wxConfig/weixin/v1/jsSdkSign`;
     // const signUrl = `https://gisapp.swun.edu.cn/wxConfig/weixin/v1/jsSdkSign`;
-    const getIbeconUrl = `https://map.parkbobo.com/location/weka/v1/classify`;// map
-    // const getIbeconUrl = `https://gisgd.scu.edu.cn/location/weka/v1/classify`;// map
+    // const getIbeconUrl = `https://map.parkbobo.com/location/weka/v1/classify`;// map
+    const getIbeconUrl = `https://gismp.scu.edu.cn/location/weka/v1/classify`;// map
     // const getIbeconUrl = `https://gl.swun.edu.cn/location/weka/v1/classify`;
 
     // const deviceUrl = `https://xz.parkbobo.com/location/device/v1/getAll`;
@@ -46,6 +46,7 @@ const blueToothFn = (target) => {
                 },
                 body: signBody
             }).then((response) => response.json()).then((data) => {
+
                 this.configWx(data.data);
                 this.initIbeacon = true;
                 this.initSuccess();
@@ -104,11 +105,11 @@ const blueToothFn = (target) => {
         startIbeaconSearch() {
             console.log("进入蓝牙");
             wx.ready(() => {
-                let time = Date.now();
+                let time = 0;
                 let flag = false;
                 let timeId = void 0;
                 window.addEventListener("devicemotion", () => {
-                    if (Date.now() - time >= 80) {
+                    if (Date.now() - time >= 300) {
                         time = Date.now();
                         if (false === flag) {
                             wx.stopSearchBeacons({
@@ -215,9 +216,9 @@ const blueToothFn = (target) => {
          */
         getIbeaconPoints(data) {
             let filterData = data.beacons && data.beacons
-                    .map(v => {
-                        return {rssi: ~~Number(v.rssi), device: `${v.major}_${v.minor}`};
-                    });
+                .map(v => {
+                    return {rssi: ~~Number(v.rssi), device: `${v.major}_${v.minor}`};
+                });
             if (filterData.length === 0) {
                 // this.onSuccess();
             } else {
@@ -273,8 +274,8 @@ const blueToothFn = (target) => {
             } else {
                 ibeaconArr.push(data);
                 const inputArr = ibeaconArr && ibeaconArr.map((v, i) => {
-                        return {...v, timestamp: new Date().getTime() + i * 2000};
-                    });
+                    return {...v, timestamp: new Date().getTime() + i * 2000};
+                });
                 const polygonLocation = this.polygonV2(inputArr);
                 ibeaconArr.shift();
                 return polygonLocation;

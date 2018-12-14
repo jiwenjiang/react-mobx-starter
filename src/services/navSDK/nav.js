@@ -25,8 +25,8 @@ class Nav {
 
     init(loc) {
         this.loc = loc;
+        this.isIOS = /(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent) ? true : false;
         if (loc.currentPosition) {
-            console.log("进入nav存在loc定位", loc.currentPosition);
             this.currentPoint = loc.currentPosition;
             this.initStepper(loc);
         }
@@ -96,9 +96,14 @@ class Nav {
         }
     ) {
         this.voiceRecorder = {};
+        this.floorRecorder = {
+            lastFloor: null
+        };
         this.onNavStep = onNav;
         this.navComplete = complete;
+        this.mapObj = map;
         this.handleData = preHandleRealData(routeData, map);
+        this.navStartLevel = routeData[0].startFloor;
         this.navEndLevel = routeData[routeData.length - 1].endFloor;
         this.currentMode = "realNav";
         this.correctNavFlag = false;

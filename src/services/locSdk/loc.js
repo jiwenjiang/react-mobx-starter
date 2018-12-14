@@ -47,7 +47,7 @@ class Loc {
     }
 
     initSuccess() {
-        if (this.locType.includes("ibeacon") && this.initIbeacon || this.locType.includes("gps") && this.initGps) {
+        if (this.locType.includes("ibeacon") && this.initIbeacon) {
             this.initComplete();
         }
     }
@@ -98,18 +98,16 @@ class Loc {
 
     onSuccessGps(data) {
         this.gpsCoords = data;
-        if (!this.initIbeacon || this.currentLocation !== "ibeacon") {
+        if (this.currentLocation !== "ibeacon") {
             this.onLocationComplete(this.gpsCoords);
-            if (data.accuracy <= 25) {
-                this.currentPosition = data;
-            }
+            this.currentPosition = data;
         }
     }
 
     onSuccessIbeacon(data) {
         this.ibeaconCoords = data;
         this.currentPosition = data;
-        this.onLocationComplete(this.ibeaconCoords);
+        this.onLocationComplete(this.ibeaconCoords, this);
     }
 }
 

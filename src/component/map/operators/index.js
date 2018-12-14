@@ -12,7 +12,6 @@ import Scale from "./scale";
 import Floor from "./floor";
 import SearchInput from "component/search/searchInput";
 import "./index.less";
-import LoadingComponent from "component/common/loading";
 import LocationLoading from "component/common/loading";
 import wx from "weixin-js-sdk";
 
@@ -22,7 +21,7 @@ import wx from "weixin-js-sdk";
 class operatorsComponent extends Component {
 
     render() {
-        const {projectType} = this.props.commonStore;
+        const {projectType, noLogo} = this.props.commonStore;
         const {mapObj, mapFloor = 1} = this.props.mapStore;
         const searchProps = {
             extendStyle: "extendSearchStyle",
@@ -56,7 +55,7 @@ class operatorsComponent extends Component {
 
         return (
             <div className="map-operators">
-                {Logo(projectType)}
+                {Logo(projectType, noLogo)}
                 {mapObj && <Direction map={mapObj}></Direction>}
                 {mapObj && <Scale map={mapObj} measurement="km"></Scale>}
                 {mapObj && <Floor map={mapObj} floor={mapFloor}></Floor>}
@@ -65,7 +64,6 @@ class operatorsComponent extends Component {
                 <div className="map-operators-search">
                     <SearchInput {...searchProps}></SearchInput>
                 </div>
-                {this.props.commonStore.loadingStatus ? <LoadingComponent/> : <div></div>}
                 {this.props.commonStore.LocationLoading ? <LocationLoading text={`定位中...`}/> : <div></div>}
             </div>
         );

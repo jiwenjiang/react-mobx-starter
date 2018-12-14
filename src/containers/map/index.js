@@ -18,12 +18,15 @@ import NavEndModal from "component/nav/navComplete";
 import NoticeComponent from "component/common/notice";
 import BeginNav from "component/nav/beginNav";
 import startConfirm from "assets/img/startConfirm.png";
+import endConfirm from "assets/img/endConfirm.png";
 import "./index.less";
 import loc from "services/locSdk";
 import nav from "services/navSDK";
 import {getQueryString} from "services/utils/tool";
 import normalUrl from "config/url/normal";
 import wx from "weixin-js-sdk";
+import LoadingComponent from "component/common/loading";
+import {booleanPointInPolygon, point} from "@turf/turf";
 
 // import audioTest from "assets/audio/routePlan.mp3";
 
@@ -37,6 +40,7 @@ class mapPage extends Component {
         this.polyMarker = null; // blue
         this.ibeaconMarker = null; // red
         this.gpsMarker = null; // green
+        this.defaultLoc = "gps";
     }
 
     getSignature() {
@@ -88,7 +92,9 @@ class mapPage extends Component {
         const mapId = getQueryString("mapId", window.location.href) || this.props.mapStore.mapId;
         let shareMessage = getQueryString("miniMessage", window.location.href);
         let startMessage = getQueryString("startMessage", window.location.href);
+        let noLogo = getQueryString("noLogo", window.location.href);
 
+        this.props.commonStore.changeLogoStatus(noLogo);
         this.props.commonStore.changeProjectType(projectType);
         // 更新服务
         this.props.mapStore.updateMapId(mapId);
@@ -111,17 +117,119 @@ class mapPage extends Component {
                         map.zoomTo(map.configComponent.mapZone.default_zoom);
                     }
                     this.props.mapStore.updateBBoxPolygon(map.configComponent.mapZone.bbox);
+                    // 定位sdk
+                    loc.init({
+                        timeout: 50000,
+                        locType: ["gps", "ibeacon"],
+                        mapId: this.props.mapStore.mapId,
+                        complete: () => {
+                            loc.startLocation({
+                                complete: (data) => {
+                                    console.log("map-开启成功", data);
+                                },
+                                error: (err) => {
+                                    console.log("map-开启失败", err);
+                                }
+                            });
+                        },
+                        error: (err) => {
+                            console.log("init", err);
+                        }
+                    });
+
+                    loc.onLocation({
+                        complete: (data) => {
+                            this.setMarker(data);
+
+                            if (!this.props.navStore.freeMarker && this.props.navStore.firstLocation) {
+                                // console.log("entry first locate");
+                                if (this.props.mapStore.mapGL) {
+                                    this.props.floorStore.listenIbeacon(this.props.mapStore, data.level);
+                                    const locFlag = this.props.navStore.initFreeMarker(this.props.mapStore, data);
+                                    this.props.navStore.updateInitLocation(true);
+                                    if (shareMessage) {
+                                        console.log("分享");
+                                        if (!this.locationFail) {
+                                            this.props.mapStore.confirmMarker("start", this.props.navStore.freeMarkerPoint);
+                                            this.props.commonStore.changeLocationLoading(false);
+                                        }
+                                    }
+                                    if (locFlag) {
+                                        setTimeout(() => {
+                                            nav.init(loc);
+                                            nav.startFree({
+                                                complete: (data) => {
+                                                    if (this.props.commonStore.detectLocation && data.locType == "ibeacon"
+                                                        && data.level && data.level != this.props.floorStore.mapFloor) {
+                                                        console.log("entry change level", data.level, this.props.floorStore.mapFloor);
+                                                        this.props.floorStore.listenIbeacon(this.props.mapStore, data.level);
+                                                    }
+                                                    this.props.navStore.moveFreeMarker(this.props.mapStore, data);
+                                                }
+                                            });
+                                        }, 100);
+                                    }
+                                }
+                            }
+
+                            if (data.locType == "ibeacon") {
+                                this.props.navStore.updateCurrentLocation(data);
+                                this.props.navStore.updateLocateCoordinate(data);
+                                if (this.defaultLoc == "gps") {
+                                    map.flyTo({
+                                        center: data.point,
+                                        zoom: 19,
+                                        speed: 2,
+                                        curve: 1,
+                                        easing: (t) => {
+                                            if (t == 1) {
+                                                setTimeout(() => {
+                                                    this.props.floorStore.listenIbeacon(this.props.mapStore, data.level);
+                                                }, 1000);
+                                            }
+                                            return t;
+                                        }
+                                    });
+                                    this.props.floorStore.listenIbeacon(this.props.mapStore, data.level);
+                                }
+                            } else {
+                                if (data.accuracy) {
+                                    const pt = point([data.longitude, data.latitude]);
+                                    if (map.bboxPolygon && booleanPointInPolygon(pt, map.bboxPolygon)) {
+                                        this.props.navStore.updateCurrentLocation(data);
+                                        this.props.navStore.updateLocateCoordinate(data);
+                                    }
+                                }
+                            }
+                            this.defaultLoc = data.locType;
+                        }
+                    });
                 }
             }, 500);
-            map.zoomTo(18);
+            // map.zoomTo(18);
             this.props.commonStore.getBaiduToken();
             if (shareMessage) {
+                shareMessage = JSON.parse(decodeURI(shareMessage));
                 this.props.commonStore.changeLocationLoading(true);
                 setTimeout(() => {
                     this.props.commonStore.changeLocationLoading(false);
+                    map.flyTo({
+                        center: shareMessage.point,
+                        zoom: 19,
+                        speed: 2,
+                        curve: 1,
+                        easing: (t) => {
+                            if (t == 1) {
+                                setTimeout(() => {
+                                    this.props.mapStore.changeFloor(shareMessage.floor);
+                                    map.resetNorth();
+                                });
+                            }
+                            return t;
+                        }
+                    });
                     this.locationFail = true;
                 }, 5000);
-                shareMessage = JSON.parse(decodeURI(shareMessage));
                 this.props.commonStore.changeSearchStatus(false);
                 this.props.mapStore.confirmMarker("end", shareMessage);
                 if (startMessage) {
@@ -152,90 +260,13 @@ class mapPage extends Component {
                 this.props.navStore.updateInitLocation(false);
             }
         });
-
         // 禁用滑动
         document.addEventListener("touchmove", (e) => {
+            // console.log(e)
             if (!e.target.classList.contains("canBeScroll") && !this.props.commonStore.searchStatus) {
                 e.preventDefault();
             }
-        });
-
-        // 定位sdk
-        loc.init({
-            timeout: 50000,
-            locType: ["gps", "ibeacon"],
-            mapId: this.props.mapStore.mapId,
-            complete: () => {
-                loc.startLocation({
-                    complete: (data) => {
-                        console.log("map-开启成功", data);
-                    },
-                    error: (err) => {
-                        console.log("map-开启失败", err);
-                    }
-                });
-            },
-            error: (err) => {
-                console.log("init", err);
-            }
-        });
-
-        loc.onLocation({
-            complete: (data) => {
-                this.setMarker(data);
-                if (this.props.commonStore.detectLocation && data.locType == "ibeacon"
-                    && data.level && data.level != this.props.floorStore.mapFloor) {
-                    console.log("entry change level", data.level, this.props.floorStore.mapFloor);
-                    this.props.floorStore.listenIbeacon(this.props.mapStore, data.level);
-                }
-                if (!this.props.navStore.freeMarker && this.props.navStore.firstLocation) {
-                    // console.log("entry first locate");
-                    if (this.props.mapStore.mapGL) {
-                        const locFlag = this.props.navStore.initFreeMarker(this.props.mapStore, data);
-                        this.props.navStore.updateInitLocation(true);
-                        if (shareMessage) {
-                            console.log("分享");
-                            if (!this.locationFail) {
-                                this.props.mapStore.confirmMarker("start", this.props.navStore.freeMarkerPoint);
-                                this.props.commonStore.changeLocationLoading(false);
-                            }
-                        }
-                        if (locFlag) {
-                            setTimeout(() => {
-                                nav.init(loc);
-                                nav.startFree({
-                                    complete: (data) => {
-                                        // console.log("move", data);
-                                        this.props.navStore.moveFreeMarker(this.props.mapStore, data);
-                                    }
-                                });
-                            }, 100);
-                        }
-                    }
-                }
-
-                if (data.locType == "ibeacon") {
-                    this.props.navStore.updateCurrentLocation(data);
-                } else {
-                    if (data.accuracy < 25) {
-                        this.props.navStore.updateCurrentLocation(data);
-                    }
-                }
-                // if (this.props.navStore.currentLocation && this.props.navStore.currentLocation.locType != data.locType) {
-                //     console.log("trigger", data.locType);
-                //     map.flyTo({
-                //         zoom: data.locType == "gps" ? 18 : 20,
-                //         speed: 1,
-                //         curve: 1.4,
-                //         easing(t) {
-                //             return t;
-                //         }
-                //     });
-                // }
-
-                // console.log(`${data.locType == "ibeacon" ? "蓝牙点" : "gps"}`, data);
-            }
-        });
+        }, true);
 
         nav.compass({
             complete: (alpha) => {
@@ -316,7 +347,9 @@ class mapPage extends Component {
                 ? endMarkerPoint && `${endMarkerPoint.name}`
                 : startMarkerPoint && `${startMarkerPoint.name}`,
             addressStyle: {},
-            icon: startConfirm,
+            icon: freeMarker
+                ? endMarkerPoint && endConfirm
+                : startMarkerPoint && startConfirm,
             confirm: () => {
                 this.props.mapStore.planRoute();
                 this.props.commonStore.changeConfirmModal(false);
@@ -363,6 +396,7 @@ class mapPage extends Component {
                 <RoutePanel></RoutePanel>
                 {startMarker && !searchStatus && <NavBottom></NavBottom>}
                 {navMode !== "free" && <NavPanel></NavPanel>}
+                {this.props.commonStore.loadingStatus ? <LoadingComponent/> : <div></div>}
                 <audio id="wb-audio" autoPlay preload="true"></audio>
             </div>
         );

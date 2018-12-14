@@ -106,18 +106,24 @@ const stepperFn = (target) => {
             // console.log("当前角度", this.alpha);
             const output = destination([this.currentPoint.longitude, this.currentPoint.latitude],
                 stepDistance, this.alpha);
+            let level = this.currentPoint.level;
             this.currentPoint = {
                 isOutdoor: this.loc.currentPosition.isOutdoor,
                 buildingId: this.currentPoint.buildingId,
-                level: this.loc.currentPosition.level,
                 locType: this.loc.currentPosition.locType,
                 orientation: this.alpha,
                 accuracy: this.loc.currentPosition.accuracy,
                 longitude: output.geometry.coordinates[0],
                 latitude: output.geometry.coordinates[1]
             };
-            this.currentMode == "free" && this.onFreeStep(this.currentPoint);
-            this.currentMode == "realNav" && this.onRealNavStep(this.currentPoint);
+            if (this.currentMode == "free") {
+                this.currentPoint = {...this.currentPoint, level: this.loc.currentPosition.level};
+                this.onFreeStep(this.currentPoint);
+            }
+            if (this.currentMode == "realNav") {
+                this.currentPoint = {...this.currentPoint, level};
+                this.onRealNavStep(this.currentPoint);
+            }
             this.initPolygonLocate && clearInterval(this.initPolygonLocate);
         }
 

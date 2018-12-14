@@ -34,6 +34,7 @@ class CommonStore {
     @observable baiduVoice; // 百度语音
     @observable recordPanelStatus; // 录音面板
     @observable recordType; // 录音类型，map地图上的搜索，plate车牌,berth车位，
+    @observable noLogo; // 是否显示logo(false)
 
     constructor() {
         this.loadingStatus = false;
@@ -50,6 +51,7 @@ class CommonStore {
         this.baiduVoice = null;
         this.recordPanelStatus = false;
         this.recordType = "";
+        this.noLogo = false;
     }
 
     @action
@@ -110,6 +112,11 @@ class CommonStore {
     @action
     changeProjectType(status) {
         this.projectType = status;
+    }
+
+    @action
+    changeLogoStatus(v) {
+        this.noLogo = v;
     }
 
     @action

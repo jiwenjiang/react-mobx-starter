@@ -26,23 +26,26 @@ const correctLocateFn = (target) => {
             this.correctFreeLocateTimer();
         }
 
-        updateFreeCurrentPoint(point) {
+        updateFreeCurrentPoint = (point) => {
             this.correctFreeFlag = true;
             this.currentPoint = point;
             this.onFreeStep(point);
             setTimeout(() => {
                 this.correctFreeFlag = false;
             }, 5000);
-        }
+        };
 
-        chooseFreeCorrectMode(loc) {
+        chooseFreeCorrectMode = (loc) => {
             const locate = loc.currentPosition;
             const correctMode = {
                 "ibeacon": this.correctFreeLocateIndoor,
                 "gps": this.correctFreeLocateOutdoor
             }[locate.locType];
+            if (this.currentPoint.level != this.loc.currentPosition.level) {
+                this.currentPoint = {...this.currentPoint, level: this.loc.currentPosition.level};
+            }
             correctMode && correctMode(locate);
-        }
+        };
 
         /**
          * @author j_bleach
@@ -58,6 +61,7 @@ const correctLocateFn = (target) => {
             if (loc.timer == this.locTimer) {
                 return false;
             }
+
             this.locTimer = loc.timer;
             const ibeaconPoint = [loc.longitude, loc.latitude]; // 蓝牙点
             const fiducialPoint = [loc.fiducialLon, loc.fiducialLat]; // 置信点
@@ -116,27 +120,24 @@ const correctLocateFn = (target) => {
             }
         };
 
-        correctFreeLocateOutdoor = (loc) => {
+        correctFreeLocateOutdoor = () => {
             if (this.correctFreeFlag) {
                 return false;
             }
             const gpsCoords = this.loc.gpsCoords; // 当前点
-            const gpsPoint = [gpsCoords.longitude, gpsCoords.latitude];
-            const currentPoint = [this.currentPoint.longitude, this.currentPoint.latitude]; // 当前点
-            const currentToGps = calcDistanceFn(currentPoint, gpsPoint); // 当前点gps点距离
-            if (loc.accuracy <= 25) {
-                if (currentToGps >= 5) {
-                    console.log("free 当前点至gps点大于10米");
-                    const point = {...this.currentPoint, longitude: gpsCoords.longitude, latitude: gpsCoords.latitude};
-                    this.updateFreeCurrentPoint(point);
-                }
-            }
+            // const gpsPoint = [gpsCoords.longitude, gpsCoords.latitude];
+            // const currentPoint = [this.currentPoint.longitude, this.currentPoint.latitude]; // 当前点
+            // const currentToGps = calcDistanceFn(currentPoint, gpsPoint); // 当前点gps点距离
+            // ios 12.5
+            // android 8
+            this.calcAccuracy(gpsCoords, this.updateFreeCurrentPoint);
         };
 
 
         // 导航模式
         startCorrectNavLocate() {
             console.log("entry 导航纠偏");
+            this.countNum = 0;
             this.correctFreeLocateTimer = null;
             this.correctFreeLocateWatchId && clearTimeout(this.correctFreeLocateWatchId);
             this.correctNavLocateTimer = () => {
@@ -148,40 +149,44 @@ const correctLocateFn = (target) => {
             this.correctNavLocateTimer();
         }
 
-        chooseNavCorrectMode(loc) {
+        chooseNavCorrectMode = (loc) => {
             const locate = loc.currentPosition;
             const correctMode = {
                 "ibeacon": this.correctNavLocateIndoor,
                 "gps": this.correctNavLocateOutdoor
             }[this.loc.currentLocation];
-            // if (this.lastLocation != this.loc.currentLocation) {
-            //     console.log("定位点切换，上次定位，当前定位", this.lastLocation, this.loc.currentLocation);
-            //     this.notReplan = true;
-            //     setTimeout(() => {
-            //         this.notReplan = false;
-            //     }, 5000);
-            // }
+            if ((this.loc.currentPosition.level == this.navEndLevel || this.loc.currentPosition.level == this.navStartLevel)
+                && this.currentPoint.level != this.loc.currentPosition.level) {
+                if (this.loc.currentPosition.level != this.navEndLevel) {
+                    this.countNum++;
+                    if (this.countNum >= 3) {
+                        this.countNum = 0;
+                        this.currentPoint = {...this.currentPoint, level: this.loc.currentPosition.level};
+                    }
+                } else {
+                    this.currentPoint = {...this.currentPoint, level: this.loc.currentPosition.level};
+                }
+            }
+
             correctMode && correctMode(locate);
             // this.lastLocation = this.loc.currentLocation;
-        }
+        };
 
         correctNavLocateIndoor = (loc) => {
-            console.log("室内定位gps精度", this.loc.gpsCoords.accuracy);
             if (this.inElevator) {
-                let distanceEl = 0
+                let distanceEl = 0;
                 if (this.elEndPoint) {
                     const currentPoint = point([this.loc.currentPosition.longitude, this.loc.currentPosition.latitude]); // 当前点
                     distanceEl = distance(currentPoint, this.elEndPoint) * 1000;
                 }
-                if (loc.level == this.navEndLevel || distanceEl > 10) {
+                if (loc.level == this.handleData.crossEndLevel || distanceEl > 10) {
                     this.inElevator = false;
                 }
                 return false;
             }
-            if (this.correctNavFlag || loc.locType == "gps" || this.loc.gpsCoords.accuracy <= 25) {
+            if (this.correctNavFlag || loc.locType == "gps") {
                 return false;
             }
-            console.log("判断纠偏");
             // 时间戳判断
             if (loc.timer == this.locTimer) {
                 return false;
@@ -292,40 +297,59 @@ const correctLocateFn = (target) => {
                 return false;
             }
             const gpsCoords = this.loc.gpsCoords; // 当前点
-            const gpsPoint = [gpsCoords.longitude, gpsCoords.latitude];
-            const currentPoint = [this.currentPoint.longitude, this.currentPoint.latitude]; // 当前点
+            // const gpsPoint = [gpsCoords.longitude, gpsCoords.latitude];
+            // const currentPoint = [this.currentPoint.longitude, this.currentPoint.latitude]; // 当前点
             // let gpsToLine = null;
-            if (gpsCoords.accuracy <= 25) {
-                // if (this.currentRealNavLine) {
-                //     gpsToLine = pointToLineDistance(point(gpsPoint), this.currentRealNavLine) * 1000;  // gps点至导航线
-                //     // console.log("gps至线", gpsToLine);
-                // }
-                // if (gpsToLine && gpsToLine < 30) {
-                const currentTogps = calcDistanceFn(gpsPoint, currentPoint);
-                // console.log("当前点至gps", currentTogps);
-                if (currentTogps > 10) {
+            this.calcAccuracy(gpsCoords, this.updateNavCurrentPointOutDoor);
+            // if (gpsCoords.accuracy <= 25) {
+            //     // if (this.currentRealNavLine) {
+            //     //     gpsToLine = pointToLineDistance(point(gpsPoint), this.currentRealNavLine) * 1000;  // gps点至导航线
+            //     //     // console.log("gps至线", gpsToLine);
+            //     // }
+            //     // if (gpsToLine && gpsToLine < 30) {
+            //     const currentTogps = calcDistanceFn(gpsPoint, currentPoint);
+            //     // console.log("当前点至gps", currentTogps);
+            //     if (currentTogps > 10) {
+            //         const point = {
+            //             ...this.currentPoint,
+            //             longitude: gpsCoords.longitude,
+            //             latitude: gpsCoords.latitude
+            //         };
+            //         console.log("nav gps 定位点纠偏,当前点", point);
+            //         this.updateNavCurrentPointOutDoor(point);
+            //     }
+            // }
+        };
+
+        calcAccuracy(data, fn) {
+            let k1 = null;
+            if (this.isIOS && data.accuracy < 40) {
+                k1 = 12.5 / data.accuracy;
+            }
+            if (!this.isIOS && data.accuracy < 30) {
+                k1 = 8 / data.accuracy;
+            }
+            if (k1) {
+                if (k1 >= 1) {
                     const point = {
                         ...this.currentPoint,
-                        longitude: gpsCoords.longitude,
-                        latitude: gpsCoords.latitude
+                        longitude: data.longitude,
+                        latitude: data.latitude
                     };
-                    console.log("nav gps 定位点纠偏,当前点", point);
-                    this.updateNavCurrentPointOutDoor(point);
+                    fn(point);
+                } else {
+                    const longitude = k1 * (data.longitude) + (1 - k1) * this.currentPoint.longitude;
+                    const latitude = k1 * (data.latitude) + (1 - k1) * this.currentPoint.latitude;
+                    const point = {
+                        ...this.currentPoint,
+                        longitude: longitude,
+                        latitude: latitude
+                    };
+                    fn(point);
                 }
-                // } else {
-                //     // if (gpsCoords.accuracy <= 15) {
-                //     //     console.log("nav gps定位点导航线距离10米, 户外偏航");
-                //     //     const point = {
-                //     //         ...this.currentPoint,
-                //     //         longitude: gpsCoords.longitude,
-                //     //         latitude: gpsCoords.latitude,
-                //     //         isYaw: true // 偏航
-                //     //     };
-                //     //     this.updateNavCurrentPointOutDoor(point);
-                //     // }
-                // }
             }
-        };
+        }
+
 
         updateNavCurrentPoint(point) {
             this.correctNavFlag = true;
@@ -341,7 +365,7 @@ const correctLocateFn = (target) => {
             }, 5000);
         }
 
-        updateNavCurrentPointOutDoor(point) {
+        updateNavCurrentPointOutDoor = (point) => {
             this.correctNavOutdoorFlag = true;
             this.currentPoint = point;
             if (point.isYaw) {
@@ -354,7 +378,7 @@ const correctLocateFn = (target) => {
             setTimeout(() => {
                 this.correctNavOutdoorFlag = false;
             }, 4000);
-        }
+        };
     };
 };
 

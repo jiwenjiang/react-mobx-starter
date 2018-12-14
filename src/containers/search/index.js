@@ -183,7 +183,7 @@ class searchPage extends Component {
                     }
                     <SearchInput {...searchProps}/>
                 </div>
-                <div className="search-content">
+                <div className="search-content" style={{overflowY:(showSearchHistory || showSearchResult) ? "hidden": "auto"}}>
                     <div className="mt-10 carousel-box carousel-content">
                         {<CarouselComponent {...carouselProps}/>}
                     </div>
