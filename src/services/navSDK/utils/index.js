@@ -137,7 +137,7 @@ const preHandleSimData = (route, map, speed = 1) => {
         handleRouteFloor,
         handleRouteFloorBezierAni,
         routeLength,
-        animateArray,
+        animateArray
     };
 };
 /**
@@ -155,6 +155,7 @@ const preHandleRealData = (route, map) => {
     let handleRouteFloorShadow = {};
     let countKey = {};
     let lastFloor = null;
+    let crossStartLevel = null;
     let crossEndLevel = null;
     let parseTurnType = (turnType) => {
         let turnText = {
@@ -174,6 +175,9 @@ const preHandleRealData = (route, map) => {
         item.turnTypeText = parseTurnType(route[i].turnType);
         if (item.crossType == 11 || item.crossType == 13) {
             crossEndLevel = item.startFloor;
+        }
+        if (item.crossType == 10 || item.crossType == 12) {
+            crossStartLevel = item.startFloor;
         }
         if (route[i]["geometry"]["type"] === "LineString") {
             for (let k = 0; k < route[i]["geometry"]["coordinates"].length; k++) {
@@ -265,6 +269,7 @@ const preHandleRealData = (route, map) => {
         handleRouteFloorBezier,
         handleRouteFloorBezierAni,
         handleRouteFloorShadow,
+        crossStartLevel,
         crossEndLevel,
         countKey
     };

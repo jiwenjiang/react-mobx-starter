@@ -3,7 +3,7 @@
  */
 /*eslint-disable*/
 import {action, autorun, computed, configure, observable, runInAction, toJS} from "mobx";
-import {bboxPolygon, centerOfMass, polygon} from "@turf/turf";
+import {bboxPolygon, centerOfMass, polygon, bbox, point as turfPoint, distance} from "@turf/turf";
 import http from "services/http";
 import normalUrl from "config/url/normal";
 import {commonStore} from "../commonStore";
@@ -29,12 +29,14 @@ class MapStore {
     @observable startMarker; // 开始marker 对象（mapbox sdk）
     @observable endMarker; // 结束marker 对象（mapbox sdk）
     @observable startMarkerPoint; // 开始marker坐标点
+    @observable startRoutePoint; // 开始路径坐标点
     @observable endMarkerPoint; // 结束marker坐标点
+    @observable endRoutePoint; // 结束路径坐标点
     @observable confirmEndMarker; // 确定终点标记
     @observable bboxPolygon; // 确定终点标记
 
     constructor() {
-        this.mapId = 1;
+        this.mapId = 2;
         this.carouselData = [];
         this.accordionData = [];
         this.mapObj = null;
@@ -43,7 +45,9 @@ class MapStore {
         this.startMarker = null;
         this.endMarker = null;
         this.startMarkerPoint = null;
+        this.startRoutePoint = null;
         this.endMarkerPoint = null;
+        this.endRoutePoint = null;
         this.confirmEndMarker = false;
         this.bboxPolygon = null;
     }
@@ -108,6 +112,8 @@ class MapStore {
         if (this.routeObj) {
             this.routeObj.ri = {
                 routeSuccess: () => {
+                    this.startRoutePoint = null;
+                    this.endRoutePoint = null;
                     runInAction(() => {
                         commonStore.changeLoadingStatus(false);
                     });
@@ -116,6 +122,8 @@ class MapStore {
                 },
                 routeError: () => {
                     console.error("路径规划失败");
+                    this.startRoutePoint = null;
+                    this.endRoutePoint = null;
                     runInAction(() => {
                         commonStore.changeLoadingStatus(false);
                     });
@@ -140,9 +148,23 @@ class MapStore {
                     if (this.mapObj.getSource("building-route-down")) {
                         this.mapObj.removeSource("building-route-down");
                     }
+                    let routeList = {
+                        type: "FeatureCollection",
+                        features: []
+                    };
+                    let objKeys = Object.keys(floorStore.routeIndoor);
+                    for (let v of objKeys) {
+                        if (v.indexOf(`"level":${Number(floor)}`) > -1) {
+                            const routeIndoor = floorStore.routeIndoor[v]
+                                && floorStore.routeIndoor[v].features
+                                && floorStore.routeIndoor[v].features.filter(e => e.geometry.type !== "Point");
+                            routeList.features.push(bezierV2(toJS(routeIndoor), this.mapObj));
+                        }
+                    }
+                    // console.log(routeList);
                     const handleFloor = JSON.stringify({level: Number(floor), index: 0});
                     const routeIndoor = floorStore.routeIndoor[handleFloor].features.filter(v => v.geometry.type !== "Point");
-                    console.log(toJS(floorStore.routeIndoor));
+                    // console.log(toJS(floorStore.routeIndoor));
                     floorStore.routeIndoorBezier[handleFloor] = bezierV2(routeIndoor, this.mapObj);
                     // console.log("当前bezier", toJS(floorStore.routeIndoorBezier));
                     this.mapObj.addSource("building-route", {
@@ -200,6 +222,9 @@ class MapStore {
                             }
                         }
                     });
+
+                    this.mapObj.getSource("building-route").setData(routeList);
+                    this.mapObj.getSource("building-route-down").setData(routeList);
 
                     if (!navStore.rePlanStatus) {
                         console.log("规划路径成功");
@@ -270,11 +295,26 @@ class MapStore {
     @action
     handleMarker(e) {
         let feature = this.mapObj.queryRenderedFeatures(e.point);
-        // console.log(this.mapObj.queryRenderedFeatures(aaa));
-        // console.log(feature);
-        if (feature && feature[0] && "layer" in feature[0] && "properties" in feature[0]) {
-            // let coordinates = feature[0].geometry.coordinates;
-            // let resArr = coordinates[0].map(v => this.mapObj.project(v));
+        if (feature && feature[0] && feature[0].geometry.type == "Polygon"
+            && "layer" in feature[0] && "properties" in feature[0]) {
+            let bboxPoint = bbox(feature[0].geometry);
+            let bboxSlice = [bboxPoint.slice(0, 2), bboxPoint.slice(2, 4)];
+            let resArr = bboxSlice.map(v => this.mapObj.project(v));
+            let routePoint = this.mapObj.queryRenderedFeatures(resArr).filter(v => v.geometry.type == "Point");
+            if (routePoint && routePoint.length > 0 && this.endMarkerPoint) {
+                const comparePt = turfPoint(this.endMarkerPoint.point);
+                let minDistance = Number.MAX_VALUE;
+                for (let v of routePoint) {
+                    const dt = distance(comparePt, v.geometry);
+                    if (dt < minDistance) {
+                        routePoint = v;
+                        minDistance = dt;
+                    }
+                }
+                // console.log(toJS(this.endMarkerPoint), comparePt);
+            } else {
+                routePoint = routePoint[0];
+            }
             if (feature[0]["properties"]["name"]) {
                 let source = feature[0].layer.source || "outdoor";
                 let polygonGeojson = feature[0].geometry.coordinates;
@@ -298,6 +338,7 @@ class MapStore {
                     name: feature[0]["properties"]["name"],
                     source: source
                 };
+                /*change
                 if (navStore.freeMarker) {
                     this.confirmMarker("start", navStore.freeMarkerPoint, true);
                     this.confirmMarker("end", markerData, true);
@@ -310,22 +351,43 @@ class MapStore {
                         this.confirmStartMarkerFn();
                     }
                 }
+                */
+                if (!this.confirmEndMarker) {
+                    this.endRoutePoint = routePoint;
+                    this.confirmMarker("end", markerData);
+                } else {
+                    this.startRoutePoint = routePoint;
+                    this.confirmMarker("start", markerData, true);
+                    this.confirmStartMarkerFn();
+                }
             }
         }
+    }
+
+    // 更新路径起点
+    @action
+    updateStartRoutePoint(v) {
+        this.startRoutePoint = v;
+    }
+
+    // 更新路径终点
+    @action
+    updateEndRoutePoint(v) {
+        this.endRoutePoint = v;
     }
 
     @action
     confirmMarker(type, data, notPlan) {
         // if (data.floor || data.floor == 0) {
-        if (navStore.freeMarker) {
-            this.startMarkerPoint = navStore.freeMarkerPoint;
-            if (this.startMarker) {
-                this.startMarker.setLngLat(this.startMarkerPoint.point);
-            } else {
-                const el = this.generateDom(startImg);
-                this.startMarker = new this.mapGL.Marker(el).setLngLat(this.startMarkerPoint.point).addTo(this.mapObj);
-            }
-        }
+        // if (navStore.freeMarker) {
+        //     this.startMarkerPoint = navStore.freeMarkerPoint;
+        //     if (this.startMarker) {
+        //         this.startMarker.setLngLat(this.startMarkerPoint.point);
+        //     } else {
+        //         const el = this.generateDom(startImg);
+        //         this.startMarker = new this.mapGL.Marker(el).setLngLat(this.startMarkerPoint.point).addTo(this.mapObj);
+        //     }
+        // }
         const startMarkerHandle = () => {
             if (this.endMarkerPoint && this.endMarkerPoint.point.toString() == data.point.toString()
                 && this.endMarkerPoint.floor == data.floor) {
@@ -463,8 +525,12 @@ class MapStore {
     @action
     planRoute() {
         commonStore.changeLoadingStatus(true);
-        const [startLng, startLat] = toJS(this.startMarkerPoint).point;
-        const [endLng, endLat] = toJS(this.endMarkerPoint).point;
+        const [startLng, startLat] = this.startRoutePoint
+            ? this.startRoutePoint.geometry.coordinates
+            : toJS(this.startMarkerPoint).point;
+        const [endLng, endLat] = this.endRoutePoint
+            ? this.endRoutePoint.geometry.coordinates
+            : toJS(this.endMarkerPoint).point;
         this.routeObj.roadType = navStore.navRoadType;
         this.routeObj.priorityType = navStore.navPriorityType;
         this.routeObj.setLocation({

@@ -50,7 +50,7 @@ class searchPage extends Component {
             let params = {
                 zone_id: this.props.mapStore.mapId,
                 page: 1,
-                pageSize: 5,
+                pageSize: 10,
                 location: this.props.navStore.locateCoordinate,
                 text: v
             };
@@ -62,6 +62,7 @@ class searchPage extends Component {
             let response = await http.post(mapUrl.mapSearch, params);
             this.props.commonStore.changeLoadingStatus(false);
             this.setState({
+                total: response.total,
                 showSearchResult: true,
             }, () => {
                 this.setState({searchResultData: response && response.list});
@@ -105,7 +106,7 @@ class searchPage extends Component {
 
 
     render() {
-        const {showSearchResult, searchResultData} = this.state;
+        const {showSearchResult, searchResultData, total} = this.state;
         const {carouselData, accordionData} = this.props.mapStore;
         const {showSearchHistory} = this.props.commonStore;
 
@@ -183,7 +184,8 @@ class searchPage extends Component {
                     }
                     <SearchInput {...searchProps}/>
                 </div>
-                <div className="search-content" style={{overflowY:(showSearchHistory || showSearchResult) ? "hidden": "auto"}}>
+                <div className="search-content"
+                     style={{overflowY: (showSearchHistory || showSearchResult) ? "hidden" : "auto"}}>
                     <div className="mt-10 carousel-box carousel-content">
                         {<CarouselComponent {...carouselProps}/>}
                     </div>
@@ -191,7 +193,7 @@ class searchPage extends Component {
                         {accordionData.length > 0 && <AccordionComponent {...accordionProps}/>}
                     </div>
                     {showSearchHistory && <SearchHistory {...searchHistoryProps}/>}
-                    {showSearchResult && <SearchResult data={searchResultData} getMore={() => {
+                    {showSearchResult && <SearchResult data={searchResultData} total={total} getMore={() => {
                         this.getMore();
                     }}/>}
                 </div>

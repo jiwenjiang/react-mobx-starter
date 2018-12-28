@@ -39,23 +39,40 @@ class SearchResult extends Component {
         this.props.commonStore.changeSearchHistory(false);
         setTimeout(() => {
             this.props.mapStore.confirmMarker(status, data);
+            if (status == "start") {
+                this.props.mapStore.updateStartRoutePoint(null);
+            } else {
+                this.props.mapStore.updateEndRoutePoint(null);
+            }
         });
+    }
+
+    scrollMore() {
+        let dom = document.getElementById("search-history-box");
+        let domHeight = dom.scrollHeight;
+        let scrollHeight = dom.scrollTop + dom.offsetHeight;
+        let {searchResult} = this.state;
+        if (scrollHeight >= domHeight && searchResult.length < this.props.total) {
+            this.props.getMore();
+        }
+        // console.log("h", domHeight);
+        // console.log("t", scrollHeight);
     }
 
     render() {
         return (
-            this.state.searchResult.length ? <div className="search-history-box canBeScroll">
-                    <div className="search-history-content canBeScroll">
+            this.state.searchResult.length
+                ? <div className="search-history-box" onScroll={() => this.scrollMore()} id="search-history-box">
+                    <div className="search-history-content">
                         <List>
                             {this.state.searchResult.map(v =>
                                 <List.Item
                                     className="search-result-right"
                                     key={v.id}
-                                    thumb={<i className="iconfont icon-didian canBeScroll"
-                                              style={{fontSize: "4.5vw", color: "#1cccc6"}}/>}
-                                    extra={<div className="search-result-extra canBeScroll"
+                                    // thumb={}
+                                    extra={<div className="search-result-extra"
                                                 onClick={() => this.confirmMarker(v)}>
-                                        <i className="iconfont icon-quzheli canBeScroll"
+                                        <i className="iconfont icon-quzheli"
                                            style={{
                                                color: "#1cccc6",
                                                fontSize: "7vw",
@@ -69,33 +86,40 @@ class SearchResult extends Component {
                                             marginTop: "-1vw"
                                         }}>{this.props.commonStore.searchStatus === "start" ? "出发" : "去这里"}</span>
                                     </div>}>
-                                    <div className="search-result-content canBeScroll">
+                                    <div className="search-result-content">
                                         <div style={{
                                             width: "56vw",
                                             overflow: "hidden",
                                             textOverflow: "ellipsis",
                                             whiteSpace: "nowrap"
                                         }}>
+                                            <i className="iconfont icon-didian"
+                                               style={{
+                                                   fontSize: "4.5vw",
+                                                   color: "#1cccc6",
+                                                   display: "inline-block",
+                                                   marginRight: "2vw"
+                                               }}/>
                                             {v.tags.name}
                                             {/*v.tags.name.length > 9 ? v.tags.name.slice(0, 16) + "..." : v.tags.name*/}
                                         </div>
                                     </div>
                                     <List.Item.Brief>
-                                        {`${v.tags.level
-                                            ? `在${v.tags.level >= 0 ? Number(v.tags.level) + 1 : Number(v.tags.level)}楼`
-                                            : ""}
+                                        <span style={{display: "inline-block", width: "6.5vw"}}></span>{`${v.tags.level
+                                        ? `在${v.tags.level >= 0 ? Number(v.tags.level) + 1 : Number(v.tags.level)}楼`
+                                        : ""}
                                       ${v.distance ? `距离：${v.distance}米` : ""}`}
                                     </List.Item.Brief>
                                 </List.Item>
                             )}
-                            <div className="car-tab-more" onClick={this.props.getMore}>查看更多</div>
                         </List>
+                        {/*<div className="car-tab-more" onClick={this.props.getMore}>查看更多</div>*/}
                     </div>
                 </div> :
                 <div className="search-history-nodata-box">
-                    <div className="search-history-nodata" style={{boxShadow:'none',background:'none'}}>
+                    <div className="search-history-nodata" style={{boxShadow: "none", background: "none"}}>
                         <img src={notData} alt=""/>
-                        <div className="" style={{textAlign:'center',color:'#63A8A8',fontSize:'1rem'}}>
+                        <div className="" style={{textAlign: "center", color: "#63A8A8", fontSize: "1rem"}}>
                             没有查询到相关信息 !
                         </div>
                     </div>

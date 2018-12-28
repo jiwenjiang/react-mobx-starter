@@ -25,13 +25,15 @@ class confirmModal extends Component {
     }
 
     render() {
-        const {address, text, icon, textStyle, addressStyle} = this.props;
+        const {address, text, icon, textStyle, addressStyle, boxStyle} = this.props;
         return (
             <div className="confirm-mask">
                 <div className="confirm-modal">
                     {icon && <img src={icon} alt=""/>}
-                    <div className="confirm-modal-text" style={textStyle}>{text}</div>
-                    <div className="confirm-modal-text-address" style={addressStyle}>{address}</div>
+                    <div style={boxStyle}>
+                        <div className="confirm-modal-text" style={textStyle}>{text}</div>
+                        <div className="confirm-modal-text-address" style={addressStyle}>{address}</div>
+                    </div>
                     <div className="confirm-modal-btn">
                         <div className="confirm-modal-btn-confirm">
                             <div className="confirm-modal-btn-confirm-content" onClick={() => this.confirm()}>

@@ -5,22 +5,28 @@ import React, {Component} from "react";
 import {observer, inject} from "mobx-react";
 import wx from "weixin-js-sdk";
 import "./index.less";
-import {toJS} from "mobx"
+import {toJS} from "mobx";
 
-@inject("mapStore", "commonStore")
+@inject("mapStore", "commonStore", "navStore")
 @observer
 class gotoComponent extends Component {
     constructor() {
         super();
-        this.navigateToMiniApp = this.navigateToMiniApp.bind(this)
+        this.navigateToMiniApp = this.navigateToMiniApp.bind(this);
     }
 
     goToHere() {
         document.getElementsByClassName("map-routePanel")[0].classList.add("dom-transformY-35");
         document.getElementById("map-goToShare").classList.remove("dom-transformY-30");
         document.getElementById("begin-nav").classList.add("dom-transformY-30");
-        this.props.mapStore.confirmEndMarkerFn(true);
-        this.props.mapStore.confirmMarker()
+        if (this.props.navStore.freeMarker) {
+            console.log("zhr")
+            this.props.mapStore.confirmMarker("start", this.props.navStore.freeMarkerPoint, true);
+            this.props.mapStore.confirmStartMarkerFn();
+        } else {
+            this.props.mapStore.confirmEndMarkerFn(true);
+            this.props.mapStore.confirmMarker();
+        }
     }
 
     navigateToMiniApp() {
@@ -29,7 +35,7 @@ class gotoComponent extends Component {
         h5Message.type = this.props.commonStore.projectType;
         wx.miniProgram.navigateTo({
             url: `../share/share?h5Message=${JSON.stringify(h5Message)}`
-        })
+        });
     }
 
     render() {

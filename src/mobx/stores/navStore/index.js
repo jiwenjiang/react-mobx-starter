@@ -205,7 +205,6 @@ class NavStore {
     }
 
     @action moveFreeMarker(map, data) {
-        console.log("free", data);
         if (this.navMode === "free") {
             if (data) {
                 this.freeMarkerPoint = {
@@ -277,7 +276,7 @@ class NavStore {
         this.navRealData = data;
     }
 
-    // 导航完成(清楚marker,导航线)
+    // 导航完成(清除marker,导航线)
     @action completeNav(map) {
         this.changeNavMode("free");
         this.removeNavMarker();
@@ -285,7 +284,7 @@ class NavStore {
         map.removeMarker("end");
         map.mapObj.resetNorth();
         floorStore.updateRouteIndoor({});
-        floorStore.checkMarkerAndRoute(map, 0);
+        floorStore.checkMarkerAndRoute(map, null);
         this.getNavRoutes(null);
     }
 

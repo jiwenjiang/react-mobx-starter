@@ -22,7 +22,7 @@ class CarouselComponent extends Component {
             <div>
                 <img src={e.icon ? e.icon : `${config.normalIp}${e.iconImg}`} alt=""/>
             </div>
-            <div>
+            <div style={{marginTop: "1.5vw"}}>
                 <span>{e.serviceName}</span>
             </div>
         </div>;

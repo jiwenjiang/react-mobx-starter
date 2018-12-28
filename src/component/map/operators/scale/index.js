@@ -91,14 +91,18 @@ class direction extends Component {
             measurement
         );
         const relativeWidth = totalWidth / clientWidth * 1.3 * MIN_WIDTH_SCALE;
-        const chosenScale = scales.reduce((acc, curr) => {
+        let chosenScale = scales.reduce((acc, curr) => {
             if (!acc && curr > relativeWidth) {
                 return curr;
             }
             return acc;
         }, 0);
         // tslint:disable-next-line:no-any
-        const scaleWidth = chosenScale / totalWidth * (clientWidth / 1.5);
+        let scaleWidth = chosenScale / totalWidth * (clientWidth / 1.5);
+        if (scaleWidth > 100) {
+            chosenScale = chosenScale / 2;
+            scaleWidth = scaleWidth / 2;
+        }
         this.setState({
             chosenScale,
             scaleWidth

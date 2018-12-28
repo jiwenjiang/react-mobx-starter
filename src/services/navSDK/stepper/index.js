@@ -2,6 +2,7 @@
  * Created by j_bleach on 2018/10/23 0023.
  */
 import {destination} from "@turf/turf";
+// import kalmanWorker from "./kalman.worker";
 /*eslint-disable*/
 const stepperFn = (target) => {
     let h = [.003, .556, 1.083, 1.492, 1.682, 1.56, 1.102, .394, -.382, -1.018, -1.378, -1.445, -1.3, -1.053, -.78, -.489]
@@ -39,6 +40,7 @@ const stepperFn = (target) => {
 
         initStepper(loc) {
             console.log("进入步进器");
+            this.worker = new Worker(kalmanWorker);
             // 重置当前位置至质心点
             this.initPolygonLocate = setInterval(() => {
                 if (loc.currentPosition.locType === "ibeacon") {
@@ -107,6 +109,24 @@ const stepperFn = (target) => {
             const output = destination([this.currentPoint.longitude, this.currentPoint.latitude],
                 stepDistance, this.alpha);
             let level = this.currentPoint.level;
+            //web worker
+            let iBeacon = [this.loc.currentPosition.longitude, this.loc.currentPosition.latitude],
+                fiducial = [], stepper = [output.geometry.coordinates[0], output.geometry.coordinates[1]];
+            if (this.loc.currentPosition.locType == "ibeacon") {
+                fiducial = [this.loc.currentPosition.fiducialLon, this.loc.currentPosition.fiducialLat];
+            }
+            this.worker.onmessage = function (e) {
+                console.log("收到worker消息", e.data);
+                // 主线程收到工作线程的消息
+            };
+            this.worker.postMessage({
+                array: {
+                    iBeacon,
+                    fiducial,
+                    stepper
+                },
+                hasStep: true
+            });
             this.currentPoint = {
                 isOutdoor: this.loc.currentPosition.isOutdoor,
                 buildingId: this.currentPoint.buildingId,
@@ -116,6 +136,7 @@ const stepperFn = (target) => {
                 longitude: output.geometry.coordinates[0],
                 latitude: output.geometry.coordinates[1]
             };
+
             if (this.currentMode == "free") {
                 this.currentPoint = {...this.currentPoint, level: this.loc.currentPosition.level};
                 this.onFreeStep(this.currentPoint);

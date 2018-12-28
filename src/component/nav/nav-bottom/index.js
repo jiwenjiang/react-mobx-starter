@@ -33,6 +33,10 @@ class navBottom extends Component {
             text: `温馨提示`,
             textStyle: {color: "#13B1AC", fontSize: "3vw"},
             address: `确认退出导航？`,
+            boxStyle: {
+                marginTop: "-6vw",
+                marginBottom: "6vw"
+            },
             addressStyle: {color: "#13B1AC", fontSize: "3.4vw"},
             confirm: () => {
                 if (this.props.navStore.navMode == "real") {

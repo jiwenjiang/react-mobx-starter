@@ -136,6 +136,18 @@ module.exports = {
                     // smaller than specified limit in bytes as data URLs to avoid requests.
                     // A missing `test` is equivalent to a match.
                     {
+                        // 匹配 *.worker.js
+                        test: /\.worker\.js$/,
+                        use: {
+                            loader: 'worker-loader',
+                            options: {
+                                name: '[name]:[hash:8].js',
+                                // fallback: false
+                                // publicPath: '/scripts/workers/'
+                            }
+                        }
+                    },
+                    {
                         test: /\.less$/,
                         use: [
                             require.resolve("style-loader"),

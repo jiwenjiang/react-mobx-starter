@@ -155,7 +155,10 @@ const correctLocateFn = (target) => {
                 "ibeacon": this.correctNavLocateIndoor,
                 "gps": this.correctNavLocateOutdoor
             }[this.loc.currentLocation];
-            if ((this.loc.currentPosition.level == this.navEndLevel || this.loc.currentPosition.level == this.navStartLevel)
+            if ((this.loc.currentPosition.level == this.navEndLevel
+                || this.handleData.crossStartLevel == this.loc.currentPosition.level
+                || this.handleData.crossEndLevel == this.loc.currentPosition.level
+                || this.loc.currentPosition.level == this.navStartLevel)
                 && this.currentPoint.level != this.loc.currentPosition.level) {
                 if (this.loc.currentPosition.level != this.navEndLevel) {
                     this.countNum++;
@@ -276,21 +279,29 @@ const correctLocateFn = (target) => {
                         // this.updateNavCurrentPoint(point);
                     } else {
                         //  质心点和当前位置距离大于 10
-                        if (currentToPolygon > 15) {
-                            console.log("nav 质心点和当前位置距离大于 15", currentToPolygon);
-                            const point = {
-                                ...this.currentPoint,
-                                longitude: loc.polygonLon, latitude: loc.polygonLat
-                            };
-                            this.updateNavCurrentPoint(point);
-                        }
+                        // if (currentToPolygon > 15) {
+                        //     console.log("nav 质心点和当前位置距离大于 15", currentToPolygon);
+                        //     const point = {
+                        //         ...this.currentPoint,
+                        //         longitude: loc.polygonLon, latitude: loc.polygonLat
+                        //     };
+                        //     this.updateNavCurrentPoint(point);
+                        // }
                     }
                 }
             }
         };
 
-        correctNavLocateOutdoor = () => {
+        correctNavLocateOutdoor = (loc) => {
             if (this.inElevator) {
+                let distanceEl = 0;
+                if (this.elEndPoint) {
+                    const currentPoint = point([this.loc.currentPosition.longitude, this.loc.currentPosition.latitude]); // 当前点
+                    distanceEl = distance(currentPoint, this.elEndPoint) * 1000;
+                }
+                if (loc.level == this.handleData.crossEndLevel || distanceEl > 10) {
+                    this.inElevator = false;
+                }
                 return false;
             }
             if (this.correctNavOutdoorFlag || this.loc.currentLocation == "ibeacon" || this.correctNavFlag) {

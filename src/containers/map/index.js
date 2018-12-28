@@ -1,6 +1,7 @@
 /**
  * Created by j_bleach on 2018/9/27 0027.
  */
+/*eslint-disable*/
 import React, {Component} from "react";
 import {inject, observer} from "mobx-react";
 import config from "config";
@@ -27,8 +28,9 @@ import normalUrl from "config/url/normal";
 import wx from "weixin-js-sdk";
 import LoadingComponent from "component/common/loading";
 import {booleanPointInPolygon, point} from "@turf/turf";
+// import kalmanWorker from "./aaa.worker";
 
-// import audioTest from "assets/audio/routePlan.mp3";
+import Worker from "./kalman.worker";
 
 @inject("mapStore", "commonStore", "floorStore", "navStore")
 @observer
@@ -73,7 +75,8 @@ class mapPage extends Component {
                 "onWXDeviceBluetoothStateChange", "startSearchBeacons",
                 "stopSearchBeacons", "onSearchBeacons", "startRecord", "stopRecord",
                 "translateVoice", "onMenuShareAppMessage", "getLocation",
-                "openBluetoothAdapter", "onWXDeviceBluetoothStateChange", "getBluetoothAdapterState"] // 必填，需要使用的JS接口列表
+                "openBluetoothAdapter", "onBeaconServiceChange", "onWXDeviceBluetoothStateChange",
+                "getBluetoothAdapterState", "onBluetoothAdapterStateChange"] // 必填，需要使用的JS接口列表
         });
         wx.error(err => {
             console.log(err, "err");
@@ -84,7 +87,12 @@ class mapPage extends Component {
     }
 
     componentDidMount() {
-
+        console.log("nav", navigator.appVersion);
+        let worker = new Worker();
+        worker.postMessage({a: 1});
+        worker.onmessage = function (event) {
+            console.log("worker", event);
+        };
         this.getSignature();
         // 获取url参数
         const projectType = getQueryString("type", window.location.href) || "Addressing";
@@ -109,6 +117,7 @@ class mapPage extends Component {
             this.props.mapStore.saveMapObj(map, creeper, route);
             setTimeout(() => {
                 map.resetNorth();
+                map.setMaxZoom(20);
                 if (map.configComponent && map.configComponent.mapZone) {
                     if (map.configComponent.mapZone && map.configComponent.mapZone.name) {
                         document.title = map.configComponent.mapZone.name;
@@ -139,7 +148,7 @@ class mapPage extends Component {
 
                     loc.onLocation({
                         complete: (data) => {
-                            this.setMarker(data);
+                            // this.setMarker(data);
 
                             if (!this.props.navStore.freeMarker && this.props.navStore.firstLocation) {
                                 // console.log("entry first locate");
@@ -332,7 +341,6 @@ class mapPage extends Component {
             }
         }
     }
-
 
     render() {
         const {

@@ -52,7 +52,6 @@ class FloorStore {
     }
 
     checkMarkerAndRoute(map, floor, index = 0) {
-        console.log(index);
         // marker 跨楼层判断
         const endMarkerPoint = map.endMarkerPoint;
         const startMarkerPoint = map.startMarkerPoint;
@@ -75,30 +74,51 @@ class FloorStore {
         // 路径规划 跨楼层判断
 
         if (map.mapObj.getLayer("building-layer")) {
-            const handleFloor = JSON.stringify({level: Number(floor), index});
-            const routeIndoor = floorStore.routeIndoor[handleFloor]
-                && floorStore.routeIndoor[handleFloor].features
-                && floorStore.routeIndoor[handleFloor].features.filter(v => v.geometry.type !== "Point");
-            const geoData = routeIndoor && routeIndoor.length > 0
-                ? bezierV2(toJS(routeIndoor), map.mapObj)
-                : {
-                    type: "FeatureCollection",
-                    features: []
-                };
-            map.mapObj.getSource("building-route").setData(geoData);
+            let routeList = {
+                type: "FeatureCollection",
+                features: []
+            };
+            if (floor || floor == 0) {
+                let objKeys = Object.keys(floorStore.routeIndoor);
+                for (let v of objKeys) {
+                    if (v.indexOf(`"level":${floor}`) > -1) {
+                        const routeIndoor = floorStore.routeIndoor[v]
+                            && floorStore.routeIndoor[v].features
+                            && floorStore.routeIndoor[v].features.filter(e => e.geometry.type !== "Point");
+                        routeList.features.push(bezierV2(toJS(routeIndoor), map.mapObj));
+                    }
+                }
+            }
+
+            // const routeIndoor = floorStore.routeIndoor[handleFloor]
+            //     && floorStore.routeIndoor[handleFloor].features
+            //     && floorStore.routeIndoor[handleFloor].features.filter(v => v.geometry.type !== "Point");
+            // const geoData = routeIndoor && routeIndoor.length > 0
+            //     ? bezierV2(toJS(routeIndoor), map.mapObj)
+            //     : {
+            //         type: "FeatureCollection",
+            //         features: []
+            //     };
+            // console.log(geoData);
+            map.mapObj.getSource("building-route").setData(routeList);
         }
         if (map.mapObj.getLayer("building-layer-down")) {
-            const handleFloor = JSON.stringify({level: Number(floor), index});
-            const routeIndoor = floorStore.routeIndoor[handleFloor]
-                && floorStore.routeIndoor[handleFloor].features
-                && floorStore.routeIndoor[handleFloor].features.filter(v => v.geometry.type !== "Point");
-            const geoData = routeIndoor && routeIndoor.length > 0
-                ? bezierV2(toJS(routeIndoor), map.mapObj)
-                : {
-                    type: "FeatureCollection",
-                    features: []
-                };
-            map.mapObj.getSource("building-route-down").setData(geoData);
+            let routeList = {
+                type: "FeatureCollection",
+                features: []
+            };
+            if (floor || floor == 0) {
+                let objKeys = Object.keys(floorStore.routeIndoor);
+                for (let v of objKeys) {
+                    if (v.indexOf(`"level":${floor}`) > -1) {
+                        const routeIndoor = floorStore.routeIndoor[v]
+                            && floorStore.routeIndoor[v].features
+                            && floorStore.routeIndoor[v].features.filter(e => e.geometry.type !== "Point");
+                        routeList.features.push(bezierV2(toJS(routeIndoor), map.mapObj));
+                    }
+                }
+            }
+            map.mapObj.getSource("building-route-down").setData(routeList);
         }
     }
 

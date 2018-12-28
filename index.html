@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <title>Canvas</title>
+</head>
+<style>
+    html, body {
+        padding: 0;
+        margin: 0;
+    }
+</style>
+<body>
+
+<canvas id="leftCanvas"></canvas>
+<canvas id="rightCanvas" style="position: absolute;left: 0"></canvas>
+
+<script>
+    // draw(30);
+    var clientWidth = document.documentElement.clientWidth;
+    var canvasWidth = Math.floor(clientWidth * 0.2);
+
+    console.log(clientWidth);
+    var canvasL = document.getElementById("leftCanvas"),
+        cxtL = canvasL.getContext("2d");
+    canvasL.setAttribute("width", canvasWidth + "px");
+    canvasL.setAttribute("height", canvasWidth + "px");
+    var cWidthL = canvasL.width;
+    var cHeightL = canvasL.height;
+    var animationId = window.requestAnimationFrame(paint);
+    var startL = -1 / 2 * Math.PI;
+    var endL = startL + 1 / 6 * Math.PI;
+
+    var canvasR = document.getElementById("rightCanvas"),
+        cxtR = canvasR.getContext("2d");
+    canvasR.setAttribute("width", canvasWidth + "px");
+    canvasR.setAttribute("height", canvasWidth + "px");
+    var cWidthR = canvasR.width;
+    var cHeightR = canvasR.height;
+    var startR = -1 / 2 * Math.PI;
+    var endR = startL - 1 / 5 * Math.PI;
+
+    function paint() {
+        // l
+        cxtL.clearRect(0, 0, cWidthL, cHeightL);
+        cxtL.beginPath();
+        cxtL.lineCap = "round";
+        cxtL.strokeStyle = "blue";
+        cxtL.lineWidth = 2;
+        cxtL.arc(cWidthL / 2, cHeightL / 2, cWidthL / 2 - 7, startL, endL, false);
+        cxtL.stroke();
+        // r
+        cxtR.clearRect(0, 0, cWidthR, cHeightR);
+        cxtR.beginPath();
+        cxtR.lineCap = "round";
+        cxtR.strokeStyle = "blue";
+        cxtR.lineWidth = 2;
+        cxtR.arc(cWidthR / 2, cHeightR / 2, cWidthR / 2 - 2, startR, endR, true);
+        cxtR.stroke();
+
+
+        if (endL < 3 / 2 * Math.PI) {
+            startL += 2 / 180 * Math.PI;
+            endL += 2 / 180 * Math.PI;
+            startR -= 2.0001 / 180 * Math.PI;
+            endR -= 2.0001 / 180 * Math.PI;
+            animationId = window.requestAnimationFrame(paint);
+        } else {
+            if (startL < 3 / 2 * Math.PI) {
+                startL += 2 / 180 * Math.PI;
+                startR -= 2.001 / 180 * Math.PI;
+                animationId = window.requestAnimationFrame(paint);
+            } else {
+                cxtL.clearRect(0, 0, cWidthL, cHeightL);
+                cxtR.clearRect(0, 0, cWidthR, cHeightR);
+                window.cancelAnimationFrame(animationId);
+            }
+        }
+    }
+
+
+    /**
+     * [顺时针方向画图，起始点在左侧]
+     * @param  {[number]} percent [所占的进度百分比，比如66%，则传66即可，0 <= percent <= 100]
+     * @param  {[number]} sR      [圆弧起始角度，可不传，默认是π/2，Math.PI/2 <= sR < 3/2 * Math.PI]
+     */
+    // function draw(percent, sR) {
+    //     if (percent < 0 || percent > 100) {
+    //         return;
+    //     }
+    //     if (sR < Math.PI / 2 || sR >= 3 / 2 * Math.PI) {
+    //         return;
+    //     }
+    //
+    //     var canvas = document.querySelector("#canvas"),
+    //         cxt = canvas.getContext("2d"),
+    //         cWidth = canvas.width,
+    //         cHeight = canvas.height,
+    //         baseColor = "#e1e1e1",
+    //         coverColor = "#fe4d43",
+    //         PI = Math.PI,
+    //         sR = sR || 1 / 2 * PI; // 默认圆弧的起始点弧度为π/2
+    //
+    //     var finalRadian = sR + ((PI + (PI - sR) * 2) * percent / 100); // 红圈的终点弧度
+    //     var step = (PI + (PI - sR) * 2) / 100; // 一个1%对应的弧度大小
+    //     var text = 0; // 显示的数字
+    //
+    //     window.requestAnimationFrame(paint);
+    //
+    //     function paint() {
+    //         cxt.clearRect(0, 0, cWidth, cHeight);
+    //         var endRadian = sR + text * step;
+    //         // 画灰色圆弧
+    //         drawCanvas(cWidth / 2, cHeight / 2, 80, sR, sR + (PI + (PI - sR) * 2), baseColor, 2);
+    //         // 画红色圆弧
+    //         drawCanvas(cWidth / 2, cHeight / 2, 80, sR, endRadian, coverColor, 2);
+    //
+    //         // 画红色圆头
+    //         // 红色圆头其实就是一个圆，关键的是找到其圆心，涉及到三角函数知识，自己画个图一看就明了
+    //         var angle = 2 * PI - endRadian; // 转换成逆时针方向的弧度（三角函数中的）
+    //         xPos = Math.cos(angle) * 80 + cWidth / 2; // 红色圆 圆心的x坐标
+    //         yPos = -Math.sin(angle) * 80 + cHeight / 2; // 红色圆 圆心的y坐标
+    //         drawCanvas(xPos, yPos, 2, 0, 2 * PI, coverColor, 2);
+    //
+    //         // 数字
+    //         cxt.fillStyle = coverColor;
+    //         cxt.font = "40px PT Sans";
+    //         var textWidth = cxt.measureText(text + "%").width;
+    //         cxt.fillText(text + "%", cWidth / 2 - textWidth / 2, cHeight / 2 + 15);
+    //         text++;
+    //
+    //         if (endRadian.toFixed(2) < finalRadian.toFixed(2)) {
+    //             window.requestAnimationFrame(paint);
+    //         }
+    //     }
+    //
+    //     function drawCanvas(x, y, r, sRadian, eRadian, color, lineWidth) {
+    //         cxt.beginPath();
+    //         cxt.lineCap = "round";
+    //         cxt.strokeStyle = color;
+    //         cxt.lineWidth = lineWidth;
+    //         cxt.arc(x, y, r, sRadian, eRadian, false);
+    //         cxt.stroke();
+    //     }
+    // }
+</script>
+</body>
+</html>

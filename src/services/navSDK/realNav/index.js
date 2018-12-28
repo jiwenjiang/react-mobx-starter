@@ -78,7 +78,7 @@ const realNavigationFn = (target) => {
                 this.navComplete({...this.currentPoint, isYaw: true});
                 return false;
             }
-            if (this.currentPoint.locType == "ibeacon" && currentDistance > 15) {
+            if (this.currentPoint.locType == "ibeacon" && currentDistance > 20) {
                 console.log("ibeacon 偏航", currentDistance);
                 this.stopNav();
                 this.navComplete({...this.currentPoint, isYaw: true});
@@ -102,12 +102,14 @@ const realNavigationFn = (target) => {
             //         this.elEndPoint = point(coordinates[coordinates.length - 1]);
             //     }
             // }
-
-            if (this.loc.currentPosition.level != crossEndLevel) {
+            if (this.loc.currentPosition.level == routeFloor[currentLineIndex].startFloor
+                && crossEndLevel != null && this.loc.currentPosition.level != crossEndLevel) {
+                console.log("crossEndLevel", crossEndLevel);
                 const coordinates = routeFloorBezier.geometry.coordinates;
                 const endPoint = point(coordinates[coordinates.length - 1]);
-                const elDistance = distance(shadowPoint, endPoint) * 1000;
-                if (elDistance < 2) {
+                const elDistance = ~~(distance(shadowPoint, endPoint) * 1000);
+                if (elDistance <= 2) {
+                    console.log("进入跨楼判断");
                     const crossType = routeFloor[currentLineIndex + 1]
                     && routeFloor[currentLineIndex + 1].crossType == 12 ? "elevator" : "stairs";
                     this.inElevator = crossType;
@@ -142,7 +144,7 @@ const realNavigationFn = (target) => {
                 voice: voice || navResult.voice,
                 isOutdoor: this.currentPoint.isOutdoor,
                 info: "SUCCESS",
-                inElevator: this.inElevator,
+                inElevator: this.inElevator
             };
             this.onNavStep(output);
         }
@@ -269,7 +271,7 @@ const realNavigationFn = (target) => {
                         }
                     }
                 } else {
-                    if (this.currentPoint.level == this.navEndLevel) {
+                    if (this.currentPoint.level == this.navEndLevel && !this.inElevator) {
                         if (currentStartDistance >= 1) {
                             turnType = 1;
                             text = `前方${currentEndDistance}米到达终点`;

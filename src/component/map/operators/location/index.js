@@ -5,7 +5,7 @@ import React, {Component} from "react";
 import "./index.less";
 import {inject, observer} from "mobx-react";
 
-@inject("mapStore", "navStore", "floorStore")
+@inject("mapStore", "navStore", "floorStore", "commonStore")
 @observer
 class location extends Component {
 
@@ -29,6 +29,9 @@ class location extends Component {
             if (this.props.navStore.freeMarker) {
                 this.props.navStore.checkFreeMarker(this.props.mapStore);
             }
+        } else {
+            console.log(111);
+            this.props.commonStore.changeWarningModal("暂无定位");
         }
     }
 

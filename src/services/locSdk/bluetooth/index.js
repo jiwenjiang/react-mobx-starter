@@ -9,11 +9,11 @@ const POINTLENTH = 3; // 质心点计算数组长度
 const CHANGE_GPS = 5000; // 搜索不到蓝牙5000ms后，切换gps
 
 const blueToothFn = (target) => {
-    const signUrl = `https://gisgd.scu.edu.cn/wxConfig/weixin/v1/jsSdkSign`;
-    // const signUrl = `https://xz.parkbobo.com/wxConfig/weixin/v1/jsSdkSign`;
+    // const signUrl = `https://gisgd.scu.edu.cn/wxConfig/weixin/v1/jsSdkSign`;
+    const signUrl = `https://xz.parkbobo.com/wxConfig/weixin/v1/jsSdkSign`;
     // const signUrl = `https://gisapp.swun.edu.cn/wxConfig/weixin/v1/jsSdkSign`;
-    // const getIbeconUrl = `https://map.parkbobo.com/location/weka/v1/classify`;// map
-    const getIbeconUrl = `https://gismp.scu.edu.cn/location/weka/v1/classify`;// map
+    const getIbeconUrl = `https://map.parkbobo.com/location/weka/v1/classify`;// map
+    // const getIbeconUrl = `https://gismp.scu.edu.cn/location/weka/v1/classify`;// map
     // const getIbeconUrl = `https://gl.swun.edu.cn/location/weka/v1/classify`;
 
     // const deviceUrl = `https://xz.parkbobo.com/location/device/v1/getAll`;
@@ -81,7 +81,8 @@ const blueToothFn = (target) => {
                     "onWXDeviceBluetoothStateChange", "startSearchBeacons",
                     "stopSearchBeacons", "onSearchBeacons", "startRecord", "stopRecord",
                     "translateVoice", "onMenuShareAppMessage", "getLocation",
-                    "openBluetoothAdapter", "onWXDeviceBluetoothStateChange", "getBluetoothAdapterState"] // 必填，需要使用的JS接口列表
+                    "openBluetoothAdapter", "onBeaconServiceChange", "onWXDeviceBluetoothStateChange",
+                    "getBluetoothAdapterState", "onBluetoothAdapterStateChange"] // 必填，需要使用的JS接口列表
             });
             wx.error((res) => {
                 this.initError(res);
