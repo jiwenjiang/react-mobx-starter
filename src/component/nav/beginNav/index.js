@@ -93,7 +93,7 @@ class beginNav extends Component {
                         <span className="nav-route-secondText nav-route-boldText">{this.props.mapStore.endMarkerPoint
                         && this.props.mapStore.endMarkerPoint.name}</span>
                     </span>
-                </li>,
+                </li>
             }[v.turnType];
         } else {
             return {
@@ -110,7 +110,7 @@ class beginNav extends Component {
                     <span className="nav-route-firstText nav-route-thinText">{Math.round(v.distance)}米后</span>
                     <span className="nav-route-secondText nav-route-boldText">乘坐电梯</span>
                     </span>
-                </li>,
+                </li>
             }[v.crossType];
         }
     }
@@ -249,6 +249,7 @@ class beginNav extends Component {
         // 当前时间
         let navTime = new Date().getTime();
         this.props.commonStore.changeDetectLocation(true); // 开启定位检测
+        this.props.floorStore.listenIbeacon(this.props.mapStore, this.props.mapStore.startMarkerPoint.floor);
         //
         this.props.navStore.changeNavMode("real");
         this.props.mapStore.crossMarker && this.props.mapStore.crossMarker.remove();
@@ -323,7 +324,7 @@ class beginNav extends Component {
                         this.props.mapStore.confirmMarker("start", startPoint);
                     }, 1500);
                 }
-            },
+            }
         });
     }
 
