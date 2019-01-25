@@ -13,6 +13,11 @@
   transition: transform 0.5s;
 }
 
+.dom-transformY-route {
+  transform: translateY(-30vw);
+  transition: transform 0.5s;
+}
+
 .dom-transformY-30 {
   transform: translateY(-30vw);
   transition: transform 0.5s;
@@ -21,4 +26,26 @@
 .dom-transformY-100vh {
   transform: translateY(-100vh);
   transition: transform 0.5s;
+}
+
+.map-crossMarker {
+  width: 15vw;
+  height: 4.8vw;
+  background: rgba(43, 41, 41, .8);
+  border-radius: 0.66vw;
+  position: relative;
+  margin-top: -5vw;
+  color: white;
+  text-align: center;
+  font-size: 2.4vw;
+  &::after {
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid rgba(43, 41, 41, 0.8);
+    content: "";
+    position: absolute;
+    width: 0;
+    bottom: -5px;
+    left: 10px;
+  }
 }

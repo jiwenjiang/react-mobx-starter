@@ -1,7 +1,6 @@
 /**
  * Created by j_bleach on 2018/9/27 0027.
  */
-/*eslint-disable*/
 import React, {Component} from "react";
 import {inject, observer} from "mobx-react";
 import config from "config";
@@ -28,9 +27,8 @@ import normalUrl from "config/url/normal";
 import wx from "weixin-js-sdk";
 import LoadingComponent from "component/common/loading";
 import {booleanPointInPolygon, point} from "@turf/turf";
-// import kalmanWorker from "./aaa.worker";
 
-import Worker from "./kalman.worker";
+// import audioTest from "assets/audio/routePlan.mp3";
 
 @inject("mapStore", "commonStore", "floorStore", "navStore")
 @observer
@@ -88,11 +86,7 @@ class mapPage extends Component {
 
     componentDidMount() {
         console.log("nav", navigator.appVersion);
-        let worker = new Worker();
-        worker.postMessage({a: 1});
-        worker.onmessage = function (event) {
-            console.log("worker", event);
-        };
+
         this.getSignature();
         // 获取url参数
         const projectType = getQueryString("type", window.location.href) || "Addressing";
@@ -117,7 +111,7 @@ class mapPage extends Component {
             this.props.mapStore.saveMapObj(map, creeper, route);
             setTimeout(() => {
                 map.resetNorth();
-                map.setMaxZoom(20);
+                // map.setMaxZoom(20);
                 if (map.configComponent && map.configComponent.mapZone) {
                     if (map.configComponent.mapZone && map.configComponent.mapZone.name) {
                         document.title = map.configComponent.mapZone.name;
@@ -129,6 +123,7 @@ class mapPage extends Component {
                     // 定位sdk
                     loc.init({
                         timeout: 50000,
+                        wxSDK: wx,
                         locType: ["gps", "ibeacon"],
                         mapId: this.props.mapStore.mapId,
                         complete: () => {
@@ -148,12 +143,19 @@ class mapPage extends Component {
 
                     loc.onLocation({
                         complete: (data) => {
-                            // this.setMarker(data);
+                            this.setMarker(data);
+
+                            // setInterval(() => {
+                            //     this.printMarker(window.kalmanPt);
+                            // }, 500);
 
                             if (!this.props.navStore.freeMarker && this.props.navStore.firstLocation) {
                                 // console.log("entry first locate");
                                 if (this.props.mapStore.mapGL) {
-                                    this.props.floorStore.listenIbeacon(this.props.mapStore, data.level);
+                                    const pt = point([data.longitude, data.latitude]);
+                                    if (map.bboxPolygon && booleanPointInPolygon(pt, map.bboxPolygon)) {
+                                        this.props.floorStore.listenIbeacon(this.props.mapStore, data.level);
+                                    }
                                     const locFlag = this.props.navStore.initFreeMarker(this.props.mapStore, data);
                                     this.props.navStore.updateInitLocation(true);
                                     if (shareMessage) {
@@ -180,7 +182,6 @@ class mapPage extends Component {
                                     }
                                 }
                             }
-
                             if (data.locType == "ibeacon") {
                                 this.props.navStore.updateCurrentLocation(data);
                                 this.props.navStore.updateLocateCoordinate(data);
@@ -265,13 +266,23 @@ class mapPage extends Component {
 
         // 监听地图移动
         map.on("touchmove", () => {
+            if (this.props.navStore.navMode == "sim") {
+                nav.pauseSim(false);
+                this.props.navStore.updateSimPauseStatus(true);
+                clearTimeout(this.pauseSimTimer);
+                this.pauseSimTimer = setTimeout(() => {
+                    if (this.props.navStore.simPauseStatus) {
+                        nav.pauseSim(true);
+                        this.props.navStore.updateSimPauseStatus(false);
+                    }
+                }, 2000);
+            }
             if (this.props.navStore.initLocation) {
                 this.props.navStore.updateInitLocation(false);
             }
         });
         // 禁用滑动
         document.addEventListener("touchmove", (e) => {
-            // console.log(e)
             if (!e.target.classList.contains("canBeScroll") && !this.props.commonStore.searchStatus) {
                 e.preventDefault();
             }
@@ -338,6 +349,22 @@ class mapPage extends Component {
                             .addTo(this.props.mapStore.mapObj);
                     }
                 }
+            }
+        }
+    }
+
+    printMarker(data) {
+        // console.log(21, data);
+        if (data) {
+            if (this.confMarker2) {
+                this.confMarker2.setLngLat([data[0], data[1]]);
+            } else {
+                let el = document.createElement("div");
+                el.style.background = "gray";
+                el.style.width = "10px";
+                el.style.height = "10px";
+                this.confMarker2 = new this.props.mapStore.mapGL.Marker(el).setLngLat([data[0], data[1]])
+                    .addTo(this.props.mapStore.mapObj);
             }
         }
     }

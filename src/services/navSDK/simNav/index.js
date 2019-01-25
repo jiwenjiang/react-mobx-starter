@@ -9,14 +9,11 @@ const simNavigationFn = (target) => {
             super();
         }
 
-        startSimNavigation = (handleData, map, speed = 1) => {
-            // 清除自由模式纠偏
-            this.correctFreeLocateTimer = null;
-            clearTimeout(this.correctFreeLocateWatchId);
-            //
-            const {animateArray, handleRoute, routeLength, handleRouteFloorBezierAni} = handleData;
+        startSimNavigation = (map, speed = 1) => {
+
+            const {handleRoute, routeLength, handleRouteFloorBezierAni, animateArray} = this.handleData;
+            // const animateArray = this.animateArray;
             // 判断是否跨楼层
-            let completeLength = 0;
             let currentLineIndex = 0;
             this.animateId = null;
             let voiceRecorder = {};
@@ -31,14 +28,18 @@ const simNavigationFn = (target) => {
                     animateArray.shift();
                     let geoPoint = point(currentPoint);
                     const distanceArr = [];
-                    for (let v of handleRoute) {
+                    handleRoute.forEach(v => {
                         let line = lineString(v.LineCoordinates);
                         distanceArr.push((pointToLineDistance(geoPoint, line) * 1000));
-                    }
+                    });
+                    // for (let v of handleRoute) {
+                    //     let line = lineString(v.LineCoordinates);
+                    //     distanceArr.push((pointToLineDistance(geoPoint, line) * 1000));
+                    // }
 
                     // console.log(distanceArr);
                     currentLineIndex = distanceArr.findIndex(v => v == Math.min(...distanceArr));
-                    const leftDistance = routeLength - (completeLength / 50 / speed);
+                    const leftDistance = routeLength - (this.completeLength / 50 / speed);
                     const simResult = this.simNavLogic(currentPoint, currentLineIndex, handleRoute, voiceRecorder, floorRecorder, lastFloor);
                     const currentFloor = JSON.stringify({
                         level: Number(simResult.currentFloor),
@@ -65,7 +66,7 @@ const simNavigationFn = (target) => {
                         floorIndex: simResult.floorIndex
                     };
                     this.onSimStep(output);
-                    completeLength++;
+                    this.completeLength++;
                 } else {
                     console.log("取消");
                     this.inElevator = false;
@@ -78,7 +79,7 @@ const simNavigationFn = (target) => {
                         });
                     }
                     if (this.loc && this.loc.currentPosition) {
-                        this.startCorrectFreeLocate(this.loc);
+                        this.currentMode = "free";
                     }
                 }
             };

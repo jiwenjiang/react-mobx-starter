@@ -132,12 +132,13 @@ const preHandleSimData = (route, map, speed = 1) => {
         let segment = along(routeLine, j);
         animateArray.push(segment.geometry.coordinates);
     }
+
     return {
         handleRoute,
         handleRouteFloor,
         handleRouteFloorBezierAni,
         routeLength,
-        animateArray
+        animateArray,
     };
 };
 /**
@@ -148,6 +149,7 @@ const preHandleSimData = (route, map, speed = 1) => {
  */
 const preHandleRealData = (route, map) => {
     let pointCollects = []; // 点集合
+    let levelCollects = []; // 楼层集合
     let routeLength = 0; // 总距离
     let handleRouteFloor = {};
     let handleRouteFloorBezier = {};
@@ -172,6 +174,7 @@ const preHandleRealData = (route, map) => {
         // totalDistance += route[i].distance;
         let item = route[i];
         item.LineCoordinates = [];
+        levelCollects.push(Number(item.startFloor));
         item.turnTypeText = parseTurnType(route[i].turnType);
         if (item.crossType == 11 || item.crossType == 13) {
             crossEndLevel = item.startFloor;
@@ -263,6 +266,8 @@ const preHandleRealData = (route, map) => {
     }
     let routeLine = lineString(pointCollects);
     routeLength = length(routeLine) * 1000;
+
+    levelCollects = [...new Set(levelCollects)];
     return {
         routeLength,
         handleRouteFloor,
@@ -271,7 +276,8 @@ const preHandleRealData = (route, map) => {
         handleRouteFloorShadow,
         crossStartLevel,
         crossEndLevel,
-        countKey
+        countKey,
+        levelCollects
     };
 };
 

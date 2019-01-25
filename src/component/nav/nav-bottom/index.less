@@ -7,6 +7,7 @@
   background: rgba(255, 255, 255, 1);
   border-radius: 5px;
   box-shadow: 2.487px -1.678px 6px 0px rgba(119, 119, 119, 0.26);
+
   .nav-bottom-floor {
     font-size: 4vw;
     font-family: PingFang-SC-Medium;
@@ -63,4 +64,37 @@
       font-size: 3.2vw;
     }
   }
+}
+
+.nav-bottom-simPause {
+  z-index: 100;
+  position: fixed;
+  width: 9.3vw;
+  height: 9.3vw;
+  bottom: 31vw;
+  right: 3vw;
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0px 2px 6px 0px rgba(119, 119, 119, 0.3);
+  border-radius: 1vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  i {
+    font-size: 4.5vw;
+  }
+  span {
+    font-size: 2.4vw;
+  }
+  span, i {
+    display: inline-block;
+  }
+}
+
+.continueColor {
+  color: #0AB9B3;
+}
+
+.pauseColor {
+  color: #333333;
 }

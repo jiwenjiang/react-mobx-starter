@@ -28,7 +28,11 @@ class Nav {
         this.isIOS = /(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent) ? true : false;
         if (loc.currentPosition) {
             this.currentPoint = loc.currentPosition;
+            this.lastLocation = loc.currentPosition;
+            this.tempLocation = loc.currentPosition;
+            this.stepLocation = loc.currentPosition;
             this.initStepper(loc);
+            this.startWeightsPointCalc();
         }
         this.initCompass();
     }
@@ -49,7 +53,8 @@ class Nav {
         }
     ) {
         if (this.loc.currentPosition) {
-            this.startCorrectFreeLocate(this.loc);
+            // this.startCorrectFreeLocate(this.loc);
+            this.startWeightsPointCalc();
         }
         this.onFreeStep = complete;
     }
@@ -69,17 +74,27 @@ class Nav {
     ) {
         this.onSimStep = onSimNav;
         this.simComplete = complete;
-        const handleData = preHandleSimData(routeData, map, speed);
+        this.handleData = preHandleSimData(routeData, map, speed);
+        this.completeLength = 0;
+        this.map = map;
         // const handleData = preHandleRealData(routeData, map);
         // console.log(handleData)
-        this.startSimNavigation(handleData, map, speed);
+        this.startSimNavigation(map, speed);
+    }
+
+    pauseSim(v) {
+        if (v) {
+            this.startSimNavigation(this.map);
+        } else {
+            window.cancelAnimationFrame(this.animateId);
+        }
     }
 
     stopSim() {
         window.cancelAnimationFrame(this.animateId);
         this.inElevator = false;
         if (this.loc && this.loc.currentPosition) {
-            this.startCorrectFreeLocate(this.loc);
+            // this.startCorrectFreeLocate(this.loc);
         }
     }
 
@@ -97,7 +112,7 @@ class Nav {
     ) {
         this.voiceRecorder = {};
         this.floorRecorder = {
-            lastFloor: null
+            lastFloor: null // 上一条线路
         };
         this.onNavStep = onNav;
         this.navComplete = complete;
@@ -106,15 +121,15 @@ class Nav {
         this.navStartLevel = routeData[0].startFloor;
         this.navEndLevel = routeData[routeData.length - 1].endFloor;
         this.currentMode = "realNav";
-        this.correctNavFlag = false;
-        this.correctNavOutdoorFlag = false;
-        this.startCorrectNavLocate(this.loc);
+        // this.correctNavFlag = false;
+        // this.correctNavOutdoorFlag = false;
+        // this.startCorrectNavLocate(this.loc);
     }
 
     stopNav() {
         this.currentMode = "free";
         this.inElevator = false;
-        this.startCorrectFreeLocate(this.loc);
+        // this.startCorrectFreeLocate(this.loc);
     }
 
 }

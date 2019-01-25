@@ -45,7 +45,7 @@ class navPanel extends Component {
             <div>
                 {
                     navRealData && navRealData.text && <div className="nav-panel">
-                        <i className={`iconfont ${navRealData && this.renderIcon(navRealData)}`}></i>
+                        <i className={`iconfont ${navRealData && this.renderIcon(navRealData)} noticeIcon`}></i>
                         &emsp;&emsp;
                         <span>{navRealData && navRealData.text}</span>
                     </div>

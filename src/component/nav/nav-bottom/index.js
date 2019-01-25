@@ -8,6 +8,7 @@ import nav from "services/navSDK";
 import ConfirmModal from "component/common/confirmModal";
 import {handleDistance} from "services/utils/tool";
 
+
 @inject("mapStore", "navStore", "floorStore", "commonStore")
 @observer
 class navBottom extends Component {
@@ -24,11 +25,20 @@ class navBottom extends Component {
         });
     }
 
+    changePauseStatus() {
+        nav.pauseSim(this.props.navStore.simPauseStatus);
+        this.props.navStore.updateSimPauseStatus(!this.props.navStore.simPauseStatus);
+    }
+
+    pauseAudio() {
+        this.props.commonStore.changeAllowAudio(!this.props.commonStore.allowAudioPlay);
+    }
+
     render() {
         const {startMarkerPoint, endMarkerPoint} = this.props.mapStore;
         const {exitModalStatus} = this.state;
         const {mapFloor} = this.props.floorStore;
-        const {navRealData} = this.props.navStore;
+        const {navRealData, simPauseStatus, navMode} = this.props.navStore;
         const confirmModalProps = {
             text: `温馨提示`,
             textStyle: {color: "#13B1AC", fontSize: "3vw"},
@@ -60,6 +70,12 @@ class navBottom extends Component {
         return (
             <div className="begin-nav-container">
                 {exitModalStatus && <ConfirmModal {...confirmModalProps}></ConfirmModal>}
+                {navMode == "sim" &&
+                <div className={`nav-bottom-simPause ${simPauseStatus ? "continueColor" : "pauseColor"}`}
+                     onClick={() => this.changePauseStatus()}>
+                    <i className="iconfont icon-daohang2"></i>
+                    <span>{simPauseStatus ? "继续" : "暂停"}</span>
+                </div>}
                 <div className="nav-bottom-box" id="nav-bottom">
                     <div className="map-goToShare-head">
                         <div className="map-goToShare-name">
@@ -72,6 +88,11 @@ class navBottom extends Component {
                                 && `距离目的地${navRealData && handleDistance(navRealData.leftDistance)}`}
                                 &emsp;
                             </div>
+                        </div>
+                        <div className="stop-audio" onClick={() => {
+                            this.pauseAudio();
+                        }}>
+                            <i className={`iconfont ${this.props.commonStore.allowAudioPlay ? "icon-laba" : "icon-jingyin"}`}></i>
                         </div>
                         <div className="begin-nav-exit" style={{color: "#999999", top: "4.5vw"}}
                              onClick={() => this.exit()}>

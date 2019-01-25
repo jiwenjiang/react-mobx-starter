@@ -141,19 +141,6 @@ module.exports = {
                     // "url" loader works just like "file" loader but it also embeds
                     // assets smaller than specified size as data URLs to avoid requests.
                     {
-                        // 匹配 *.worker.js
-                        test: /\.worker\.js$/,
-                        use: {
-                            loader: "worker-loader",
-                            options: {
-                                name: "[name]:[hash:8].js",
-                                inline: true,
-                                // fallback: false
-                                // publicPath: '/scripts/workers/'
-                            }
-                        }
-                    },
-                    {
                         test: /\.less$/,
                         use: [
                             require.resolve("style-loader"),

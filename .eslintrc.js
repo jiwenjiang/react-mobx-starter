@@ -14,8 +14,7 @@ module.exports = {
         }
     },
     "globals": {
-        "debugger": true,
-        "importScripts": true
+        "debugger":true
     },
     "plugins": [
         "react"
@@ -25,4 +24,4 @@ module.exports = {
         "react/jsx-uses-react": "error",
         "react/jsx-uses-vars": "error",
     }
-};
+}

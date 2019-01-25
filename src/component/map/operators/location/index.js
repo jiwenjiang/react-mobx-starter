@@ -10,27 +10,28 @@ import {inject, observer} from "mobx-react";
 class location extends Component {
 
     location() {
-        if (!this.props.navStore.initLocation && this.props.navStore.freeMarker) {
-            if (this.props.floorStore.mapFloor != this.props.navStore.freeMarkerPoint.floor) {
-                this.props.floorStore.listenIbeacon(this.props.mapStore, this.props.navStore.freeMarkerPoint.floor);
-            }
-            const [currentLon, currentLat] = this.props.navStore.freeMarkerPoint.point;
-            this.props.mapStore.mapObj.flyTo({
-                center: [currentLon, currentLat],
-                zoom: 20,
-                speed: 2,
-                curve: 1,
-                bearing: 0,
-                easing(t) {
-                    return t;
+        if (this.props.navStore.freeMarker) {
+            if (!this.props.navStore.initLocation) {
+                if (this.props.floorStore.mapFloor != this.props.navStore.freeMarkerPoint.floor) {
+                    this.props.floorStore.listenIbeacon(this.props.mapStore, this.props.navStore.freeMarkerPoint.floor);
                 }
-            });
-            this.props.navStore.updateInitLocation(true);
-            if (this.props.navStore.freeMarker) {
-                this.props.navStore.checkFreeMarker(this.props.mapStore);
+                const [currentLon, currentLat] = this.props.navStore.freeMarkerPoint.point;
+                this.props.mapStore.mapObj.flyTo({
+                    center: [currentLon, currentLat],
+                    zoom: 20,
+                    speed: 2,
+                    curve: 1,
+                    bearing: 0,
+                    easing(t) {
+                        return t;
+                    }
+                });
+                this.props.navStore.updateInitLocation(true);
+                if (this.props.navStore.freeMarker) {
+                    this.props.navStore.checkFreeMarker(this.props.mapStore);
+                }
             }
         } else {
-            console.log(111);
             this.props.commonStore.changeWarningModal("暂无定位");
         }
     }

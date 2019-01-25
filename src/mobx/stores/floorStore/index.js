@@ -72,7 +72,6 @@ class FloorStore {
             }
         }
         // 路径规划 跨楼层判断
-
         if (map.mapObj.getLayer("building-layer")) {
             let routeList = {
                 type: "FeatureCollection",
@@ -119,6 +118,19 @@ class FloorStore {
                 }
             }
             map.mapObj.getSource("building-route-down").setData(routeList);
+        }
+        // 跨楼层标记判断
+        if (map.crossMarker) {
+            map.crossMarker.remove && map.crossMarker.remove();
+        }
+        if (map.crossMarkerSets[floor]) {
+            // console.log(2333, toJS(map.crossMarkerSets[floor]));
+            const type = map.crossMarkerSets[floor].type == "stairs" ? "通过楼梯" : "乘电梯";
+            const endFloor = map.crossMarkerSets[floor].destination;
+            const floorName = endFloor >= 0 ? `${Number(endFloor) + 1}F` : `B${-Number(endFloor)}`;
+            const text = `${type}到${floorName}`;
+            // console.log(toJS(map.crossMarkerSets[floor]));
+            map.setCrossMarker(text, map.crossMarkerSets[floor].point);
         }
     }
 

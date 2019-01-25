@@ -29,7 +29,7 @@ const gpsFn = (target) => {
                 level: "0",
                 locType: "gps",
                 timestamp: res.timestamp,
-                // timer: new Date().getTime(),
+                timer: new Date().getTime(),
             };
             this.onSuccessGps(gpsObj);
         };

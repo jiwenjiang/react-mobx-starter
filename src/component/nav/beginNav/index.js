@@ -10,6 +10,7 @@ import "./index.less";
 import {toJS} from "mobx";
 import {floorStore} from "../../../mobx/stores/floorStore";
 import {handleTime, handleDistance} from "services/utils/tool";
+import floor from "component/map/operators/floor";
 
 
 @inject("mapStore", "navStore", "floorStore", "commonStore")
@@ -123,6 +124,8 @@ class beginNav extends Component {
         }
 
         this.props.navStore.changeNavMode("sim");
+        this.props.mapStore.crossMarker && this.props.mapStore.crossMarker.remove();
+        this.props.mapStore.crossMarkerSets = {};
         this.props.navStore.freeMarker && this.props.navStore.removeFreeMarker();
         this.props.commonStore.baiduVoiceUrl("开始导航");
 
@@ -139,7 +142,7 @@ class beginNav extends Component {
         nav.startSim({
             routeData: toJS(this.props.navStore.navRoutes),
             map: this.props.mapStore.mapObj,
-            speed: 5,
+            speed: 1,
             onSimNav: (data) => {
                 this.props.navStore.moveNavMarker(this.props.mapStore, [data.currentLon, data.currentLat], "simMarker");
                 let navDatas = data.text ? data : {
@@ -187,21 +190,50 @@ class beginNav extends Component {
             complete: () => {
                 this.props.navStore.changeNavMode("free");
                 this.props.commonStore.baiduVoiceUrl("到达目的地，感谢使用本次导航");
+                // document.getElementsByClassName("nav-route-detail")[0].classList.add("dom-transformY-100vh");
+                document.getElementsByClassName("map-routePanel")[0].classList.add("dom-transformY-35");
+                document.getElementById("begin-nav").classList.add("dom-transformY-30");
                 document.getElementById("nav-bottom").classList.remove("dom-transformY-30");
-                this.props.navStore.upDateNavCompleteRoute({
-                    start: this.props.mapStore.startMarkerPoint,
-                    end: this.props.mapStore.endMarkerPoint,
+
+                // document.getElementById("nav-bottom").classList.remove("dom-transformY-30");
+                // this.props.navStore.upDateNavCompleteRoute({
+                //     start: this.props.mapStore.startMarkerPoint,
+                //     end: this.props.mapStore.endMarkerPoint,
+                // });
+                // if (this.props.navStore.freeMarkerPoint) {
+                //     const freePoint = {
+                //         longitude: this.props.navStore.freeMarkerPoint.point[0],
+                //         latitude: this.props.navStore.freeMarkerPoint.point[1],
+                //         level: this.props.navStore.freeMarkerPoint.floor,
+                //     };
+                //     this.props.navStore.moveFreeMarker(this.props.mapStore, freePoint);
+                // }
+                const {point, floor} = this.props.mapStore.startMarkerPoint;
+                this.props.mapStore.mapObj.flyTo({
+                    center: point,
+                    zoom: 19,
+                    speed: 2,
+                    curve: 1,
+                    easing: (t) => {
+                        if (t == 1) {
+                            setTimeout(() => {
+                                this.props.mapStore.mapObj.resetNorth();
+                                const classList = ["map-operators-location-box", "map-logo",
+                                    "map-operators-scale", "map-operators-zoom-box", "map-operators-floor"];
+                                for (let v of classList) {
+                                    document.getElementsByClassName(v) && document.getElementsByClassName(v)[0]
+                                    && document.getElementsByClassName(v)[0].classList["add"]("dom-transformY");
+                                }
+                                this.props.floorStore.listenIbeacon(this.props.mapStore, floor);
+                            }, 100);
+                        }
+                        return t;
+                    }
                 });
-                if (this.props.navStore.freeMarkerPoint) {
-                    const freePoint = {
-                        longitude: this.props.navStore.freeMarkerPoint.point[0],
-                        latitude: this.props.navStore.freeMarkerPoint.point[1],
-                        level: this.props.navStore.freeMarkerPoint.floor,
-                    };
-                    this.props.navStore.moveFreeMarker(this.props.mapStore, freePoint);
-                }
-                this.props.navStore.completeNav(this.props.mapStore);
+                this.props.navStore.removeNavMarker();
+                this.props.navStore.updateNavData({});
                 clearInterval(this.navTimer);
+                // this.props.navStore.completeNav(this.props.mapStore);
                 // this.props.navStore.changeEvaluateStatus(true);
             }
         });
@@ -219,6 +251,8 @@ class beginNav extends Component {
         this.props.commonStore.changeDetectLocation(true); // 开启定位检测
         //
         this.props.navStore.changeNavMode("real");
+        this.props.mapStore.crossMarker && this.props.mapStore.crossMarker.remove();
+        this.props.mapStore.crossMarkerSets = {};
         this.props.navStore.freeMarker && this.props.navStore.removeFreeMarker();
         const routeKey = JSON.stringify({level: Number(this.props.floorStore.mapFloor), index: 0});
         const startPoint = toJS(this.props.floorStore.routeIndoorBezier[routeKey])
@@ -235,6 +269,9 @@ class beginNav extends Component {
             map: this.props.mapStore.mapObj,
             onNav: (data) => {
                 if (data.level && data.level != this.props.floorStore.mapFloor) {
+                    this.props.floorStore.listenIbeacon(this.props.mapStore, data.level);
+                }
+                if (data.level != this.props.mapStore.mapObj.floorComponent.nowLevelIndex) {
                     this.props.floorStore.listenIbeacon(this.props.mapStore, data.level);
                 }
                 this.props.navStore.moveNavMarker(this.props.mapStore, [data.currentLon, data.currentLat], "navMarker");
@@ -292,6 +329,8 @@ class beginNav extends Component {
 
     exit() {
         this.props.mapStore.removeMarker("end");
+        this.props.mapStore.crossMarker && this.props.mapStore.crossMarker.remove();
+        this.props.mapStore.crossMarkerSets = {};
         document.getElementById("begin-nav") && document.getElementById("begin-nav").classList.remove("dom-transformY-30");
         document.getElementsByClassName("map-routePanel")[0].classList.remove("dom-transformY-35");
         if (this.props.mapStore.startMarkerPoint) {
@@ -304,20 +343,72 @@ class beginNav extends Component {
         }
     }
 
+    calcPadding(l) {
+        if (l >= 4) {
+            return;
+        }
+        return {
+            2: "28vw",
+            3: "17vw"
+        }[l];
+    }
+
+    calcLevel(v) {
+        if (v.length == 2 || v.length == 3) {
+            return v.map((v, i) => {
+                return <div onClick={() => this.changeRouteLevel(v, i)} className={`${v.status
+                    ? "begin-nav-selectLevel" : "begin-nav-normalLevel"}`} key={v.level}>
+                    {
+                        v.level >= 0 ? `${Number(v.level) + 1}F路线` : `B${-Number(v.level)}路线`
+                    }
+                </div>;
+            });
+        }
+    }
+
+    changeRouteLevel(v) {
+        // console.log(toJS(floorStore.routeIndoor[JSON.stringify({"level": v.level, "index": 0})]));
+        // const coordinates = floorStore.routeIndoor[JSON.stringify({"level": v.level, "index": 0})]
+        //     .features[1].geometry.coordinates;
+        // const aroundPt = typeof coordinates[0] == "object" ? coordinates[0][0] : coordinates;
+        // console.log(toJS(aroundPt), toJS(floorStore.routeIndoor[JSON.stringify({"level": v.level, "index": 0})]));
+        // this.props.mapStore.mapObj.flyTo({
+        //     center: aroundPt,
+        //     zoom: 19,
+        //     speed: 2,
+        //     curve: 1,
+        //     easing: (t) => {
+        //         return t;
+        //     }
+        // });
+        //
+        this.props.navStore.updateNavRouteLevel(this.props.navStore.navRoutesLevelArr, v.level); // 更新楼层数据
+        this.props.commonStore.changeDetectLocation(false); // 取消定位检测
+        this.props.floorStore.updateFloor(v.level); // 更新楼层（mobx）
+        this.props.mapStore.mapObj.setLevel(v.level); //  更新楼层
+        this.props.floorStore.checkMarkerAndRoute(this.props.mapStore, v.level); // 终点，起点，路径检测
+    }
+
     render() {
-        const {totalDistance, navTime, navRoutes} = this.props.navStore;
+        const {totalDistance, navTime, navRoutes, navRoutesLevelArr, navMode} = this.props.navStore;
         // const {searchStatus} = this.props.commonStore;
-        // console.log(searchStatus);
         return (
             <div className="begin-nav-container">
                 <div>
+                    {navMode == "free" && navRoutes && navRoutesLevelArr && navRoutesLevelArr.length > 1 &&
+                    <div className="begin-nav-route" style={{
+                        paddingLeft: `${this.calcPadding(navRoutesLevelArr.length)}`,
+                        paddingRight: `${this.calcPadding(navRoutesLevelArr.length)}`
+                    }}>
+                        {this.calcLevel(navRoutesLevelArr)}
+                    </div>}
                     <div className="map-goToShare begin-nav" id="begin-nav">
                         <div className="map-goToShare-head">
                             <div className="map-goToShare-head-swipe"></div>
                             <div className="map-goToShare-name">
-                            <span className="map-goToShare-name-font nav-font">
-                                {navRoutes ? `${handleDistance(totalDistance)} ${handleTime(navTime)}` : "请选择起点"}
-                                </span>
+                        <span className="map-goToShare-name-font nav-font">
+                        {navRoutes && totalDistance ? `${handleDistance(totalDistance)} ${handleTime(navTime)}` : "请选择起点"}
+                        </span>
                             </div>
                             <div className="begin-nav-exit" onClick={() => this.exit()}>
                                 <span>退出</span>

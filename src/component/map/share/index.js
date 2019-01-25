@@ -20,8 +20,10 @@ class gotoComponent extends Component {
         document.getElementById("map-goToShare").classList.remove("dom-transformY-30");
         document.getElementById("begin-nav").classList.add("dom-transformY-30");
         if (this.props.navStore.freeMarker) {
-            console.log("zhr")
-            this.props.mapStore.confirmMarker("start", this.props.navStore.freeMarkerPoint, true);
+            this.props.mapStore.confirmMarker("start", {
+                ...this.props.navStore.freeMarkerPoint,
+                source: this.props.navStore.currentLocation && this.props.navStore.currentLocation.locType == "gps" ? "outdoor" : "indoor"
+            }, true);
             this.props.mapStore.confirmStartMarkerFn();
         } else {
             this.props.mapStore.confirmEndMarkerFn(true);

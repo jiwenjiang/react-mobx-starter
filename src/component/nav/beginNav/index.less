@@ -1,4 +1,35 @@
 .begin-nav-container {
+  .begin-nav-route {
+    box-sizing: border-box;
+    height: 5.8vw;
+    position: absolute;
+    bottom: 31vw;
+    width: 94vw;
+    left: 3vw;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    .begin-nav-level {
+      width: 16vw;
+      height: 5.8vw;
+      box-shadow: 2px -2px 6px 0px rgba(119, 119, 119, 0.26);
+      border-radius: 0.66vw;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 3.2vw;
+    }
+    .begin-nav-selectLevel {
+      .begin-nav-level;
+      background-color: #1CCCC6;
+      color: #ffffff;
+    }
+    .begin-nav-normalLevel {
+      .begin-nav-level;
+      background-color: #ffffff;
+      color: #999999;
+    }
+  }
   .begin-nav {
     .begin-nav-box {
       display: flex;
@@ -57,6 +88,13 @@
         font-size: 3.2vw;
       }
     }
+  }
+  .stop-audio{
+    position: absolute;
+    right: 13.5vw;
+    top: 4vw;
+    font-size: 3.2vw;
+    color: #CCCCCC;
   }
   .begin-nav-exit {
     position: absolute;

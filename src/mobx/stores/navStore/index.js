@@ -2,7 +2,7 @@
  * Created by j_bleach on 2018/9/20 0020.
  */
 /*eslint-disable*/
-import {observable, action} from "mobx";
+import {observable, action, autorun} from "mobx";
 import locateHalfImg from "assets/img/locate-half.png";
 import locateImg from "assets/img/locate.png";
 import navImg from "assets/img/nav.png";
@@ -31,6 +31,7 @@ class NavStore {
     @observable totalDistance; // 导航总距离
     @observable navTime; // 导航总距离
     @observable navRoutes; // 原始导航路径
+    @observable navRoutesLevelArr; // 路径楼层集合
     @observable navRoadType; // 导航方式 foot/car
     @observable navPriorityType; // 跨楼层方式 elevator/stairs
     @observable freeMarker; // 自由模式marker
@@ -46,6 +47,7 @@ class NavStore {
     @observable currentLocation; // 当前定位r
     @observable rePlanStatus; // 重新规划路劲
     @observable locType; // 定位类型
+    @observable simPauseStatus; // 暂停模拟导航
 
     constructor() {
         this.mapNavParams = {
@@ -65,6 +67,7 @@ class NavStore {
         this.speed = 1.5; // 每秒1.5米
         this.navTime = 0; // 导航时间
         this.navRoutes = null;
+        this.navRoutesLevelArr = null;
         this.navRoadType = "foot";
         this.navPriorityType = "elevator";
         this.freeMarker = null;
@@ -79,6 +82,7 @@ class NavStore {
         this.currentLocation = null;
         this.rePlanStatus = false;
         this.locType = null;
+        this.simPauseStatus = false;
     }
 
     // 更新当前定位点
@@ -94,6 +98,11 @@ class NavStore {
     @action updateRePlanStatus = (v) => {
         this.rePlanStatus = v;
     };
+
+    // 更新模拟暂停状态
+    @action updateSimPauseStatus(v) {
+        this.simPauseStatus = v;
+    }
 
     // 更新导航模式
     @action changeNavMode = (mode) => {
@@ -117,6 +126,17 @@ class NavStore {
     // 更新原始路径
     @action getNavRoutes(v) {
         this.navRoutes = v;
+    }
+
+    // 更新数据楼层
+    @action updateNavRouteLevel(v, i) {
+        if (v) {
+            v = v.map((e) => {
+                const status = e == i || e.level == i ? true : false;
+                return {level: (e.level || e.level == 0) ? e.level : e, status};
+            });
+        }
+        this.navRoutesLevelArr = v;
     }
 
     @action changeRoadType(v) {
@@ -305,5 +325,10 @@ class NavStore {
 
 
 const navStore = new NavStore();
+// autorun(() => {
+//     if (navStore.navRoutes) {
+//     }
+// });
+
 
 export {navStore};

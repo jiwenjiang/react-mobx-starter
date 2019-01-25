@@ -2,18 +2,17 @@
  * Created by j_bleach on 2018/10/16 0016.
  */
 
-import wx from "weixin-js-sdk";
-
 const INTERVAL = 500; // 服务器时间间隔
 const POINTLENTH = 3; // 质心点计算数组长度
-const CHANGE_GPS = 5000; // 搜索不到蓝牙5000ms后，切换gps
+const ANDROID_CHANGE_GPS = 5000; // android搜索不到蓝牙5000ms后，切换gps
+const IOS_CHANGE_GPS = 5000; // ios搜索不到蓝牙3000ms后，切换gps
 
 const blueToothFn = (target) => {
-    // const signUrl = `https://gisgd.scu.edu.cn/wxConfig/weixin/v1/jsSdkSign`;
-    const signUrl = `https://xz.parkbobo.com/wxConfig/weixin/v1/jsSdkSign`;
+    const signUrl = `https://gisgd.scu.edu.cn/wxConfig/weixin/v1/jsSdkSign`;
+    // const signUrl = `https://xz.parkbobo.com/wxConfig/weixin/v1/jsSdkSign`;
     // const signUrl = `https://gisapp.swun.edu.cn/wxConfig/weixin/v1/jsSdkSign`;
-    const getIbeconUrl = `https://map.parkbobo.com/location/weka/v1/classify`;// map
-    // const getIbeconUrl = `https://gismp.scu.edu.cn/location/weka/v1/classify`;// map
+    // const getIbeconUrl = `https://map.parkbobo.com/location/weka/v1/classify`;// map
+    const getIbeconUrl = `https://gismp.scu.edu.cn/location/weka/v1/classify`;// map
     // const getIbeconUrl = `https://gl.swun.edu.cn/location/weka/v1/classify`;
 
     // const deviceUrl = `https://xz.parkbobo.com/location/device/v1/getAll`;
@@ -36,7 +35,7 @@ const blueToothFn = (target) => {
             // const deviceBody = `mapId=${this.mapId}&isElevator=1`;
             // 注销页面，停止微信
             window.onunload = () => {
-                wx.stopSearchBeacons();
+                this.wx.stopSearchBeacons();
             };
             // 请求签名
             fetch(signUrl, {
@@ -70,7 +69,7 @@ const blueToothFn = (target) => {
 
         // 配置微信
         configWx(sign) {
-            wx.config({
+            this.wx.config({
                 debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
                 appId: sign.appid, // 必填，公众号的唯一标识
                 timestamp: sign.timestamp, // 必填，生成签名的时间戳
@@ -84,13 +83,13 @@ const blueToothFn = (target) => {
                     "openBluetoothAdapter", "onBeaconServiceChange", "onWXDeviceBluetoothStateChange",
                     "getBluetoothAdapterState", "onBluetoothAdapterStateChange"] // 必填，需要使用的JS接口列表
             });
-            wx.error((res) => {
+            this.wx.error((res) => {
                 this.initError(res);
             });
         }
 
         stopIbeaconSearch() {
-            wx.stopSearchBeacons({
+            this.wx.stopSearchBeacons({
                 complete: () => {
                     console.log("停止蓝牙");
                     this.stopLocationComplete({code: 0, msg: "蓝牙停止"});
@@ -105,7 +104,7 @@ const blueToothFn = (target) => {
          */
         startIbeaconSearch() {
             console.log("进入蓝牙");
-            wx.ready(() => {
+            this.wx.ready(() => {
                 let time = 0;
                 let flag = false;
                 let timeId = void 0;
@@ -113,7 +112,7 @@ const blueToothFn = (target) => {
                     if (Date.now() - time >= 300) {
                         time = Date.now();
                         if (false === flag) {
-                            wx.stopSearchBeacons({
+                            this.wx.stopSearchBeacons({
                                 complete: () => {
                                     console.log("启动蓝牙搜索");
                                     ibeaconArr = [];
@@ -128,7 +127,7 @@ const blueToothFn = (target) => {
                         timeId && clearTimeout(timeId);
                         timeId = setTimeout(() => {
                             flag = false;
-                            wx.stopSearchBeacons();
+                            this.wx.stopSearchBeacons();
                         }, 500);
                     }
                 });
@@ -147,13 +146,13 @@ const blueToothFn = (target) => {
          * @Description: 搜索蓝牙点
          */
         searchIbeacon() {
-            wx.startSearchBeacons({
+            this.wx.startSearchBeacons({
                 ticket: "",
                 complete: (t) => {
                     this.startSuccess({code: 0, msg: `室内定位启动，${t.errMsg}`});
                     let n = t.errMsg;
                     if ("startSearchBeacons:already started" === n) {
-                        return wx.stopSearchBeacons(() => {
+                        return this.wx.stopSearchBeacons(() => {
                             this.searchIbeacon();
                         });
                     }
@@ -176,7 +175,7 @@ const blueToothFn = (target) => {
          * @Description: 监听蓝牙点
          */
         onSearchBeacons() {
-            wx.onSearchBeacons({ //监听iBeacon设备更新事件
+            this.wx.onSearchBeacons({ //监听iBeacon设备更新事件
                 complete: (data) => {
                     this.getIbeaconPoints(data);
                 }
@@ -190,18 +189,20 @@ const blueToothFn = (target) => {
          */
         onSearchBeaconsWithGps() {
             console.log("进入蓝牙定时搜索");
-            wx.onSearchBeacons({ //监听iBeacon设备更新事件
+            this.wx.onSearchBeacons({ //监听iBeacon设备更新事件
                 complete: (data) => {
-                    data.beacons = data.beacons && data.beacons.filter(v => (v.rssi != 0 && v.rssi > -90));
+                    const rssi = this.gpsCoords && this.gpsCoords.accuracy <= 25 ? -80 : -90;
+                    // console.log("gps精度,rssi", this.gpsCoords.accuracy, rssi);
+                    data.beacons = data.beacons && data.beacons.filter(v => (v.rssi != 0 && v.rssi > rssi));
                     if (data.beacons && data.beacons.length > 0) {
+                        console.log("搜索到有效蓝牙", rssi);
                         this.currentLocation = "ibeacon";
                         this.getIbeaconPoints(data);
                         gpsTimeId && clearTimeout(gpsTimeId);
                         gpsTimeId = setTimeout(() => {
-                            console.log("定时器执行");
                             ibeaconArr = [];
                             this.currentLocation = "gps";
-                        }, CHANGE_GPS);
+                        }, this.isIOS ? IOS_CHANGE_GPS : ANDROID_CHANGE_GPS);
                     }
                 },
                 fail: (err) => {
@@ -236,6 +237,7 @@ const blueToothFn = (target) => {
                 }).then((response) => response.json()).then((data) => {
                     if (data.code == 0) {
                         const res = data.data;
+                        // console.log(res);
                         const Polygon = this.setPolygonLocation(res);
                         const ibeaconObj = {
                             isOutdoor: 0,

@@ -35,6 +35,8 @@ class CommonStore {
     @observable recordPanelStatus; // 录音面板
     @observable recordType; // 录音类型，map地图上的搜索，plate车牌,berth车位，
     @observable noLogo; // 是否显示logo(false)
+    @observable routeErrorStatus; // 路径规划失败
+    @observable allowAudioPlay; // 是否允许语音播放(true)
 
     constructor() {
         this.loadingStatus = false;
@@ -52,6 +54,8 @@ class CommonStore {
         this.recordPanelStatus = false;
         this.recordType = "";
         this.noLogo = false;
+        this.routeErrorStatus = false;
+        this.allowAudioPlay = true;
     }
 
     @action
@@ -67,7 +71,15 @@ class CommonStore {
         }
     }
 
+    @action
+    changeAllowAudio(v) {
+        this.allowAudioPlay = v;
+    }
+
     baiduVoiceUrl(text) {
+        if (!this.allowAudioPlay) {
+            return false;
+        }
         const baiduVoice = `http://tsn.baidu.com/text2audio?lan=zh&ctp=1&cuid=abcdxxx&tok=${this.baiduVoice}&tex=${text}`;
         const audio = document.getElementById("wb-audio");
         let audioSrc = {
@@ -92,6 +104,11 @@ class CommonStore {
     @action
     changeLoadingStatus(status) {
         this.loadingStatus = status;
+    }
+
+    @action
+    changeRouteError(v) {
+        this.routeErrorStatus = v;
     }
 
     @action

@@ -20,9 +20,15 @@ const realNavigationFn = (target) => {
 
         onRealNavStep() {
             const {
-                handleRouteFloor, handleRouteFloorBezier,
+                handleRouteFloor, handleRouteFloorBezier, levelCollects,
                 routeLength, handleRouteFloorBezierAni, crossEndLevel, handleRouteFloorShadow
             } = this.handleData;
+            if (this.loc.currentPosition.locType == "ibeacon"
+                && !levelCollects.includes(Number(this.loc.currentPosition.level))) {
+                this.stopNav();
+                this.navComplete({...this.loc.currentPosition, isYaw: true});
+                return false;
+            }
             /*线路分段计算*/
             if (this.floorRecorder[this.currentPoint.level] !== undefined) {
                 if (this.floorRecorder.lastFloor != this.currentPoint.level) {
@@ -41,10 +47,10 @@ const realNavigationFn = (target) => {
                 level: Number(this.currentPoint.level),
                 index: this.floorRecorder[this.currentPoint.level]
             });
-            const routeFloor = handleRouteFloor[currentFloor];
-            const routeFloorBezier = handleRouteFloorBezier[currentFloor];
+            const routeFloor = handleRouteFloor[currentFloor]; // 当前线路
+            const routeFloorBezier = handleRouteFloorBezier[currentFloor]; // 当前贝塞尔线路
             const routeFloorBezierAni = handleRouteFloorBezierAni[currentFloor];
-            const routeFloorBezierShadow = handleRouteFloorShadow[currentFloor];
+            const routeFloorBezierShadow = handleRouteFloorShadow[currentFloor]; // 当前贝塞尔投影线路
             let bezierShadowPoint = null;
             let currentLineIndex = 0;
 
@@ -54,10 +60,14 @@ const realNavigationFn = (target) => {
             let turnType = null;
 
             const distanceArr = [];
-            for (let v of routeFloor) {
+            routeFloor.forEach(v => {
                 let line = lineString(v.LineCoordinates);
                 distanceArr.push(pointToLineDistance(geoPoint, line));
-            }
+            });
+            // for (let v of routeFloor) {
+            //     let line = lineString(v.LineCoordinates);
+            //     distanceArr.push(pointToLineDistance(geoPoint, line));
+            // }
             currentLineIndex = distanceArr.findIndex(v => v == Math.min(...distanceArr));
             this.currentRealNavLine = lineString(routeFloor[currentLineIndex].LineCoordinates);
 
@@ -72,13 +82,13 @@ const realNavigationFn = (target) => {
             /*历史动画*/
             let currentDistance = distance(geoPoint, shadowPoint) * 1000;
             /*偏航*/
-            if (this.currentPoint.locType == "gps" && this.currentPoint.accuracy <= 30 && currentDistance > 30) {
+            if (this.loc.currentPosition.locType == "gps" && this.currentPoint.accuracy <= 30 && currentDistance > 30) {
                 console.log("gps 偏航", currentDistance);
                 this.stopNav();
                 this.navComplete({...this.currentPoint, isYaw: true});
                 return false;
             }
-            if (this.currentPoint.locType == "ibeacon" && currentDistance > 20) {
+            if (this.loc.currentPosition.locType == "ibeacon" && currentDistance > 10) {
                 console.log("ibeacon 偏航", currentDistance);
                 this.stopNav();
                 this.navComplete({...this.currentPoint, isYaw: true});
@@ -104,7 +114,6 @@ const realNavigationFn = (target) => {
             // }
             if (this.loc.currentPosition.level == routeFloor[currentLineIndex].startFloor
                 && crossEndLevel != null && this.loc.currentPosition.level != crossEndLevel) {
-                console.log("crossEndLevel", crossEndLevel);
                 const coordinates = routeFloorBezier.geometry.coordinates;
                 const endPoint = point(coordinates[coordinates.length - 1]);
                 const elDistance = ~~(distance(shadowPoint, endPoint) * 1000);
@@ -167,36 +176,50 @@ const realNavigationFn = (target) => {
             const currentBearing = bearingToAzimuth(bearing(startPoint, endPoint)); // 当前方向
 
             // 当前点替换
-            const replaceLimit = this.loc.currentLocation == "gps" ? 8 : 5;
-            if (currentStartDistance > replaceLimit && currentEndDistance > replaceLimit) {
-                this.currentPoint = {
-                    ...this.currentPoint,
-                    longitude: shadowPoint.geometry.coordinates[0],
-                    latitude: shadowPoint.geometry.coordinates[1]
-                };
-            }
-            /*重新计算投影点*/
-            let currentPt = [this.currentPoint.longitude, this.currentPoint.latitude]; // 当前点
-            const currentEndShadow = routeFloorBezierShadow[currentLineIndex];
-            const currentStartShadow = currentLineIndex > 0
-                ? routeFloorBezierShadow[currentLineIndex - 1]
-                : null;
-            let shadowLinePoint = null;
+            // const replaceLimit = this.loc.currentLocation == "gps" ? 8 : 5;
+            // if (currentStartDistance > replaceLimit && currentEndDistance > replaceLimit) {
+            //     this.stepLocation = {
+            //         ...this.stepLocation,
+            //         longitude: shadowPoint.geometry.coordinates[0],
+            //         latitude: shadowPoint.geometry.coordinates[1]
+            //     };
+            // }
 
-            if (nextCrossType) {
-                if (currentLineIndex == 0) {
-                    if (currentEndDistance < replaceLimit) {
-                        shadowLinePoint = nearestPointOnLine(currentEndShadow, point(currentPt));
-                    }
-                } else {
-                    if (currentStartDistance < replaceLimit) {
-                        shadowLinePoint = nearestPointOnLine(currentStartShadow, point(currentPt));
-                    }
-                    if (currentEndDistance < replaceLimit) {
-                        shadowLinePoint = nearestPointOnLine(currentEndShadow, point(currentPt));
-                    }
-                }
-            }
+            /*计算是否位于室内最后一段及室外 禁止室内纠偏*/
+            // if (routeFloor[currentLineIndex].indoor == false
+            //     || (nextCrossType && routeFloor[currentLineIndex + 1].indoor == false) && currentEndDistance <= 3) {
+            //     if (routeFloor[currentLineIndex + 1]) {
+            //         console.log("current,next", routeFloor[currentLineIndex].indoor, routeFloor[currentLineIndex + 1].indoor);
+            //     }
+            //     console.log("currentEndDistance", currentEndDistance);
+            //     this.stopCorrectIndoor = true;
+            // } else {
+            //     this.stopCorrectIndoor = false;
+            // }
+            /*计算是否位于室内最后一段及室外*/
+
+            /*重新计算投影点*/
+            // let currentPt = [this.currentPoint.longitude, this.currentPoint.latitude]; // 当前点
+            // const currentEndShadow = routeFloorBezierShadow[currentLineIndex];
+            // const currentStartShadow = currentLineIndex > 0
+            //     ? routeFloorBezierShadow[currentLineIndex - 1]
+            //     : null;
+            // let shadowLinePoint = null;
+            //
+            // if (nextCrossType) {
+            //     if (currentLineIndex == 0) {
+            //         if (currentEndDistance < replaceLimit) {
+            //             shadowLinePoint = nearestPointOnLine(currentEndShadow, point(currentPt));
+            //         }
+            //     } else {
+            //         if (currentStartDistance < replaceLimit) {
+            //             shadowLinePoint = nearestPointOnLine(currentStartShadow, point(currentPt));
+            //         }
+            //         if (currentEndDistance < replaceLimit) {
+            //             shadowLinePoint = nearestPointOnLine(currentEndShadow, point(currentPt));
+            //         }
+            //     }
+            // }
             /*重新计算投影点*/
 
 
@@ -204,9 +227,13 @@ const realNavigationFn = (target) => {
             let leftDistance = 0;
             if (currentLineIndex == (routeFloor.length - 1)) {
                 leftDistance = currentEndDistance;
-                if (this.currentPoint.level != this.navEndLevel && handleRouteFloor[this.navEndLevel]) {
-                    for (let i = 0; i < handleRouteFloor[this.navEndLevel].length; i++) {
-                        leftDistance += handleRouteFloor[this.navEndLevel][i];
+                const endLevel = JSON.stringify({
+                    level: Number(this.navEndLevel),
+                    index: 0
+                });
+                if (this.currentPoint.level != this.navEndLevel && handleRouteFloor[endLevel]) {
+                    for (let i = 0; i < handleRouteFloor[endLevel].length; i++) {
+                        leftDistance += handleRouteFloor[endLevel][i].distance;
                     }
                 }
             } else {
@@ -214,9 +241,13 @@ const realNavigationFn = (target) => {
                     leftDistance += routeFloor[i].distance;
                 }
                 leftDistance = leftDistance + currentEndDistance;
-                if (this.currentPoint.level != this.navEndLevel && handleRouteFloor[this.navEndLevel]) {
-                    for (let i = 0; i < handleRouteFloor[this.navEndLevel].length; i++) {
-                        leftDistance += handleRouteFloor[this.navEndLevel][i].distance;
+                const endLevel = JSON.stringify({
+                    level: Number(this.navEndLevel),
+                    index: 0
+                });
+                if (this.currentPoint.level != this.navEndLevel && handleRouteFloor[endLevel]) {
+                    for (let i = 0; i < handleRouteFloor[endLevel].length; i++) {
+                        leftDistance += handleRouteFloor[endLevel][i].distance;
                     }
                 }
             }
@@ -260,12 +291,12 @@ const realNavigationFn = (target) => {
                                 if (nextCrossType == 19) {
                                     voice = `${turnTypeText}`;
                                 }
-                                // else if (nextCrossType == 10 || nextCrossType == 12) {
-                                //     const startFloor = Number(routeFloor[currentLineIndex + 1].startFloor);
-                                //     const endFloor = Number(routeFloor[currentLineIndex + 1].endFloor);
-                                //     const type = startFloor > endFloor ? "下至" : "上至";
-                                //     voice = `请${type}${endFloor >= 0 ? endFloor + 1 : endFloor}楼`;
-                                // }
+                                else if (nextCrossType == 10 || nextCrossType == 12) {
+                                    const startFloor = Number(routeFloor[currentLineIndex + 1].startFloor);
+                                    const endFloor = Number(routeFloor[currentLineIndex + 1].endFloor);
+                                    const type = startFloor > endFloor ? "下至" : "上至";
+                                    voice = `请${type}${endFloor >= 0 ? endFloor + 1 : endFloor}楼`;
+                                }
                                 voiceRecorder[`${currentLineIndex}3`] = true;
                             }
                         }
@@ -283,7 +314,7 @@ const realNavigationFn = (target) => {
                         if (currentEndDistance < 2) {
                             console.log("完成导航");
                             this.currentMode = "free";
-                            this.startCorrectFreeLocate(this.loc);
+                            // this.startCorrectFreeLocate(this.loc);
                             this.navComplete(this.currentPoint);
                         }
                     }
@@ -296,7 +327,7 @@ const realNavigationFn = (target) => {
                 turnType,
                 currentBearing,
                 leftDistance,
-                shadowLinePoint
+                // shadowLinePoint
             };
         }
     };

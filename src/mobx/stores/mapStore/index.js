@@ -34,6 +34,8 @@ class MapStore {
     @observable endRoutePoint; // 结束路径坐标点
     @observable confirmEndMarker; // 确定终点标记
     @observable bboxPolygon; // 确定终点标记
+    @observable crossMarkerSets; // 跨楼层标记集合
+    @observable crossMarker; // 跨楼层标记
 
     constructor() {
         this.mapId = 2;
@@ -50,6 +52,8 @@ class MapStore {
         this.endRoutePoint = null;
         this.confirmEndMarker = false;
         this.bboxPolygon = null;
+        this.crossMarkerSets = {};
+        this.crossMarker = null;
     }
 
     // 更新mapId
@@ -119,6 +123,8 @@ class MapStore {
                     });
                     this.routeObj.clearLocation();
                     document.getElementById("map-goToShare").classList.remove("dom-transformY-30");
+                    this.operateDom("remove", "dom-transformY");
+                    this.operateDom("add", "dom-transformY-route");
                 },
                 routeError: () => {
                     console.error("路径规划失败");
@@ -126,6 +132,10 @@ class MapStore {
                     this.endRoutePoint = null;
                     runInAction(() => {
                         commonStore.changeLoadingStatus(false);
+                        commonStore.changeRouteError(true);
+                        setTimeout(() => {
+                            commonStore.changeRouteError(false);
+                        }, 1500);
                     });
                     this.routeObj.clearLocation();
                 },
@@ -164,7 +174,6 @@ class MapStore {
                     // console.log(routeList);
                     const handleFloor = JSON.stringify({level: Number(floor), index: 0});
                     const routeIndoor = floorStore.routeIndoor[handleFloor].features.filter(v => v.geometry.type !== "Point");
-                    // console.log(toJS(floorStore.routeIndoor));
                     floorStore.routeIndoorBezier[handleFloor] = bezierV2(routeIndoor, this.mapObj);
                     // console.log("当前bezier", toJS(floorStore.routeIndoorBezier));
                     this.mapObj.addSource("building-route", {
@@ -249,12 +258,28 @@ class MapStore {
      */
     routeHandle(paths) {
         floorStore.routeIndoor = {};
-        let countKey = {};
+        let countKey = {}; // 楼层计数
         let totalDistance = 0;
         let lastFloor = null;
-
+        let levelCollects = []; // 导航线路数组集合
+        const initLevel = paths[0].startFloor;
         paths.forEach(v => {
             totalDistance += v.distance;
+            if (levelCollects.indexOf(v.startFloor) == -1) {
+                levelCollects.push(v.startFloor);
+            }
+            if (v.crossType == 10 || v.crossType == 12) {
+                const direct = v.startFloor > v.endFloor ? "down" : "up";
+                const type = v.crossType == 10 ? "stairs" : "elevator";
+                const arr = v.geometry.coordinates[0];
+                const point = typeof arr[0] == "object" ? arr[0] : arr;
+                this.crossMarkerSets[v.startFloor] = {
+                    direct,
+                    type,
+                    point,
+                    destination: v.endFloor
+                };
+            }
             if (countKey[v.startFloor] !== undefined) {
                 if (lastFloor != v.startFloor) {
                     lastFloor = v.startFloor;
@@ -265,7 +290,6 @@ class MapStore {
                 countKey[v.startFloor] = 0;
             }
 
-
             const routeKey = JSON.stringify({level: Number(v.startFloor), index: countKey[v.startFloor]});
             let currentRoute = floorStore.routeIndoor[routeKey];
             if (currentRoute) {
@@ -274,7 +298,6 @@ class MapStore {
                     "geometry": v.geometry,
                     "distance": v.distance
                 });
-
             } else {
                 floorStore.routeIndoor[routeKey] = {
                     "type": "FeatureCollection",
@@ -289,13 +312,14 @@ class MapStore {
         });
         navStore.recordDistance(totalDistance);
         navStore.getNavRoutes(paths);
+        navStore.updateNavRouteLevel(levelCollects.sort(), initLevel);
     }
 
     // 地图点击处理
     @action
     handleMarker(e) {
         let feature = this.mapObj.queryRenderedFeatures(e.point);
-        if (feature && feature[0] && feature[0].geometry.type == "Polygon"
+        if (feature && feature[0] && (feature[0].geometry.type == "Polygon" || feature[0].layer.type == "symbol")
             && "layer" in feature[0] && "properties" in feature[0]) {
             let bboxPoint = bbox(feature[0].geometry);
             let bboxSlice = [bboxPoint.slice(0, 2), bboxPoint.slice(2, 4)];
@@ -446,6 +470,15 @@ class MapStore {
         // }
     }
 
+    setCrossMarker(str, pt) {
+        // console.log(23, pt);
+        let el = document.createElement("div");
+        el.className = "map-crossMarker";
+        let text = document.createTextNode(str);
+        el.appendChild(text);
+        this.crossMarker = new this.mapGL.Marker(el).setLngLat(pt).addTo(this.mapObj);
+    }
+
     /**
      * @author j_bleach
      * @date 2018-10-11
@@ -475,15 +508,19 @@ class MapStore {
         }
     }
 
+    operateDom(type, name) {
+        const classList = ["map-operators-location-box", "map-logo",
+            "map-operators-scale", "map-operators-zoom-box", "map-operators-floor"];
+        for (let v of classList) {
+            document.getElementsByClassName(v) && document.getElementsByClassName(v)[0]
+            && document.getElementsByClassName(v)[0].classList[type](name);
+        }
+    }
+
     checkNodePosition() {
         if (!this.confirmEndMarker) {
             const type = this.endMarker ? "add" : "remove";
-            const classList = ["map-operators-location-box", "map-logo",
-                "map-operators-scale", "map-operators-zoom-box", "map-operators-floor"];
-            for (let v of classList) {
-                document.getElementsByClassName(v) && document.getElementsByClassName(v)[0]
-                && document.getElementsByClassName(v)[0].classList[type]("dom-transformY");
-            }
+            this.operateDom(type, "dom-transformY");
             document.getElementById("map-goToShare")
             && document.getElementById("map-goToShare").classList[type]("dom-transformY-30");
         }
@@ -497,6 +534,7 @@ class MapStore {
             this.endMarker = null;
             this.confirmEndMarkerFn(false);
             this.checkNodePosition();
+            this.operateDom("remove", "dom-transformY-route");
         };
         const startMarkerPoint = () => {
             this.startMarkerPoint = null;

@@ -31,15 +31,18 @@ class Loc {
              timeout,
              locType,
              mapId,
+             wxSDK,
              complete = () => {
              },
              error = () => {
              }
          }) {
         console.log("开始定位");
+        this.isIOS = /(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent) ? true : false;
         this.mapId = mapId;
         this.timeout = timeout; // 超时时间
         this.locType = locType; // 定位类型
+        this.wx = wxSDK;
         this.initComplete = complete; // 初始化成功函数
         this.initError = error; // 初始化失败函数
         // locType && locType.includes("gps") && this.checkGPS();

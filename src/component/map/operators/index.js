@@ -13,6 +13,7 @@ import Floor from "./floor";
 import SearchInput from "component/search/searchInput";
 import "./index.less";
 import LocationLoading from "component/common/loading";
+import RouteError from "component/common/routeError";
 import wx from "weixin-js-sdk";
 
 
@@ -21,7 +22,7 @@ import wx from "weixin-js-sdk";
 class operatorsComponent extends Component {
 
     render() {
-        const {projectType, noLogo} = this.props.commonStore;
+        const {projectType, noLogo, routeErrorStatus} = this.props.commonStore;
         const {mapObj, mapFloor = 1} = this.props.mapStore;
         const searchProps = {
             extendStyle: "extendSearchStyle",
@@ -64,6 +65,7 @@ class operatorsComponent extends Component {
                 <div className="map-operators-search">
                     <SearchInput {...searchProps}></SearchInput>
                 </div>
+                {routeErrorStatus && RouteError("路径规划失败")}
                 {this.props.commonStore.LocationLoading ? <LocationLoading text={`定位中...`}/> : <div></div>}
             </div>
         );

@@ -1,7 +1,6 @@
 /**
  * Created by j_bleach on 2018/11/1 0001.
  */
-/*eslint-disable*/
 import React, {Component} from "react";
 import {observer, inject} from "mobx-react";
 import iconSrc from "assets/img/navEnd.png";
@@ -18,7 +17,7 @@ class navComplete extends Component {
         tarArr: [
             {
                 text: "体验流畅",
-                active: false
+                active: true
             },
             {
                 text: "提示贴心",
@@ -26,7 +25,7 @@ class navComplete extends Component {
             },
             {
                 text: "定位不准",
-                active: true
+                active: false
             },
             {
                 text: "信息有误",
@@ -61,7 +60,6 @@ class navComplete extends Component {
     }
 
     closeModal() {
-        this.props.mapStore.mapObj.resetNorth();
         this.props.navStore.changeEvaluateStatus(false);
     }
 
