@@ -445,7 +445,7 @@ const correctLocateFn = (target) => {
                 let denominator = Math.sqrt(Math.pow(M, 2)
                     + Math.pow(N, 2) + X * X + Y * Y);
                 let angle = Math.acos(molecule / denominator) / Math.PI * 180;
-                console.log("angle", angle);
+                // console.log("angle", angle);
                 if (angle < 100 || angle > 270) {
                     const currentPt = this.loc.currentPosition;
                     let ibeaconPoint = [currentPt.longitude, currentPt.latitude]; // 蓝牙点
@@ -512,7 +512,8 @@ const correctLocateFn = (target) => {
                     console.log("定位楼层，当前点楼层", this.loc.currentPosition.level, this.currentPoint.level);
                     if (this.loc.currentPosition.level != this.navEndLevel) {
                         this.countNum++;
-                        if (this.countNum >= 5) {
+                        console.log("countNum", this.countNum)
+                        if (this.countNum >= 3) {
                             this.countNum = 0;
                             this.currentPoint = {...this.currentPoint, level: this.loc.currentPosition.level};
                         }

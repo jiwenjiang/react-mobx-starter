@@ -25,9 +25,12 @@ const realNavigationFn = (target) => {
             } = this.handleData;
             if (this.loc.currentPosition.locType == "ibeacon"
                 && !levelCollects.includes(Number(this.loc.currentPosition.level))) {
-                this.stopNav();
-                this.navComplete({...this.loc.currentPosition, isYaw: true});
-                return false;
+                this.diffLevelCount++;
+                if (this.diffLevelCount > 3) {
+                    this.stopNav();
+                    this.navComplete({...this.loc.currentPosition, isYaw: true});
+                    return false;
+                }
             }
             /*线路分段计算*/
             if (this.floorRecorder[this.currentPoint.level] !== undefined) {
@@ -134,7 +137,7 @@ const realNavigationFn = (target) => {
             }
             /*进入电梯、扶梯判断*/
 
-            const navResult = this.realNavLogic(shadowPoint, currentLineIndex, routeFloor, handleRouteFloor, routeFloorBezierShadow);
+            const navResult = this.realNavLogic(shadowPoint, currentLineIndex, routeFloor, handleRouteFloor, routeFloorBezierShadow, currentFloor);
 
             if (!this.inElevator && navResult.shadowLinePoint) {
                 bezierShadowPoint = nearestPointOnLine(routeFloorBezier, navResult.shadowLinePoint);
@@ -159,7 +162,7 @@ const realNavigationFn = (target) => {
         }
 
         // 导航逻辑
-        realNavLogic(shadowPoint, currentLineIndex, routeFloor, handleRouteFloor, routeFloorBezierShadow) {
+        realNavLogic(shadowPoint, currentLineIndex, routeFloor, handleRouteFloor, routeFloorBezierShadow, targetFloor) {
             let voiceRecorder = this.voiceRecorder;
             const currentFloor = routeFloor[currentLineIndex].startFloor; // 当前楼层
             const currentLine = routeFloor[currentLineIndex].LineCoordinates; // 当前路径
@@ -302,7 +305,8 @@ const realNavigationFn = (target) => {
                         }
                     }
                 } else {
-                    if (this.currentPoint.level == this.navEndLevel && !this.inElevator) {
+                    console.log("target", targetFloor)
+                    if (targetFloor == this.navEndLevelString && !this.inElevator) {
                         if (currentStartDistance >= 1) {
                             turnType = 1;
                             text = `前方${currentEndDistance}米到达终点`;
@@ -326,7 +330,7 @@ const realNavigationFn = (target) => {
                 currentFloor,
                 turnType,
                 currentBearing,
-                leftDistance,
+                leftDistance
                 // shadowLinePoint
             };
         }

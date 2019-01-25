@@ -37,21 +37,17 @@ class Nav {
         this.initCompass();
     }
 
-    compass(
-        {
-            complete = () => {
-            }
-        }
-    ) {
+    compass({
+                complete = () => {
+                }
+            }) {
         this.onCompass = complete;
     }
 
-    startFree(
-        {
-            complete = () => {
-            }
-        }
-    ) {
+    startFree({
+                  complete = () => {
+                  }
+              }) {
         if (this.loc.currentPosition) {
             // this.startCorrectFreeLocate(this.loc);
             this.startWeightsPointCalc();
@@ -59,19 +55,17 @@ class Nav {
         this.onFreeStep = complete;
     }
 
-    startSim(
-        {
-            routeData = [],
-            speed = 1,
-            map,
-            onSimNav = () => {
-            },
-            complete = () => {
-            },
-            error = () => {
-            }
-        }
-    ) {
+    startSim({
+                 routeData = [],
+                 speed = 1,
+                 map,
+                 onSimNav = () => {
+                 },
+                 complete = () => {
+                 },
+                 error = () => {
+                 }
+             }) {
         this.onSimStep = onSimNav;
         this.simComplete = complete;
         this.handleData = preHandleSimData(routeData, map, speed);
@@ -98,18 +92,16 @@ class Nav {
         }
     }
 
-    startNav(
-        {
-            routeData = [],
-            map,
-            onNav = () => {
-            },
-            complete = () => {
-            },
-            error = () => {
-            }
-        }
-    ) {
+    startNav({
+                 routeData = [],
+                 map,
+                 onNav = () => {
+                 },
+                 complete = () => {
+                 },
+                 error = () => {
+                 }
+             }) {
         this.voiceRecorder = {};
         this.floorRecorder = {
             lastFloor: null // 上一条线路
@@ -118,9 +110,19 @@ class Nav {
         this.navComplete = complete;
         this.mapObj = map;
         this.handleData = preHandleRealData(routeData, map);
+
         this.navStartLevel = routeData[0].startFloor;
         this.navEndLevel = routeData[routeData.length - 1].endFloor;
+        let navEndLevelArr = []
+        Object.keys(this.handleData.handleRouteFloor).forEach(v => {
+            if (v.includes(`"level":${this.navEndLevel}`)) {
+                navEndLevelArr.push(v)
+            }
+        })
+        this.navEndLevelString = navEndLevelArr.pop();
         this.currentMode = "realNav";
+        this.diffLevelCount = 0;
+        this.countNum = 0;
         // this.correctNavFlag = false;
         // this.correctNavOutdoorFlag = false;
         // this.startCorrectNavLocate(this.loc);

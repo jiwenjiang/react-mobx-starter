@@ -195,7 +195,7 @@ const blueToothFn = (target) => {
                     // console.log("gps精度,rssi", this.gpsCoords.accuracy, rssi);
                     data.beacons = data.beacons && data.beacons.filter(v => (v.rssi != 0 && v.rssi > rssi));
                     if (data.beacons && data.beacons.length > 0) {
-                        console.log("搜索到有效蓝牙", rssi);
+                        // console.log("搜索到有效蓝牙", rssi);
                         this.currentLocation = "ibeacon";
                         this.getIbeaconPoints(data);
                         gpsTimeId && clearTimeout(gpsTimeId);
