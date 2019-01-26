@@ -106,6 +106,7 @@ class mapPage extends Component {
         }
         const map = new creeper.VectorMap("wb-map", this.props.mapStore.mapId, config.mapIp + "/");
         const route = new creeper.RouteComponent(map, this.props.mapStore.mapId, config.mapIp + "/");
+
         // 监听地图加载完成
         map.on("load", () => {
             this.props.mapStore.saveMapObj(map, creeper, route);

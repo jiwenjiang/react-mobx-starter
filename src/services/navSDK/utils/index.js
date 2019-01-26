@@ -159,6 +159,8 @@ const preHandleRealData = (route, map) => {
     let lastFloor = null;
     let crossStartLevel = null;
     let crossEndLevel = null;
+    let crossStartLevelArr = [];
+    let crossEndLevelArr = [];
     let parseTurnType = (turnType) => {
         let turnText = {
             0: "起点",
@@ -178,9 +180,11 @@ const preHandleRealData = (route, map) => {
         item.turnTypeText = parseTurnType(route[i].turnType);
         if (item.crossType == 11 || item.crossType == 13) {
             crossEndLevel = item.startFloor;
+            crossEndLevelArr.push(Number(item.startFloor));
         }
         if (item.crossType == 10 || item.crossType == 12) {
             crossStartLevel = item.startFloor;
+            crossStartLevelArr.push(Number(item.startFloor));
         }
         if (route[i]["geometry"]["type"] === "LineString") {
             for (let k = 0; k < route[i]["geometry"]["coordinates"].length; k++) {
@@ -275,9 +279,12 @@ const preHandleRealData = (route, map) => {
         handleRouteFloorBezierAni,
         handleRouteFloorShadow,
         crossStartLevel,
+        crossStartLevelArr,
         crossEndLevel,
+        crossEndLevelArr,
         countKey,
-        levelCollects
+        levelCollects,
+
     };
 };
 

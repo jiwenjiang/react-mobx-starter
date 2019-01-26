@@ -110,15 +110,16 @@ class Nav {
         this.navComplete = complete;
         this.mapObj = map;
         this.handleData = preHandleRealData(routeData, map);
+        console.log(this.handleData);
 
         this.navStartLevel = routeData[0].startFloor;
         this.navEndLevel = routeData[routeData.length - 1].endFloor;
-        let navEndLevelArr = []
+        let navEndLevelArr = [];
         Object.keys(this.handleData.handleRouteFloor).forEach(v => {
             if (v.includes(`"level":${this.navEndLevel}`)) {
-                navEndLevelArr.push(v)
+                navEndLevelArr.push(v);
             }
-        })
+        });
         this.navEndLevelString = navEndLevelArr.pop();
         this.currentMode = "realNav";
         this.diffLevelCount = 0;
