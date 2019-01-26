@@ -20,13 +20,13 @@ const realNavigationFn = (target) => {
 
         onRealNavStep() {
             let {
-                handleRouteFloor, handleRouteFloorBezier, levelCollects, crossStartLevelArr, crossEndLevelArr,
+                handleRouteFloor, handleRouteFloorBezier, levelCollects,
                 routeLength, handleRouteFloorBezierAni, crossEndLevel, handleRouteFloorShadow
             } = this.handleData;
             if (this.loc.currentPosition.locType == "ibeacon"
                 && !levelCollects.includes(Number(this.loc.currentPosition.level))) {
                 this.diffLevelCount++;
-                if (this.diffLevelCount > 3) {
+                if (this.diffLevelCount > 5) {
                     this.stopNav();
                     this.navComplete({...this.loc.currentPosition, isYaw: true});
                     return false;
@@ -85,13 +85,13 @@ const realNavigationFn = (target) => {
             /*历史动画*/
             let currentDistance = distance(geoPoint, shadowPoint) * 1000;
             /*偏航*/
-            if (this.loc.currentPosition.locType == "gps" && this.currentPoint.accuracy <= 30 && currentDistance > 30) {
+            if (this.loc.currentPosition.locType == "gps" && this.currentPoint.accuracy <= 25 && currentDistance > 30) {
                 console.log("gps 偏航", currentDistance);
                 this.stopNav();
                 this.navComplete({...this.currentPoint, isYaw: true});
                 return false;
             }
-            if (this.loc.currentPosition.locType == "ibeacon" && currentDistance > 10) {
+            if (this.loc.currentPosition.locType == "ibeacon" && currentDistance > 15) {
                 console.log("ibeacon 偏航", currentDistance);
                 this.stopNav();
                 this.navComplete({...this.currentPoint, isYaw: true});
@@ -115,20 +115,21 @@ const realNavigationFn = (target) => {
             //         this.elEndPoint = point(coordinates[coordinates.length - 1]);
             //     }
             // }
-            if (crossStartLevelArr.includes(Number(this.loc.currentPosition.level))
-                && crossEndLevelArr.length > 0 && !crossEndLevelArr.includes(Number(this.loc.currentPosition.level))) {
+            // console.log("start,end", this.crossStartLevelArr, this.crossEndLevelArr)
+            if (this.crossStartLevelArr.includes(Number(this.loc.currentPosition.level))
+                && this.crossEndLevelArr.length > 0 && !this.crossEndLevelArr.includes(Number(this.loc.currentPosition.level))) {
                 const coordinates = routeFloorBezier.geometry.coordinates;
                 const endPoint = point(coordinates[coordinates.length - 1]);
                 const elDistance = ~~(distance(shadowPoint, endPoint) * 1000);
                 if (elDistance <= 2) {
-                    crossStartLevelArr = crossStartLevelArr.filter(v => v != this.loc.currentPosition.level);
-                    console.log("crossStartLevelArr", crossStartLevelArr);
+                    this.crossStartLevelArr = this.crossStartLevelArr.filter(v => v != this.loc.currentPosition.level);
+                    console.log("crossStartLevelArr", this.crossStartLevelArr);
                     const crossType = routeFloor[currentLineIndex + 1]
                     && routeFloor[currentLineIndex + 1].crossType == 12 ? "elevator" : "stairs";
                     this.inElevator = crossType;
-                    voice = this.loc.currentPosition.level < crossEndLevelArr[0]
-                        ? `请上至${crossEndLevelArr[0] >= 0 ? Number(crossEndLevelArr[0]) + 1 : crossEndLevelArr[0]}楼`
-                        : `请下至${crossEndLevelArr[0] >= 0 ? Number(crossEndLevelArr[0]) + 1 : crossEndLevelArr[0]}楼`;
+                    voice = this.loc.currentPosition.level < this.crossEndLevelArr[0]
+                        ? `请上至${this.crossEndLevelArr[0] >= 0 ? Number(this.crossEndLevelArr[0]) + 1 : this.crossEndLevelArr[0]}楼`
+                        : `请下至${this.crossEndLevelArr[0] >= 0 ? Number(this.crossEndLevelArr[0]) + 1 : this.crossEndLevelArr[0]}楼`;
                     turnType = crossType == "elevator" ? 6 : 7;
                     const coordinates = routeFloorBezier.geometry.coordinates;
                     shadowPoint = point(coordinates[coordinates.length - 1]);

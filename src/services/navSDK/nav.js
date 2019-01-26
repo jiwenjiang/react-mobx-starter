@@ -110,10 +110,11 @@ class Nav {
         this.navComplete = complete;
         this.mapObj = map;
         this.handleData = preHandleRealData(routeData, map);
-        console.log(this.handleData);
 
         this.navStartLevel = routeData[0].startFloor;
         this.navEndLevel = routeData[routeData.length - 1].endFloor;
+        this.crossStartLevelArr = this.handleData.crossStartLevelArr;
+        this.crossEndLevelArr = this.handleData.crossEndLevelArr;
         let navEndLevelArr = [];
         Object.keys(this.handleData.handleRouteFloor).forEach(v => {
             if (v.includes(`"level":${this.navEndLevel}`)) {
@@ -124,6 +125,7 @@ class Nav {
         this.currentMode = "realNav";
         this.diffLevelCount = 0;
         this.countNum = 0;
+        this.inElevatorNum = 0;
         // this.correctNavFlag = false;
         // this.correctNavOutdoorFlag = false;
         // this.startCorrectNavLocate(this.loc);

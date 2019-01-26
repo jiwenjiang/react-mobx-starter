@@ -509,10 +509,10 @@ const correctLocateFn = (target) => {
                     || this.handleData.crossEndLevel == this.loc.currentPosition.level
                     || this.loc.currentPosition.level == this.navStartLevel)
                     && this.currentPoint.level != this.loc.currentPosition.level) {
-                    console.log("定位楼层，当前点楼层", this.loc.currentPosition.level, this.currentPoint.level);
+                    // console.log("定位楼层，当前点楼层", this.loc.currentPosition.level, this.currentPoint.level);
                     if (this.loc.currentPosition.level != this.navEndLevel) {
                         this.countNum++;
-                        console.log("countNum", this.countNum);
+                        // console.log("countNum", this.countNum);
                         if (this.countNum >= 6) {
                             this.countNum = 0;
                             this.currentPoint = {...this.currentPoint, level: this.loc.currentPosition.level};
@@ -540,19 +540,28 @@ const correctLocateFn = (target) => {
             // floor status
             if (this.inElevator) {
                 let distanceEl = 0;
-                let {crossEndLevelArr} = this.handleData;
                 if (this.elEndPoint) {
                     const currentPoint = point([this.loc.currentPosition.longitude, this.loc.currentPosition.latitude]); // 当前点
                     distanceEl = distance(currentPoint, this.elEndPoint) * 1000;
                 }
-                console.log("类型,楼层,距离", this.loc.currentPosition.locType, this.loc.currentPosition.level, distanceEl);
+                // console.log("类型,楼层,距离", this.loc.currentPosition.locType, this.loc.currentPosition.level, distanceEl);
                 if (this.loc.currentPosition.locType == "ibeacon" &&
-                    (crossEndLevelArr.includes(Number(this.loc.currentPosition.level)) || distanceEl > 15)) {
-                    this.inElevator = false;
-                    crossEndLevelArr = crossEndLevelArr.filter(v => v != this.loc.currentPosition.level);
-                    console.log("crossEndLevelArr", crossEndLevelArr);
+                    (this.crossEndLevelArr.includes(Number(this.loc.currentPosition.level)) || distanceEl > 15)) {
+                    console.log("当前结束", this.loc.currentPosition.level);
+                    this.inElevatorNum++;
+                    if (this.inElevatorNum > 3) {
+                        this.inElevator = false;
+                        this.crossEndLevelArr = this.crossEndLevelArr.filter(v => v != this.loc.currentPosition.level);
+                        this.currentPoint = {...this.currentPoint, level: this.loc.currentPosition.level};
+                        console.log("crossEndLevelArr", this.crossEndLevelArr);
+                        this.chooseNavMode();
+                    } else {
+                        return false
+                    }
+                } else {
+                    this.inElevatorNum = 0
+                    return false;
                 }
-                return false;
             }
             this.floorJudge();
 
