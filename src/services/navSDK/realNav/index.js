@@ -19,8 +19,8 @@ const realNavigationFn = (target) => {
         }
 
         onRealNavStep() {
-            const {
-                handleRouteFloor, handleRouteFloorBezier, levelCollects,
+            let {
+                handleRouteFloor, handleRouteFloorBezier, levelCollects, crossStartLevelArr, crossEndLevelArr,
                 routeLength, handleRouteFloorBezierAni, crossEndLevel, handleRouteFloorShadow
             } = this.handleData;
             if (this.loc.currentPosition.locType == "ibeacon"
@@ -115,19 +115,20 @@ const realNavigationFn = (target) => {
             //         this.elEndPoint = point(coordinates[coordinates.length - 1]);
             //     }
             // }
-            if (this.loc.currentPosition.level == routeFloor[currentLineIndex].startFloor
-                && crossEndLevel != null && this.loc.currentPosition.level != crossEndLevel) {
+            if (crossStartLevelArr.includes(Number(this.loc.currentPosition.level))
+                && crossEndLevelArr.length > 0 && !crossEndLevelArr.includes(Number(this.loc.currentPosition.level))) {
                 const coordinates = routeFloorBezier.geometry.coordinates;
                 const endPoint = point(coordinates[coordinates.length - 1]);
                 const elDistance = ~~(distance(shadowPoint, endPoint) * 1000);
                 if (elDistance <= 2) {
-                    console.log("进入跨楼判断");
+                    crossStartLevelArr = crossStartLevelArr.filter(v => v != this.loc.currentPosition.level);
+                    console.log("crossStartLevelArr", crossStartLevelArr);
                     const crossType = routeFloor[currentLineIndex + 1]
                     && routeFloor[currentLineIndex + 1].crossType == 12 ? "elevator" : "stairs";
                     this.inElevator = crossType;
-                    voice = this.loc.currentPosition.level < crossEndLevel
-                        ? `请上至${crossEndLevel >= 0 ? Number(crossEndLevel) + 1 : crossEndLevel}楼`
-                        : `请下至${crossEndLevel >= 0 ? Number(crossEndLevel) + 1 : crossEndLevel}楼`;
+                    voice = this.loc.currentPosition.level < crossEndLevelArr[0]
+                        ? `请上至${crossEndLevelArr[0] >= 0 ? Number(crossEndLevelArr[0]) + 1 : crossEndLevelArr[0]}楼`
+                        : `请下至${crossEndLevelArr[0] >= 0 ? Number(crossEndLevelArr[0]) + 1 : crossEndLevelArr[0]}楼`;
                     turnType = crossType == "elevator" ? 6 : 7;
                     const coordinates = routeFloorBezier.geometry.coordinates;
                     shadowPoint = point(coordinates[coordinates.length - 1]);
@@ -305,7 +306,7 @@ const realNavigationFn = (target) => {
                         }
                     }
                 } else {
-                    console.log("target", targetFloor)
+                    console.log("target", targetFloor);
                     if (targetFloor == this.navEndLevelString && !this.inElevator) {
                         if (currentStartDistance >= 1) {
                             turnType = 1;
