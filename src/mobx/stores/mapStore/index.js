@@ -38,7 +38,7 @@ class MapStore {
     @observable crossMarker; // 跨楼层标记
 
     constructor() {
-        this.mapId = 1;
+        this.mapId = 2;
         this.carouselData = [];
         this.accordionData = [];
         this.mapObj = null;

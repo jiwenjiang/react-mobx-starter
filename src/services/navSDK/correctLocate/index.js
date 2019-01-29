@@ -418,17 +418,50 @@ const correctLocateFn = (target) => {
                 const lastPoint = [this.lastLocation.longitude, this.lastLocation.latitude];
                 const lastPtToFiducial = calcDistanceFn(fiducialPoint, lastPoint); // 上一个点与置信点距离
                 const lastPtToIbeacon = calcDistanceFn(ibeaconPoint, lastPoint); // 上一个点与蓝牙点距离
+
+                // 置信点角度计算
+                let X = Math.sin(this.alpha * Math.PI / 180);
+                let Y = Math.cos(this.alpha * Math.PI / 180);
+                let M = currentPt.fiducialLon - this.stepLocation.longitude;
+                let N = currentPt.fiducialLat - this.stepLocation.latitude;
+                let molecule = M * X + N * Y;
+                let denominator = Math.sqrt((Math.pow(M, 2)
+                    + Math.pow(N, 2)) * (X * X + Y * Y));
+                let angle = Math.acos(molecule / denominator) / Math.PI * 180;
+
+
                 if (lastPtToFiducial > (this.isIOS ? 5 : 10)) {
                     fiducialPoint = calcMidPoint(lastPoint, fiducialPoint);
                 }
                 if (lastPtToIbeacon > (this.isIOS ? 10 : 15)) {
                     ibeaconPoint = calcMidPoint(lastPoint, ibeaconPoint);
                 }
-                const longitude = this.stepLocation.longitude * 0.5 + fiducialPoint[0] * 0.3
-                    + ibeaconPoint[0] * 0.1 + this.tempLocation.longitude * 0.1;
+                let longitude, latitude;
+                // console.log("置信点角度", angle);
+                if (angle < 100) {
+                    longitude = this.stepLocation.longitude * 0.5 + fiducialPoint[0] * 0.3
+                        + ibeaconPoint[0] * 0.1 + this.tempLocation.longitude * 0.1;
 
-                const latitude = this.stepLocation.latitude * 0.5 + fiducialPoint[1] * 0.3
-                    + ibeaconPoint[1] * 0.1 + this.tempLocation.latitude * 0.1;
+                    latitude = this.stepLocation.latitude * 0.5 + fiducialPoint[1] * 0.3
+                        + ibeaconPoint[1] * 0.1 + this.tempLocation.latitude * 0.1;
+                    // longitude = this.stepLocation.longitude * 0.5 + fiducialPoint[0] * 0.4
+                    //     + ibeaconPoint[0] * 0.1;
+                    //
+                    // latitude = this.stepLocation.latitude * 0.5 + fiducialPoint[1] * 0.4
+                    //     + ibeaconPoint[1] * 0.1;
+                } else {
+                    longitude = this.stepLocation.longitude * 0.7 + fiducialPoint[0] * 0.1
+                        + ibeaconPoint[0] * 0.1 + this.tempLocation.longitude * 0.1;
+
+                    latitude = this.stepLocation.latitude * 0.7 + fiducialPoint[1] * 0.1
+                        + ibeaconPoint[1] * 0.1 + this.tempLocation.latitude * 0.1;
+                    // longitude = this.stepLocation.longitude * 0.7 + fiducialPoint[0] * 0.2
+                    //     + ibeaconPoint[0] * 0.1;
+                    //
+                    // latitude = this.stepLocation.latitude * 0.7 + fiducialPoint[1] * 0.2
+                    //     + ibeaconPoint[1] * 0.1;
+                }
+
                 let kalmanPt = [longitude, latitude];
                 this.kalmanResult = this.kalmanClass.updateLocation(kalmanPt, this.lastLocation);
             } else {
@@ -441,11 +474,12 @@ const correctLocateFn = (target) => {
                 // let molecule = this.kalmanResult.speedX * X + this.kalmanResult.speedY * Y;
                 // let denominator = Math.sqrt(Math.pow(this.kalmanResult.speedX, 2)
                 //     + Math.pow(this.kalmanResult.speedY, 2) + X * X + Y * Y);
+
                 let molecule = M * X + N * Y;
-                let denominator = Math.sqrt(Math.pow(M, 2)
-                    + Math.pow(N, 2) + X * X + Y * Y);
+                let denominator = Math.sqrt((Math.pow(M, 2)
+                    + Math.pow(N, 2)) * (X * X + Y * Y));
                 let angle = Math.acos(molecule / denominator) / Math.PI * 180;
-                // console.log("angle", angle);
+                // console.log("蓝牙点角度", angle);
                 if (angle < 100 || angle > 270) {
                     const currentPt = this.loc.currentPosition;
                     let ibeaconPoint = [currentPt.longitude, currentPt.latitude]; // 蓝牙点
@@ -458,6 +492,10 @@ const correctLocateFn = (target) => {
                         + ibeaconPoint[0] * 0.2 + this.tempLocation.longitude * 0.2;
                     const latitude = this.stepLocation.latitude * 0.6
                         + ibeaconPoint[1] * 0.2 + this.tempLocation.latitude * 0.2;
+                    // const longitude = this.stepLocation.longitude * 0.8
+                    //     + ibeaconPoint[0] * 0.2;
+                    // const latitude = this.stepLocation.latitude * 0.8
+                    //     + ibeaconPoint[1] * 0.2;
                     let kalmanPt = [longitude, latitude];
                     this.kalmanResult = this.kalmanClass.updateLocation(kalmanPt, this.lastLocation);
                 }
@@ -466,6 +504,8 @@ const correctLocateFn = (target) => {
                         + 0.1 * this.tempLocation.longitude;
                     const latitude = 0.9 * this.stepLocation.latitude
                         + 0.1 * this.tempLocation.latitude;
+                    // const longitude = this.stepLocation.longitude;
+                    // const latitude = this.stepLocation.latitude;
                     let kalmanPt = [longitude, latitude];
                     this.kalmanResult = this.kalmanClass.updateLocation(kalmanPt, this.lastLocation);
                 }
@@ -547,19 +587,17 @@ const correctLocateFn = (target) => {
                 // console.log("类型,楼层,距离", this.loc.currentPosition.locType, this.loc.currentPosition.level, distanceEl);
                 if (this.loc.currentPosition.locType == "ibeacon" &&
                     (this.crossEndLevelArr.includes(Number(this.loc.currentPosition.level)) || distanceEl > 15)) {
-                    console.log("当前结束", this.loc.currentPosition.level);
                     this.inElevatorNum++;
                     if (this.inElevatorNum > 3) {
                         this.inElevator = false;
                         this.crossEndLevelArr = this.crossEndLevelArr.filter(v => v != this.loc.currentPosition.level);
                         this.currentPoint = {...this.currentPoint, level: this.loc.currentPosition.level};
-                        console.log("crossEndLevelArr", this.crossEndLevelArr);
                         this.chooseNavMode();
                     } else {
-                        return false
+                        return false;
                     }
                 } else {
-                    this.inElevatorNum = 0
+                    this.inElevatorNum = 0;
                     return false;
                 }
             }
@@ -588,6 +626,8 @@ const correctLocateFn = (target) => {
                         + 0.1 * this.tempLocation.longitude;
                     const latitude = 0.9 * this.stepLocation.latitude
                         + 0.1 * this.tempLocation.latitude;
+                    // const longitude = this.stepLocation.longitude;
+                    // const latitude = this.stepLocation.latitude;
                     let kalmanPt = [longitude, latitude];
                     this.kalmanResult = this.kalmanClass.updateLocation(kalmanPt, this.lastLocation);
                     // console.log("未更新定位", this.kalmanResult);
@@ -643,6 +683,9 @@ const correctLocateFn = (target) => {
                         let currentPoint = [currentLocation.longitude, currentLocation.latitude]; // 当前点
                         let lastPoint = [this.kalmanPoints[1].longitude, this.kalmanPoints[1].latitude]; // 上一个点
                         const lastPtToCurrent = calcDistanceFn(currentPoint, lastPoint); // 上一个点与当前点距离
+                        this.stepTimerMark = this.stepLocation.timer;
+                        let tempLon = 2 * this.kalmanPoints[1].longitude - this.kalmanPoints[0].longitude;
+                        let tempLat = 2 * this.kalmanPoints[1].latitude - this.kalmanPoints[0].latitude;
                         if (lastPtToCurrent > 1.5) {
                             const longitude = (1 - 1.2 / lastPtToCurrent) * this.tempLocation.longitude
                                 + 1.2 / lastPtToCurrent * currentLocation.longitude;
@@ -650,11 +693,25 @@ const correctLocateFn = (target) => {
                                 + 1.2 / lastPtToCurrent * currentLocation.latitude;
                             currentLocation = {...currentLocation, longitude, latitude};
                         }
-                        this.stepTimerMark = this.stepLocation.timer;
-                        let tempLon = 2 * this.kalmanPoints[1].longitude - this.kalmanPoints[0].longitude;
-                        let tempLat = 2 * this.kalmanPoints[1].latitude - this.kalmanPoints[0].latitude;
                         let currentLon = 0.7 * tempLon + 0.3 * currentLocation.longitude;
                         let currentLat = 0.7 * tempLat + 0.3 * currentLocation.latitude;
+
+                        /* 计算是否回退 */
+                        // let X = this.kalmanPoints[1].longitude - this.kalmanPoints[0].longitude;
+                        // let Y = this.kalmanPoints[1].latitude - this.kalmanPoints[0].latitude;
+                        // let M = currentLon - this.kalmanPoints[1].longitude;
+                        // let N = currentLat - this.kalmanPoints[1].latitude;
+                        // let molecule = M * X + N * Y;
+                        // let denominator = Math.sqrt((Math.pow(M, 2)
+                        //     + Math.pow(N, 2)) * (X * X + Y * Y));
+                        // let angle = Math.acos(molecule / denominator) / Math.PI * 180;
+                        // console.log("回退角度：", angle);
+                        // if (angle >= 100) {
+                        //     currentLon = 0.1 * tempLon + 0.9 * this.kalmanPoints[1].longitude;
+                        //     currentLat = 0.1 * tempLat + 0.9 * this.kalmanPoints[1].latitude;
+                        // }
+                        /* 计算是否回退 */
+
                         this.stepLocation = {
                             ...this.stepLocation,
                             longitude: currentLon,

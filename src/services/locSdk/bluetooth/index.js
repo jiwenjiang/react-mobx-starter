@@ -8,11 +8,11 @@ const ANDROID_CHANGE_GPS = 5000; // android搜索不到蓝牙5000ms后，切换g
 const IOS_CHANGE_GPS = 5000; // ios搜索不到蓝牙3000ms后，切换gps
 
 const blueToothFn = (target) => {
-    const signUrl = `https://gisgd.scu.edu.cn/wxConfig/weixin/v1/jsSdkSign`;
-    // const signUrl = `https://xz.parkbobo.com/wxConfig/weixin/v1/jsSdkSign`;
+    // const signUrl = `https://gisgd.scu.edu.cn/wxConfig/weixin/v1/jsSdkSign`;
+    const signUrl = `https://xz.parkbobo.com/wxConfig/weixin/v1/jsSdkSign`;
     // const signUrl = `https://gisapp.swun.edu.cn/wxConfig/weixin/v1/jsSdkSign`;
-    // const getIbeconUrl = `https://map.parkbobo.com/location/weka/v1/classify`;// map
-    const getIbeconUrl = `https://gismp.scu.edu.cn/location/weka/v1/classify`;// map
+    const getIbeconUrl = `https://map.parkbobo.com/location/weka/v1/classify`;// map
+    // const getIbeconUrl = `https://gismp.scu.edu.cn/location/weka/v1/classify`;// map
     // const getIbeconUrl = `https://gl.swun.edu.cn/location/weka/v1/classify`;
 
     // const deviceUrl = `https://xz.parkbobo.com/location/device/v1/getAll`;

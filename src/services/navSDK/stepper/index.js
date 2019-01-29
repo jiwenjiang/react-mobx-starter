@@ -375,6 +375,10 @@ const stepperFn = (target) => {
                     }
                 }
             }, 1000);
+            setTimeout(() => {
+                // 10秒后取消搜索
+                clearInterval(this.initPolygonLocate);
+            }, 10000);
             // 步进器
             window.addEventListener("devicemotion", (e) => {
                 if (this.inElevator) {
@@ -439,12 +443,12 @@ const stepperFn = (target) => {
             };
             // if (this.currentMode == "free") {
             //     this.stepLocation = {...this.stepLocation, level: this.loc.currentPosition.level};
-                // this.currentPoint = this.stepLocation;
-                // this.onFreeStep(this.currentPoint);
+            // this.currentPoint = this.stepLocation;
+            // this.onFreeStep(this.currentPoint);
             // }
             // if (this.currentMode == "realNav") {
             //     this.stepLocation = {...this.stepLocation, level};
-                // this.onRealNavStep(this.currentPoint);
+            // this.onRealNavStep(this.currentPoint);
             // }
             // this.initPolygonLocate && clearInterval(this.initPolygonLocate);
         }

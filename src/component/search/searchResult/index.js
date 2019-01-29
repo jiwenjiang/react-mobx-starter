@@ -108,7 +108,7 @@ class SearchResult extends Component {
                                         <span style={{display: "inline-block", width: "6.5vw"}}></span>{`${v.tags.level
                                         ? `在${v.tags.level >= 0 ? Number(v.tags.level) + 1 : Number(v.tags.level)}楼`
                                         : ""}
-                                      ${v.distance ? `距离：${v.distance}米` : ""}`}
+                                    `}
                                     </List.Item.Brief>
                                 </List.Item>
                             )}

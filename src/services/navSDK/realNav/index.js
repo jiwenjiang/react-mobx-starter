@@ -85,7 +85,8 @@ const realNavigationFn = (target) => {
             /*历史动画*/
             let currentDistance = distance(geoPoint, shadowPoint) * 1000;
             /*偏航*/
-            if (this.loc.currentPosition.locType == "gps" && this.currentPoint.accuracy <= 25 && currentDistance > 30) {
+            // console.log("类型，精度，距离", this.loc.currentPosition.locType, this.loc.currentPosition.accuracy, currentDistance);
+            if (this.loc.currentPosition.locType == "gps" && this.loc.currentPosition.accuracy <= 25 && currentDistance > 30) {
                 console.log("gps 偏航", currentDistance);
                 this.stopNav();
                 this.navComplete({...this.currentPoint, isYaw: true});
@@ -123,7 +124,6 @@ const realNavigationFn = (target) => {
                 const elDistance = ~~(distance(shadowPoint, endPoint) * 1000);
                 if (elDistance <= 2) {
                     this.crossStartLevelArr = this.crossStartLevelArr.filter(v => v != this.loc.currentPosition.level);
-                    console.log("crossStartLevelArr", this.crossStartLevelArr);
                     const crossType = routeFloor[currentLineIndex + 1]
                     && routeFloor[currentLineIndex + 1].crossType == 12 ? "elevator" : "stairs";
                     this.inElevator = crossType;
@@ -156,7 +156,7 @@ const realNavigationFn = (target) => {
                 turn: turnType || navResult.turnType,
                 text: voice || navResult.text,
                 voice: voice || navResult.voice,
-                isOutdoor: this.currentPoint.isOutdoor,
+                isOutdoor: navResult.isOutdoor,
                 info: "SUCCESS",
                 inElevator: this.inElevator
             };
@@ -172,6 +172,7 @@ const realNavigationFn = (target) => {
             const endPoint = point(currentLine[currentLine.length - 1]); // 当前路径终点
             const lineDistance = routeFloor[currentLineIndex].distance;
             const turnTypeText = routeFloor[currentLineIndex].turnTypeText;
+            const isOutdoor = !routeFloor[currentLineIndex].indoor;
             let turnType = routeFloor[currentLineIndex].turnType;
             const nextCrossType = currentLineIndex < routeFloor.length - 1
                 ? routeFloor[currentLineIndex + 1].crossType
@@ -332,7 +333,8 @@ const realNavigationFn = (target) => {
                 currentFloor,
                 turnType,
                 currentBearing,
-                leftDistance
+                leftDistance,
+                isOutdoor
                 // shadowLinePoint
             };
         }

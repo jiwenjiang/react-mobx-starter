@@ -280,10 +280,11 @@ class beginNav extends Component {
                     ...data,
                     text: this.props.navStore.navRealData && this.props.navStore.navRealData.text
                 };
+                console.log("isOutdoor", data.isOutdoor);
                 this.props.navStore.updateNavData(navDatas); // 更新导航数据
                 this.props.mapStore.mapObj.flyTo({
                     center: [data.currentLon, data.currentLat],
-                    zoom: data.isOutdoor == 0 ? 20 : 18,
+                    zoom: data.isOutdoor ? 18 : 20,
                     speed: 1,
                     curve: 1.4,
                     bearing: data.bearing,
