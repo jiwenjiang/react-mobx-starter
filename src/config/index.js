@@ -16,14 +16,14 @@ const devConfig = {
     version: "v1"
 };
 const buildConfig = {
-    // mapIp: "https://gismp.scu.edu.cn",
+    mapIp: "https://gismp.scu.edu.cn",
     // mapIp: "https://gl.swun.edu.cn",
     // mapIp: "https://map.parkbobo.com",
-    mapIp: "https://gis.parkbobo.com",
-    // normalIp: "https://gisgd.scu.edu.cn",
+    // mapIp: "https://gis.parkbobo.com",
+    normalIp: "https://gisgd.scu.edu.cn",
     // normalIp: "https://gisapp.swun.edu.cn",
     // normalIp: "https://xz.parkbobo.com",
-    normalIp: "https://locmap.parkbobo.com",
+    // normalIp: "https://locmap.parkbobo.com",
     version: "v1"
 };
 const config = process.env.NODE_ENV === "development" ? devConfig : buildConfig;
