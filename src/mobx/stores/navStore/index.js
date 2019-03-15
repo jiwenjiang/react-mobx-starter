@@ -29,7 +29,7 @@ class NavStore {
     @observable mapNavParams; // 地图导航参数
     @observable locateCoordinate; // 定位坐标(搜索用)
     @observable totalDistance; // 导航总距离
-    @observable navTime; // 导航总距离
+    @observable navTime; // 导航总时间
     @observable navRoutes; // 原始导航路径
     @observable navRoutesLevelArr; // 路径楼层集合
     @observable navRoadType; // 导航方式 foot/car
@@ -44,7 +44,7 @@ class NavStore {
     @observable initLocation; // 初始化定位
     @observable evaluateStatus; // 评价模型显示
     @observable navCompleteRoute; // 结束导航数据
-    @observable currentLocation; // 当前定位r
+    @observable currentLocation; // 当前定位
     @observable rePlanStatus; // 重新规划路劲
     @observable locType; // 定位类型
     @observable simPauseStatus; // 暂停模拟导航

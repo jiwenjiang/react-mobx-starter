@@ -85,11 +85,11 @@ class mapPage extends Component {
     }
 
     componentDidMount() {
-        console.log("nav", navigator.appVersion);
+        // console.log("nav", navigator.appVersion);
 
         this.getSignature();
         // 获取url参数
-        const projectType = getQueryString("type", window.location.href) || "Addressing";
+        const projectType = getQueryString("type", window.location.href) || "car";
         // const projectType = "car";
         const mapId = getQueryString("mapId", window.location.href) || this.props.mapStore.mapId;
         let shareMessage = getQueryString("miniMessage", window.location.href);

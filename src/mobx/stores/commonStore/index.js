@@ -58,6 +58,7 @@ class CommonStore {
         this.allowAudioPlay = true;
     }
 
+    // 获取百度口令
     @action
     async getBaiduToken(mapId) {
         this.mapId = mapId;
@@ -71,6 +72,7 @@ class CommonStore {
         }
     }
 
+    // 播放语音
     @action
     changeAllowAudio(v) {
         this.allowAudioPlay = v;
@@ -101,36 +103,43 @@ class CommonStore {
         audio.play();
     }
 
+    // 等待动画
     @action
     changeLoadingStatus(status) {
         this.loadingStatus = status;
     }
 
+    // 路径规划错误提示
     @action
     changeRouteError(v) {
         this.routeErrorStatus = v;
     }
 
+    // 定位动画
     @action
     changeLocationLoading(status) {
         this.LocationLoading = status;
     }
 
+    // 搜索状态 "start" | "end" 搜索状态分为起点、终点
     @action
     changeSearchStatus(status) {
         this.searchStatus = status;
     }
 
+    // 显示搜索历史
     @action
     changeSearchHistory(v) {
         this.showSearchHistory = v;
     }
 
+    // 寻址、车位鲸
     @action
     changeProjectType(status) {
         this.projectType = status;
     }
 
+    // logo显示状态
     @action
     changeLogoStatus(v) {
         this.noLogo = v;

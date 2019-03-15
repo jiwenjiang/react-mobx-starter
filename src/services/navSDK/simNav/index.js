@@ -39,7 +39,7 @@ const simNavigationFn = (target) => {
 
                     // console.log(distanceArr);
                     currentLineIndex = distanceArr.findIndex(v => v == Math.min(...distanceArr));
-                    const leftDistance = routeLength - (this.completeLength / 50 / speed);
+                    const leftDistance = routeLength - (this.completeLength / 50 * speed);
                     const simResult = this.simNavLogic(currentPoint, currentLineIndex, handleRoute, voiceRecorder, floorRecorder, lastFloor);
                     const currentFloor = JSON.stringify({
                         level: Number(simResult.currentFloor),
@@ -47,7 +47,7 @@ const simNavigationFn = (target) => {
                     });
                     handleRouteFloorBezierAni[currentFloor].shift();
                     const currentRoute = handleRouteFloorBezierAni[currentFloor];
-                    if (map.getLayer("building-layer") && currentRoute && currentRoute.length > 2) {
+                    if (map.getLayer("building-layer") && currentRoute && currentRoute.length % 5 == 0 && currentRoute.length > 4) {
                         const geoData = lineString(currentRoute);
                         map.getSource("building-route").setData(geoData);
                     }

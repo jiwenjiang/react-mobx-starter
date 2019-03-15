@@ -133,6 +133,28 @@ class beginNav extends Component {
         document.getElementsByClassName("map-routePanel")[0].classList.remove("dom-transformY-35");
         document.getElementById("begin-nav").classList.remove("dom-transformY-30");
         document.getElementById("nav-bottom").classList.add("dom-transformY-30");
+        let speed = 1;
+        let speedAni = 0.1;
+        let zoom = 20;
+        if (this.props.navStore.totalDistance < 100) {
+            speed = 2;
+            speedAni = 0.2;
+            zoom = 20;
+        } else if (this.props.navStore.totalDistance < 500) {
+            speed = 4;
+            speedAni = 0.4;
+            zoom = 19;
+        } else if (this.props.navStore.totalDistance < 1500) {
+            speed = 5;
+            speedAni = 0.5;
+            zoom = 18;
+        } else {
+            speed = 8;
+            speedAni = 0.8;
+            zoom = 17;
+        }
+        // console.log("totalDistance", this.props.navStore.totalDistance);
+        // console.log("speed", speed);
         let changeFlag = true;
         this.navTimer = setInterval(() => {
             changeFlag = true;
@@ -142,7 +164,7 @@ class beginNav extends Component {
         nav.startSim({
             routeData: toJS(this.props.navStore.navRoutes),
             map: this.props.mapStore.mapObj,
-            speed: 1,
+            speed,
             onSimNav: (data) => {
                 this.props.navStore.moveNavMarker(this.props.mapStore, [data.currentLon, data.currentLat], "simMarker");
                 let navDatas = data.text ? data : {
@@ -154,8 +176,8 @@ class beginNav extends Component {
                     changeFlag = false;
                     this.props.mapStore.mapObj.flyTo({
                         center: [data.currentLon, data.currentLat],
-                        zoom: 20,
-                        speed: 0.1,
+                        zoom: zoom,
+                        speed: speedAni,
                         curve: 1.6,
                         bearing: data.bearing,
                         easing(t) {
@@ -167,8 +189,8 @@ class beginNav extends Component {
                     changeFlag = false;
                     this.props.mapStore.mapObj.flyTo({
                         center: [data.currentLon, data.currentLat],
-                        zoom: 20,
-                        speed: 0.5,
+                        zoom: zoom,
+                        speed: speedAni,
                         curve: 1,
                         bearing: data.bearing,
                         easing(t) {
@@ -280,7 +302,6 @@ class beginNav extends Component {
                     ...data,
                     text: this.props.navStore.navRealData && this.props.navStore.navRealData.text
                 };
-                console.log("isOutdoor", data.isOutdoor);
                 this.props.navStore.updateNavData(navDatas); // 更新导航数据
                 this.props.mapStore.mapObj.flyTo({
                     center: [data.currentLon, data.currentLat],

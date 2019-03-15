@@ -287,6 +287,21 @@ const preHandleRealData = (route, map) => {
 
     };
 };
+/**
+ * @author j_bleach
+ * @date 2019-03-11
+ * @Description: 向量角度计算
+ * @param lineA:[]
+ * @param lineB:[]
+ * @return angle:Number
+ */
+const calcIntersectionAngle = (lineA, lineB) => {
+    let molecule = lineA[0] * lineB[0] + lineA[1] * lineB[1];
+    let denominator = Math.sqrt((Math.pow(lineA[0], 2) + Math.pow(lineA[1], 2))
+        * (Math.pow(lineB[0], 2) + Math.pow(lineB[1], 2)));
+    let angle = Math.acos(molecule / denominator) / Math.PI * 180;
+    return angle;
+};
 
 // 贝塞尔处理
 const bezierV2 = (arr, map) => {
@@ -449,4 +464,4 @@ const bezierV2 = (arr, map) => {
 
     return bezier(map);
 };
-export {calcDistanceFn, calcMidPoint, preHandleSimData, preHandleRealData, bezierV2};
+export {calcDistanceFn, calcMidPoint, preHandleSimData, preHandleRealData, bezierV2, calcIntersectionAngle};

@@ -6,19 +6,21 @@ const INTERVAL = 500; // 服务器时间间隔
 const POINTLENTH = 3; // 质心点计算数组长度
 const ANDROID_CHANGE_GPS = 5000; // android搜索不到蓝牙5000ms后，切换gps
 const IOS_CHANGE_GPS = 5000; // ios搜索不到蓝牙3000ms后，切换gps
+const LAST_IBEACON = 30000; // 搜索不到蓝牙30s后,重置上一个蓝牙点
 
 const blueToothFn = (target) => {
-    const signUrl = `https://gisgd.scu.edu.cn/wxConfig/weixin/v1/jsSdkSign`;
-    // const signUrl = `https://xz.parkbobo.com/wxConfig/weixin/v1/jsSdkSign`;
+    // const signUrl = `https://gisgd.scu.edu.cn/wxConfig/weixin/v1/jsSdkSign`;
+    const signUrl = `https://xz.parkbobo.com/wxConfig/weixin/v1/jsSdkSign`;
     // const signUrl = `https://gisapp.swun.edu.cn/wxConfig/weixin/v1/jsSdkSign`;
-    // const getIbeconUrl = `https://map.parkbobo.com/location/weka/v1/classify`;// map
-    const getIbeconUrl = `https://gismp.scu.edu.cn/location/weka/v1/classify`;// map
-    // const getIbeconUrl = `https://gl.swun.edu.cn/location/weka/v1/classify`;
+    const getIbeaconUrl = `https://map.parkbobo.com/location/weka/v1/classify`;// map
+    // const getIbeaconUrl = `https://gismp.scu.edu.cn/location/weka/v1/classify`;// map
+    // const getIbeaconUrl = `https://gl.swun.edu.cn/location/weka/v1/classify`;
 
     // const deviceUrl = `https://xz.parkbobo.com/location/device/v1/getAll`;
     let phoneType = "ios";
     let ibeaconArr = []; // 蓝牙地位点集合
     let gpsTimeId = null; // gps定时器标记
+    let lastIbeaconTimeId = null; // gps定时器标记(30s)
     const ua = navigator.userAgent.toLowerCase();
     if (/iphone|ipad|ipod/.test(ua)) {
         phoneType = `ios`;
@@ -45,7 +47,6 @@ const blueToothFn = (target) => {
                 },
                 body: signBody
             }).then((response) => response.json()).then((data) => {
-
                 this.configWx(data.data);
                 this.initIbeacon = true;
                 this.initSuccess();
@@ -192,7 +193,6 @@ const blueToothFn = (target) => {
             this.wx.onSearchBeacons({ //监听iBeacon设备更新事件
                 complete: (data) => {
                     const rssi = this.gpsCoords && this.gpsCoords.accuracy <= 25 ? -80 : -90;
-                    // console.log("gps精度,rssi", this.gpsCoords.accuracy, rssi);
                     data.beacons = data.beacons && data.beacons.filter(v => (v.rssi != 0 && v.rssi > rssi));
                     if (data.beacons && data.beacons.length > 0) {
                         // console.log("搜索到有效蓝牙", rssi);
@@ -228,7 +228,7 @@ const blueToothFn = (target) => {
                 const getIbeaconBody = `mapId=${this.mapId}&datajson=${filterData}
             &interval=${INTERVAL}&type=wx_${phoneType}`;
                 // console.log("请求", getIbeaconBody);
-                fetch(getIbeconUrl, {
+                fetch(getIbeaconUrl, {
                     method: "PUT",
                     headers: {
                         "Content-Type": "application/x-www-form-urlencoded"
@@ -251,6 +251,10 @@ const blueToothFn = (target) => {
                             timer: new Date().getTime(),
                             ...Polygon
                         };
+                        lastIbeaconTimeId && clearTimeout(lastIbeaconTimeId);
+                        lastIbeaconTimeId = setTimeout(() => {
+                            this.ibeaconCoords = null;
+                        }, LAST_IBEACON);
                         this.onSuccessIbeacon(ibeaconObj);
                     }
                 }).catch((err) => {

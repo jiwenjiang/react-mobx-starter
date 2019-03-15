@@ -319,26 +319,30 @@ class MapStore {
     @action
     handleMarker(e) {
         let feature = this.mapObj.queryRenderedFeatures(e.point);
+        // if (feature && feature[0] && feature[0].properties.icon == "yes") {
+        //     feature[0] = feature[1];
+        // }
         if (feature && feature[0] && (feature[0].geometry.type == "Polygon" || feature[0].layer.type == "symbol")
             && "layer" in feature[0] && "properties" in feature[0]) {
             let bboxPoint = bbox(feature[0].geometry);
             let bboxSlice = [bboxPoint.slice(0, 2), bboxPoint.slice(2, 4)];
             let resArr = bboxSlice.map(v => this.mapObj.project(v));
             let routePoint = this.mapObj.queryRenderedFeatures(resArr).filter(v => v.geometry.type == "Point");
-            if (routePoint && routePoint.length > 0 && this.endMarkerPoint) {
-                const comparePt = turfPoint(this.endMarkerPoint.point);
-                let minDistance = Number.MAX_VALUE;
-                for (let v of routePoint) {
-                    const dt = distance(comparePt, v.geometry);
-                    if (dt < minDistance) {
-                        routePoint = v;
-                        minDistance = dt;
-                    }
-                }
-                // console.log(toJS(this.endMarkerPoint), comparePt);
-            } else {
-                routePoint = routePoint[0];
-            }
+            // if (routePoint && routePoint.length > 0 && this.endMarkerPoint) {
+            //     const comparePt = turfPoint(this.endMarkerPoint.point);
+            //     let minDistance = Number.MAX_VALUE;
+            //     for (let v of routePoint) {
+            //         const dt = distance(comparePt, v.geometry);
+            //         if (dt < minDistance) {
+            //             routePoint = v;
+            //             minDistance = dt;
+            //         }
+            //     }
+            //     // console.log(toJS(this.endMarkerPoint), comparePt);
+            // } else {
+            routePoint = routePoint[0];
+            // }
+            console.log("门", routePoint);
             if (feature[0]["properties"]["name"]) {
                 let source = feature[0].layer.source || "outdoor";
                 let polygonGeojson = feature[0].geometry.coordinates;
@@ -362,28 +366,30 @@ class MapStore {
                     name: feature[0]["properties"]["name"],
                     source: source
                 };
-                /*change
-                if (navStore.freeMarker) {
-                    this.confirmMarker("start", navStore.freeMarkerPoint, true);
-                    this.confirmMarker("end", markerData, true);
-                    this.confirmStartMarkerFn();
-                } else {
+                // /*change
+                // if (navStore.freeMarker) {
+                //     this.confirmMarker("start", navStore.freeMarkerPoint, true);
+                //     this.confirmMarker("end", markerData, true);
+                //     this.confirmStartMarkerFn();
+                // } else {
+                //     if (!this.confirmEndMarker) {
+                //         this.confirmMarker("end", markerData);
+                //     } else {
+                //         this.confirmMarker("start", markerData, true);
+                //         this.confirmStartMarkerFn();
+                //     }
+                // }
+                // */
+                setTimeout(() => {
                     if (!this.confirmEndMarker) {
+                        this.endRoutePoint = routePoint;
                         this.confirmMarker("end", markerData);
                     } else {
+                        this.startRoutePoint = routePoint;
                         this.confirmMarker("start", markerData, true);
                         this.confirmStartMarkerFn();
                     }
-                }
-                */
-                if (!this.confirmEndMarker) {
-                    this.endRoutePoint = routePoint;
-                    this.confirmMarker("end", markerData);
-                } else {
-                    this.startRoutePoint = routePoint;
-                    this.confirmMarker("start", markerData, true);
-                    this.confirmStartMarkerFn();
-                }
+                });
             }
         }
     }
@@ -447,7 +453,7 @@ class MapStore {
             // 切换楼层
             this.mapObj.flyTo({
                 center: data.point,
-                zoom: data.source == "indoor" ? 19 : 17,
+                zoom: data.source == "outdoor" ? 17 : 19,
                 speed: 2,
                 curve: 1,
                 easing: (t) => {

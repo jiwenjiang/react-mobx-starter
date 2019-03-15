@@ -23,8 +23,8 @@ class gotoComponent extends Component {
             this.props.mapStore.confirmMarker("start", {
                 ...this.props.navStore.freeMarkerPoint,
                 source: this.props.navStore.currentLocation && this.props.navStore.currentLocation.locType == "gps" ? "outdoor" : "indoor"
-            }, true);
-            this.props.mapStore.confirmStartMarkerFn();
+            });
+            // this.props.mapStore.confirmStartMarkerFn();
         } else {
             this.props.mapStore.confirmEndMarkerFn(true);
             this.props.mapStore.confirmMarker();

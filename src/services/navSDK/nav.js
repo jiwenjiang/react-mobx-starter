@@ -126,6 +126,9 @@ class Nav {
         this.diffLevelCount = 0;
         this.countNum = 0;
         this.inElevatorNum = 0;
+        this.lastCurrentLineIndex = 0; // 上次投影线路
+        this.lastBezierShadowPoint = null;
+        this.nextLineAngleNum = 0; // 下一条线与当前角度小于35度记数
         // this.correctNavFlag = false;
         // this.correctNavOutdoorFlag = false;
         // this.startCorrectNavLocate(this.loc);
