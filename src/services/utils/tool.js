@@ -47,13 +47,5 @@ const handleTime = (s) => {
     }
 };
 
-const handleDistance = (s) => {
-    if (s && s > 0) {
-        if (s > 1000) {
-            return (s / 1000).toFixed(2) + "公里";
-        } else {
-            return ~~s + "米";
-        }
-    }
-};
-export {unique, getQueryString, handleTime, handleDistance};
+
+export {unique, getQueryString, handleTime};
