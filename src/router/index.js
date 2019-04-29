@@ -8,14 +8,14 @@ import AsyncComponent from './asyncRoute';
 import * as stores from '../mobx/stores';
 
 
-const Map = AsyncComponent(() => import("../containers/home"));
+const Home = AsyncComponent(() => import("../containers/home"));
 
 
 const reactConfig = (
     <Provider {...stores}>
         <Router>
             <Switch>
-
+                <Route path='/map' component={Home}/>
                 <Redirect path="/" to={{pathname: '/map'}}/>
             </Switch>
         </Router>
