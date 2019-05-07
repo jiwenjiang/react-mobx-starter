@@ -17,3 +17,4 @@ const buildConfig = {
 const config = process.env.NODE_ENV === "development" ? devConfig : buildConfig;
 
 export default config;
+
