@@ -1,9 +1,6 @@
 /**
  * Created by j_bleach on 2019/1/3 0003.
  */
-/**
- * Created by j_bleach on 2018/9/26 0026.
- */
 import React, {PureComponent} from "react";
 import "./index.less";
 

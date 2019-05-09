@@ -8,10 +8,12 @@
  */
 const devConfig = {
     normalIp: "https://xz.parkbobo.com",
+    mapIp: "https://cmgis.parkbobo.com",
     version: "v1"
 };
 const buildConfig = {
     normalIp: "https://locmap.parkbobo.com",
+    mapIp: "https://cmgis.parkbobo.com",
     version: "v1"
 };
 const config = process.env.NODE_ENV === "development" ? devConfig : buildConfig;

@@ -1,9 +1,8 @@
 /**
  * Created by j_bleach on 2018/9/26 0026.
  */
-import {observable, action, configure, runInAction} from "mobx";
-import http from "services/http";
-import normalUrl from "config/url/normal";
+import {observable, action, configure} from "mobx";
+
 
 configure({
     enforceActions: "observed"
@@ -11,30 +10,39 @@ configure({
 
 class CommonStore {
     @observable loadingStatus; // loading 状态显示
+    @observable routeMsg; // routeMsg
+    @observable mapObj; // 地图对象
+    @observable mapGl; // 地图sdk
 
     constructor() {
         this.loadingStatus = false;
-
-    }
-
-    // 获取百度口令
-    @action
-    async getBaiduToken(mapId) {
-        this.mapId = mapId;
-        try {
-            const data = await http.put(normalUrl.getBaiduToken);
-            runInAction(() => {
-                this.baiduVoice = data.access_token;
-            });
-        } catch (e) {
-            throw e;
-        }
+        this.routeMsg = {
+            iframeUrl: "",
+            title: ""
+        };
+        this.mapObj = {};
+        this.mapGl = {};
     }
 
     // 等待动画
     @action
     changeLoadingStatus(status) {
         this.loadingStatus = status;
+    }
+
+    @action
+    saveMap(map) {
+        this.mapObj = map;
+    }
+
+    @action
+    savMapGl(gl) {
+        this.mapGl = gl;
+    }
+
+    @action
+    updateRouteMsg(msg) {
+        this.routeMsg = msg;
     }
 }
 
