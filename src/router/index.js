@@ -10,12 +10,9 @@ import * as stores from "../mobx/stores";
 import {Layout} from "antd";
 import Sider from "component/common/sider";
 import MapSdk from "component/common/map";
+import MapMarkerRoute from "./mapMarker";
 
 const {Header} = Layout;
-
-
-const TextMarker = AsyncComponent(() => import("../containers/mapMarker/textMarker/index.js"));
-const ImgMarker = AsyncComponent(() => import("../containers/mapMarker/imgMarker/index.js"));
 
 const reactConfig = (
     <Provider {...stores}>
@@ -30,11 +27,7 @@ const reactConfig = (
                             <Sider></Sider>
                             <Layout>
                                 <div style={{background: "white", height: "100%", width: "100%"}}>
-                                    <Switch>
-                                        <Route path="/mapMarker/textMarker" component={TextMarker}/>
-                                        <Route path="/mapMarker/imgMarker" component={ImgMarker}/>
-                                        <Redirect path="/" to={{pathname: "/mapMarker/textMarker"}}></Redirect>
-                                    </Switch>
+                                    <MapMarkerRoute></MapMarkerRoute>
                                     <MapSdk></MapSdk>
                                 </div>
                             </Layout>

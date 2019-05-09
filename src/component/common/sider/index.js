@@ -39,12 +39,12 @@ const sideNavbars = [
             {
                 id: "1-6",
                 text: "批量清空标注",
-                path: "/mapMarker/textMarker11"
+                path: "/mapMarker/batClearMarker"
             },
             {
                 id: "1-7",
                 text: "清除指定标注",
-                path: "/mapMarker/textMarker22"
+                path: "/mapMarker/clearOneMarker"
             },
         ]
     },
