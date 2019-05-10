@@ -5,12 +5,12 @@
 import React from "react";
 import {Provider} from "mobx-react";
 import {HashRouter as Router, Route, Redirect, Switch} from "react-router-dom";
-import AsyncComponent from "./asyncRoute";
 import * as stores from "../mobx/stores";
 import {Layout} from "antd";
 import Sider from "component/common/sider";
 import MapSdk from "component/common/map";
 import MapMarkerRoute from "./mapMarker";
+import BaseMapRoute from "./baseMap";
 
 const {Header} = Layout;
 
@@ -26,8 +26,9 @@ const reactConfig = (
                         <Layout>
                             <Sider></Sider>
                             <Layout>
-                                <div style={{background: "white", height: "100%", width: "100%"}}>
+                                <div style={{background: "white", height: "100%", width: "100%", position: "relative"}}>
                                     <MapMarkerRoute></MapMarkerRoute>
+                                    {/*<BaseMapRoute></BaseMapRoute>*/}
                                     <MapSdk></MapSdk>
                                 </div>
                             </Layout>

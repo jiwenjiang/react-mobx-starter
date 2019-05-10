@@ -49,44 +49,39 @@ const sideNavbars = [
         ]
     },
     {
-        id: "2",
+        id: "baseMap",
         text: "3D地图示例",
         icon: "user",
         children: [
             {
                 id: "2-1",
                 text: "基础地图显示",
-                path: "/mapMarker/textMarker/7"
+                path: "/baseMap/showMap"
             },
             {
                 id: "2-2",
                 text: "地图楼层切换",
-                path: "/mapMarker/imgMarker/"
+                path: "/baseMap/changeFloor"
             },
             {
                 id: "2-3",
                 text: "地图手势控制",
-                path: "/mapMarker/imgAndTextMarker/"
+                path: "/baseMap/controlMap"
             },
             {
                 id: "2-4",
-                text: "添加定位标注",
-                path: "/mapMarker/locMarker/"
+                text: "地图旋转与倾斜",
+                path: "/baseMap/rotate"
             },
             {
                 id: "2-5",
-                text: "地图旋转与倾斜",
-                path: "/mapMarker/gifMarker/3"
+                text: "3D/2D视角切换",
+                path: "/baseMap/2dTransform"
             },
             {
                 id: "2-6",
-                text: "3D/2D视角切换",
-                path: "/mapMarker/textMarker/4"
-            },
-            {
-                id: "2-7",
                 text: "地图区块点击效果",
-                path: "/mapMarker/textMarker/5"
+                path: "/baseMap/polygonClick"
             },
         ]
     },
