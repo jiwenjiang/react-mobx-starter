@@ -9,7 +9,7 @@ const sideNavbars = [
     {
         id: "mapMarker",
         text: "3D地图标注示例",
-        icon: "user",
+        icon: "edit",
         children: [
             {
                 id: "1-1",
@@ -51,7 +51,7 @@ const sideNavbars = [
     {
         id: "baseMap",
         text: "3D地图示例",
-        icon: "user",
+        icon: "picture",
         children: [
             {
                 id: "2-1",

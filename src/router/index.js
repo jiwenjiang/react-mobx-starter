@@ -21,7 +21,13 @@ const reactConfig = (
                 <Route>
                     <Layout>
                         <Header className="header">
-                            <div style={{color: "wheat", fontSize: "20px"}}>JS代码示例</div>
+                            <div style={{
+                                color: "rgb(67, 150, 255)",
+                                fontSize: "16px",
+                                fontFamily: "cursive",
+                                fontWeight: 700
+                            }}>JS代码示例
+                            </div>
                         </Header>
                         <Layout>
                             <Sider></Sider>
